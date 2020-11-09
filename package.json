@@ -5,7 +5,8 @@
   "keywords": [
     "ember-addon",
     "elasticsearch",
-    "search-ui"
+    "search-ui",
+    "ember-cli-netlify-plugin"
   ],
   "repository": "https://github.com/bengala-tech/ember-search-ui",
   "license": "MIT",
@@ -41,6 +42,7 @@
     "ember-cli-dependency-checker": "^3.2.0",
     "ember-cli-inject-live-reload": "^2.0.2",
     "ember-cli-mirage": "^1.1.8",
+    "ember-cli-netlify": "^0.4.1",
     "ember-cli-sri": "^2.1.1",
     "ember-cli-terser": "^4.0.0",
     "ember-composable-helpers": "^4.3.0",
