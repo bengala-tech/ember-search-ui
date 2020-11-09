@@ -1,0 +1,87 @@
+<WithSearch
+  @mapContextToProps={{map-context-to-props
+    "autocompletedResults"
+    "autocompletedSuggestions"
+    "searchTerm"
+    "setSearchTerm"
+    "trackAutocompleteClickThrough"
+  }}
+  @driver={{@driver}} as |state|
+>
+  {{#let
+    (and
+      (or (bool @autocompleteResults) (bool @autocompleteSuggestions))
+      (gte state.searchTerm.length (arg-or-default @autocompleteMinimumCharacters 0))
+    )
+    (count-autocompleted-suggestions
+      state.autocompletedSuggestions
+    ) as |useAutocomplete autocompletedSuggestionsCount|
+  }}
+    {{#if @view}}
+      {{#let (component @view) as |View|}}
+        <View
+          @allAutocompletedItemsCount={{add
+            autocompletedSuggestionsCount
+            state.autocompletedResults.length
+          }}
+          @autocompleteView={{@autocompleteView}}
+          @autocompleteResults={{@autocompleteResults}}
+          @autocompleteSuggestions={{@autocompleteSuggestions}}
+          @autocompletedResults={{state.autocompletedResults}}
+          @autocompletedSuggestions={{state.autocompletedSuggestions}}
+          @autocompletedSuggestionsCount={{autocompletedSuggestionsCount}}
+          @completeSuggestion={{fn this.completeSuggestion state.setSearchTerm}}
+          @isFocused={{this.isFocused}}
+          @notifyAutocompleteSelected={{fn
+            this.handleNotifyAutocompleteSelected
+            state.trackAutocompleteClickThrough
+          }}
+          @onChange={{fn this.handleChange state.setSearchTerm}}
+          @onSelectAutocomplete={{if
+            @handleOnSelectAutocomplete
+            @handleOnSelectAutocomplete
+            this.defaultOnSelectAutocomplete
+          }}
+          @onSubmit={{fn this.handleSubmit state.setSearchTerm state.searchTerm
+          }}
+          @useAutocomplete={{useAutocomplete}}
+          @value={{state.searchTerm}}
+          @inputProps={{this.inputProps}}
+          @inputView={{@inputView}}
+          ...attributes
+        />
+      {{/let}}
+    {{else}}
+      {{yield
+        (hash
+          allAutocompletedItemsCount=(add
+            autocompletedSuggestionsCount state.autocompletedResults.length
+          )
+          autocompleteView=@autocompleteView
+          autocompleteResults=@autocompleteResults
+          autocompleteSuggestions=@autocompleteSuggestions
+          autocompletedResults=state.autocompletedResults
+          autocompletedSuggestions=state.autocompletedSuggestions
+          autocompletedSuggestionsCount=autocompletedSuggestionsCount
+          completeSuggestion=(fn this.completeSuggestion state.setSearchTerm)
+          isFocused=this.isFocused
+          notifyAutocompleteSelected=(fn
+            this.handleNotifyAutocompleteSelected
+            state.trackAutocompleteClickThrough
+          )
+          onChange=(fn this.handleChange state.setSearchTerm)
+          onSelectAutocomplete=(if
+            @handleOnSelectAutocomplete
+            @handleOnSelectAutocomplete
+            this.defaultOnSelectAutocomplete
+          )
+          onSubmit=(fn this.handleSubmit state.setSearchTerm state.searchTerm)
+          useAutocomplete=useAutocomplete
+          value=state.searchTerm
+          inputProps=this.inputProps
+          inputView=@inputView
+        )
+      }}
+    {{/if}}
+  {{/let}}
+</WithSearch>

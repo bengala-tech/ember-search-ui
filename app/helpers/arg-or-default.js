@@ -1,0 +1,1 @@
+export { default, argOrDefault } from 'ember-search-ui/helpers/arg-or-default';

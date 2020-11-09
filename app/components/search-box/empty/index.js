@@ -1,0 +1,1 @@
+export { default } from 'ember-search-ui/components/search-box/empty';
