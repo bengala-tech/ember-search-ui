@@ -1,0 +1,20 @@
+<SearchProvider @config={{this.config}} as |driver|>
+  <Sorting
+    @driver={{driver}}
+    @sortOptions={{array
+      (hash name="Relevance" value="" direction="")
+      (hash name="Price Desc" value="title" direction="asc")
+    }}
+    @label="Pets:"
+  />
+  <WithSearch
+    @driver={{driver}}
+    @mapContextToProps={{map-context-to-props "results"}} as |state|
+  >
+    <ul>
+      {{#each state.results as |pet|}}
+        <li>{{pet.name}}</li>
+      {{/each}}
+    </ul>
+  </WithSearch>
+</SearchProvider>

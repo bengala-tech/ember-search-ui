@@ -1,0 +1,1 @@
+export { default, formatSelectOption } from 'ember-search-ui/helpers/format-select-option';

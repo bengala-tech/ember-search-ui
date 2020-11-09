@@ -1,0 +1,37 @@
+{{#let (map this.formatSelectOption @sortOptions) as |options|}}
+  <WithSearch
+    @mapContextToProps={{map-context-to-props
+      "sortDirection"
+      "sortField"
+      "setSort"
+    }}
+    @driver={{@driver}} as |state|
+  >
+    {{#if @view}}
+      {{#let (component @view) as |View|}}
+        <View
+          @label={{@label}}
+          @options={{options}}
+          @setSort={{state.setSort}}
+          @sortDirection={{state.sortDirection}}
+          @sortField={{state.sortField}}
+          @onChange={{fn this.setSort state.setSort @sortOptions}}
+					@value={{format-value state.sortField state.sortDirection}}
+          ...attributes
+        />
+      {{/let}}
+    {{else}}
+      {{yield
+        (hash
+          label=@label
+          options=options
+          setSort=state.setSort
+          sortDirection=state.sortDirection
+          sortField=state.sortField
+          onChange=(fn this.setSort state.setSort @sortOptions)
+					value=(format-value state.sortField state.sortDirection)
+        )
+      }}
+    {{/if}}
+  </WithSearch>
+{{/let}}
