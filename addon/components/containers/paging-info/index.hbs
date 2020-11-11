@@ -1,0 +1,30 @@
+<WithSearch
+  @mapContextToProps={{map-context-to-props
+    "current"
+    "resultsPerPage"
+    "totalPages"
+    "totalPages"
+  }}
+  @driver={{@driver}} as |state|
+>
+  {{#if @view}}
+    {{#let (component @view) as |View|}}
+      <View
+        @current={{state.current}}
+        @resultsPerPage={{state.resultsPerPage}}
+        @totalPages={{state.totalPages}}
+        @onChange={{state.setCurrent}}
+        ...attributes
+      />
+    {{/let}}
+  {{else}}
+    {{yield
+      (hash
+        current=state.current
+        resultsPerPage=state.resultsPerPage
+        totalPages=state.totalPages
+        onChange=state.setCurrent
+      )
+    }}
+  {{/if}}
+</WithSearch>

@@ -1,0 +1,38 @@
+{{#let
+  (arg-or-default @clickThroughTags (array))
+  (arg-or-default
+    @shouldTrackClickThrough true
+  ) as |clickThroughTags shouldTrackClickThrough|
+}}
+  <WithSearch
+    @mapContextToProps={{map-context-to-props "trackClickThrough"}}
+    @driver={{@driver}} as |state|
+  >
+    {{#if @view}}
+      {{#let (component @view) as |View|}}
+        <View
+          @result={{@result}}
+          @onClickLink={{if
+            shouldTrackClickThrough
+            (fn state.trackClickThrough @result.id.raw clickThroughTags)
+          }}
+          @titleField={{@titleField}}
+          @urlField={{@urlField}}
+          ...attributes
+        />
+      {{/let}}
+    {{else}}
+      {{yield
+        (hash
+          result=@result
+          onClickLink=(if
+            shouldTrackClickThrough
+            (fn state.trackClickThrough @result.id.raw clickThroughTags)
+          )
+          titleField=@titleField
+          urlField=@urlField
+        )
+      }}
+    {{/if}}
+  </WithSearch>
+{{/let}}

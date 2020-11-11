@@ -1,0 +1,28 @@
+{{#let (arg-or-default @options (array 20 40 60)) as |options|}}
+  <WithSearch
+    @mapContextToProps={{map-context-to-props
+      "resultsPerPage"
+      "setResultsPerPage"
+    }}
+    @driver={{@driver}} as |state|
+  >
+    {{#if @view}}
+      {{#let (component @view) as |View|}}
+        <View
+          @onChange={{state.setResultsPerPage}}
+          @options={{options}}
+          @value={{state.resultsPerPage}}
+          ...attributes
+        />
+      {{/let}}
+    {{else}}
+      {{yield
+        (hash
+          onChange=state.setResultsPerPage
+          options=@options
+          value=state.resultsPerPage
+        )
+      }}
+    {{/if}}
+  </WithSearch>
+{{/let}}

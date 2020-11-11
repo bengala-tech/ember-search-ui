@@ -1,0 +1,42 @@
+{{#let
+  (arg-or-default @clickThroughTags (array))
+  (arg-or-default @shouldTrackClickThrough true)
+  (if
+    @resultView @resultView "result"
+  ) as |clickThroughTags shouldTrackClickThrough ResultView|
+}}
+  <WithSearch
+    @mapContextToProps={{map-context-to-props "results"}}
+    @driver={{@driver}} as |state|
+  >
+    {{#if @view}}
+      {{#let (component @view) as |View|}}
+        <View ...attributes>
+          {{#each state.results as |result|}}
+            <ResultContainer
+              @titleField={{@titleField}}
+              @urlField={{@urlField}}
+              @view={{ResultView}}
+              @result={{result}}
+              @shouldTrackClickThrough={{shouldTrackClickThrough}}
+              @clickThroughTags={{clickThroughTags}}
+            />
+          {{/each}}
+        </View>
+      {{/let}}
+    {{else}}
+      {{#each state.results as |result|}}
+        {{yield
+          (hash
+            titleField=@titleField
+            urlField=@urlField
+            view=ResultView
+            result=result
+            shouldTrackClickThrough=shouldTrackClickThrough
+            clickThroughTags=clickThroughTags
+          )
+        }}
+      {{/each}}
+    {{/if}}
+  </WithSearch>
+{{/let}}
