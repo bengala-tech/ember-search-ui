@@ -1,0 +1,85 @@
+{{#let (if @filterType "all") as |filterType|}}
+  <WithSearch
+    @mapContextToProps={{map-context-to-props
+      "filters"
+      "facets"
+      "addFilter"
+      "removeFilter"
+      "setFilter"
+      "a11yNotify"
+    }}
+    @driver={{@driver}} as |state|
+  >
+    {{#let (get state.facets @field) as |facetsForField|}}
+      {{#if facetsForField}}
+        {{#let
+          (get
+            (mark-selected-facet-values-from-filters
+              (object-at 0 facetsForField) state.filters @field @filterType
+            )
+            "data"
+          ) as |facetValues|
+        }}
+          {{#let
+            (map-by
+              "value" (filter-by "selected" facetValues)
+            ) as |selectedValues|
+          }}
+            {{#if
+              (not (and (eq facetValues.length 0) (eq selectedValues.length 0)))
+            }}
+              {{#each
+                (filter-facet-values
+                  facetValues state.searchTerm
+                ) as |filteredFacetValues|
+              }}
+                {{#if @view}}
+                  {{#let (component @view) as |View|}}
+                    <View
+                      @label={{@label}}
+                      @onMoreClick={{fn
+                        this.handleClickMore
+                        state.a11yNotify
+                        filteredFacetValues.length
+                      }}
+                      @onRemove={{fn this.removeFilter state.removeFilter}}
+                      @onChange={{fn this.setFilter state.setFilter}}
+                      @onSelect={{fn this.addFilter state.addFilter}}
+                      @options={{slice 0 this.more @options}}
+                      @showMore={{gt filteredFacetValues.length 0}}
+                      @values={{selectedValues}}
+                      @showSearch={{@isFilterable}}
+                      @onSearch={{set this.searchTerm}}
+                      @searchPlaceholder={{concat "Field " @field}}
+                      ...attributes
+                    />
+                  {{/let}}
+                {{else}}
+                  {{yield
+                    (hash
+                      label=@label
+                      onMoreClick=(fn
+                        this.handleClickMore
+                        state.a11yNotify
+                        filteredFacetValues.length
+                      )
+                      onRemove=(fn this.removeFilter state.removeFilter)
+                      onChange=(fn this.setFilter state.setFilter)
+                      onSelect=(fn this.addFilter state.addFilter)
+                      options=(slice 0 this.more @options)
+                      showMore=(gt filteredFacetValues.length 0)
+                      values=selectedValues
+                      showSearch=@isFilterable
+                      onSearch=(set this.searchTerm)
+                      searchPlaceholder=(concat "Field " @field)
+                    )
+                  }}
+                {{/if}}
+              {{/each}}
+            {{/if}}
+          {{/let}}
+        {{/let}}
+      {{/if}}
+    {{/let}}
+  </WithSearch>
+{{/let}}

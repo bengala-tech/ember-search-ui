@@ -1,0 +1,12 @@
+<WithSearch
+  @mapContextToProps={{map-context-to-props "error"}}
+  @driver={{@driver}} as |state|
+>
+  {{#if @view}}
+    {{#let (component @view) as |View|}}
+      <View @error={{state.error}} ...attributes />
+    {{/let}}
+  {{else}}
+    {{yield (hash error=state.error)}}
+  {{/if}}
+</WithSearch>

@@ -26,12 +26,14 @@ class WithSearchComponent extends GlimmerComponent {
     super(...arguments);
     assert(
       'WithSearch requires a function to be provided which returns an object with at least one value',
-      this.args.mapContextToProps
+      this.args.mapContextToProps || this.mapContextToProps
     );
     assert('WithSearch requires a driver', this.args.driver);
-
     const { driver, mapContextToProps } = this.args;
+    this.setup(driver, mapContextToProps);
+  }
 
+  setup(driver, mapContextToProps) {
     const initialState = driver.getState();
     this.driverActions = driver.getActions();
 

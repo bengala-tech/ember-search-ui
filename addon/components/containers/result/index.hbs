@@ -1,6 +1,6 @@
 {{#let
-  (arg-or-default @clickThroughTags (array))
-  (arg-or-default
+  (if @clickThroughTags (array))
+  (if
     @shouldTrackClickThrough true
   ) as |clickThroughTags shouldTrackClickThrough|
 }}

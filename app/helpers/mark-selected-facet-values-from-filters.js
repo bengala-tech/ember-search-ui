@@ -1,0 +1,1 @@
+export { default, markSelectedFacetValuesFromFilters } from 'ember-search-ui/helpers/mark-selected-facet-values-from-filters';

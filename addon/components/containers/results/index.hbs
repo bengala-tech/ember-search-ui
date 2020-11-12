@@ -1,6 +1,6 @@
 {{#let
-  (arg-or-default @clickThroughTags (array))
-  (arg-or-default @shouldTrackClickThrough true)
+  (if @clickThroughTags (array))
+  (if @shouldTrackClickThrough true)
   (if
     @resultView @resultView "result"
   ) as |clickThroughTags shouldTrackClickThrough ResultView|

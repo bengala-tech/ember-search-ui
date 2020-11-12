@@ -1,0 +1,1 @@
+export { default, filterFacetValues } from 'ember-search-ui/helpers/filter-facet-values';

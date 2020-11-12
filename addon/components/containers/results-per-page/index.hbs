@@ -1,4 +1,4 @@
-{{#let (arg-or-default @options (array 20 40 60)) as |options|}}
+{{#let (if @options (array 20 40 60)) as |options|}}
   <WithSearch
     @mapContextToProps={{map-context-to-props
       "resultsPerPage"

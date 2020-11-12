@@ -1,29 +1,29 @@
 <WithSearch
   @mapContextToProps={{map-context-to-props
-    "current"
-    "resultsPerPage"
-    "totalPages"
-    "totalPages"
+    "pagingStart"
+    "pagingEnd"
+    "resultSearchTerm"
+    "totalResults"
   }}
   @driver={{@driver}} as |state|
 >
   {{#if @view}}
     {{#let (component @view) as |View|}}
       <View
-        @current={{state.current}}
-        @resultsPerPage={{state.resultsPerPage}}
-        @totalPages={{state.totalPages}}
-        @onChange={{state.setCurrent}}
+        @searchTerm={{state.resultSearchTerm}}
+        @start={{state.pagingStart}}
+        @end={{state.pagingEnd}}
+        @totalResults={{state.totalResults}}
         ...attributes
       />
     {{/let}}
   {{else}}
     {{yield
       (hash
-        current=state.current
-        resultsPerPage=state.resultsPerPage
-        totalPages=state.totalPages
-        onChange=state.setCurrent
+        searchTerm=state.resultSearchTerm
+        start=state.pagingStart
+        end=state.pagingEnd
+        totalResults=state.totalResults
       )
     }}
   {{/if}}
