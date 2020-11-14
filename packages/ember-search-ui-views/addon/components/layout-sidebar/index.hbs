@@ -1,0 +1,23 @@
+{{#if (has-block)}}
+  <button
+    hidden
+    type="button"
+    class="sui-layout-sidebar-toggle"
+    {{on "click" this.toggle}}
+  >
+    Show Filters
+  </button>
+{{/if}}
+<div class={{if this.isSidebarToggled "toggled"}} ...attributes>
+  {{#if (has-block)}}
+    <button
+      hidden
+      type="button"
+      class="sui-layout-sidebar-toggle"
+      {{on "click" this.toggle}}
+    >
+      Save Filters
+    </button>
+  {{/if}}
+  {{yield}}
+</div>

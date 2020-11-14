@@ -1,0 +1,8 @@
+<Containers::ErrorBoundary @driver={{@driver}} as |state|>
+  {{#if state.error}}
+    <div class="sui-search-error" ...attributes>
+      {{state.error}}
+    </div>
+  {{/if}}
+  {{yield}}
+</Containers::ErrorBoundary>

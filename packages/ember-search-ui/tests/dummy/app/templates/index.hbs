@@ -1,27 +1,72 @@
 <SearchProvider @config={{this.config}} as |driver|>
-  <SearchBox
-    @driver={{driver}}
-    @searchAsYouType={{true}}
-    @autocompleteResults={{hash sectionTitle="Results" titleField="name"}}
-  />
-  <Sorting
-    @driver={{driver}}
-    @sortOptions={{array
-      (hash name="Relevance" value="" direction="")
-      (hash name="Price Desc" value="title" direction="asc")
-    }}
-    @label="Pets:"
-  />
   <WithSearch
     @driver={{driver}}
-    @mapContextToProps={{map-context-to-props "results"}} as |state|
+    @mapContextToProps={{map-context-to-props "wasSearched"}} as |state|
   >
-    <ul>
-      {{#each state.results as |pet|}}
-        <li>
-          {{pet.name}}
-        </li>
-      {{/each}}
-    </ul>
+    <div class="App">
+      <ErrorBoundary @driver={{driver}}>
+        <Layout>
+          <:header>
+            <SearchBox
+              @driver={{driver}}
+              @searchAsYouType={{true}}
+              @autocompleteResults={{hash
+                sectionTitle="Results"
+                titleField="name"
+              }}
+            />
+          </:header>
+          <:sideContent>
+            <div>
+              {{#if state.wasSearched}}
+                <Sorting
+                  @driver={{driver}}
+                  @sortOptions={{array
+                    (hash name="Relevance" value="" direction="")
+                    (hash name="Title" value="title" direction="asc")
+                  }}
+                  @label="Sort by"
+                />
+              {{/if}}
+              <Facet
+                @driver={{driver}}
+                @field="states"
+                @label="States"
+                @filterType="any"
+                @isFilterable={{true}}
+              />
+              <Facet
+                @driver={{driver}}
+                @field="world_heritage_site"
+                @label="World Heritage Site?"
+              />
+              <Facet
+                @driver={{driver}}
+                @field="visitors"
+                @label="Visitors"
+                @filterType="any"
+              />
+              <Facet @driver={{driver}} @field="acres" @label="Acres" />
+            </div>
+          </:sideContent>
+          <:bodyContent>
+            <Results
+              @driver={{driver}}
+              @titleField="name"
+              @shouldTrackClickThrough={{true}}
+            />
+          </:bodyContent>
+          <:bodyHeader>
+            {{#if state.wasSearched}}
+              <PagingInfo @driver={{driver}} />
+              <ResultsPerPage @driver={{driver}} />
+            {{/if}}
+          </:bodyHeader>
+          <:bodyFooter>
+            <Paging @driver={{driver}} />
+          </:bodyFooter>
+        </Layout>
+      </ErrorBoundary>
+    </div>
   </WithSearch>
 </SearchProvider>

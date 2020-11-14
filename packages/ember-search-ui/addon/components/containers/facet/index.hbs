@@ -11,6 +11,7 @@
     @driver={{@driver}} as |state|
   >
     {{#let (get state.facets @field) as |facetsForField|}}
+    {{log state.facets}}
       {{#if facetsForField}}
         {{#let
           (get

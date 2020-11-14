@@ -1,0 +1,1 @@
+export { default, getEcapedFields } from 'ember-search-ui-views/helpers/get-escaped-fields';

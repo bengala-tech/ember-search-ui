@@ -1,0 +1,40 @@
+{{#let
+  (get-escaped-fields @result)
+  (get-escaped-field @result @titleField)
+  (get-url-sanitizer @result @urlField) as |fields title url|
+}}
+  <li class="sui-result" ...attributes>
+    <div class="sui-result__header">
+      {{#if (and title (not url))}}
+        <span class="sui-result__title">
+          {{{title}}}
+        </span>
+      {{/if}}
+      {{#if (and title url)}}
+        <a
+          class="sui-result__title sui-result__title-link"
+          href={{url}}
+          target="_blank"
+          rel="noopener noreferrer"
+          {{on "click" @onClickLink}}
+        >
+          {{{title}}}
+        </a>
+      {{/if}}
+    </div>
+    <div class="sui-result__body">
+      <ul class="sui-result__details">
+        {{#each (entries @fields) as |entry|}}
+          <li>
+            <span class="sui-result__key">
+              {{entry.fieldName}}
+            </span>
+            <span class="sui-result__value">
+              {{{entry.fieldValue}}}
+            </span>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+  </li>
+{{/let}}

@@ -1,0 +1,1 @@
+export { default, getUrlSanitizer } from 'ember-search-ui-views/helpers/get-url-sanitizer';

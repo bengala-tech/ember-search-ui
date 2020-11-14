@@ -1,0 +1,1 @@
+export { default, htmlEscape } from 'ember-search-ui-views/helpers/html-escape';

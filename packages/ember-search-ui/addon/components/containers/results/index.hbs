@@ -13,7 +13,8 @@
       {{#let (component @view) as |View|}}
         <View ...attributes>
           {{#each state.results as |result|}}
-            <ResultContainer
+            <Containers::Result
+              @driver={{@driver}}
               @titleField={{@titleField}}
               @urlField={{@urlField}}
               @view={{ResultView}}
@@ -26,16 +27,15 @@
       {{/let}}
     {{else}}
       {{#each state.results as |result|}}
-        {{yield
-          (hash
-            titleField=@titleField
-            urlField=@urlField
-            view=ResultView
-            result=result
-            shouldTrackClickThrough=shouldTrackClickThrough
-            clickThroughTags=clickThroughTags
-          )
-        }}
+        <Containers::Result
+          @driver={{@driver}}
+          @titleField={{@titleField}}
+          @urlField={{@urlField}}
+          @view={{ResultView}}
+          @result={{result}}
+          @shouldTrackClickThrough={{shouldTrackClickThrough}}
+          @clickThroughTags={{clickThroughTags}}
+        />
       {{/each}}
     {{/if}}
   </WithSearch>
