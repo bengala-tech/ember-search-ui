@@ -1,13 +1,17 @@
 <div class="sui-search-box__wrapper">
   <Input
-    class="sui-search-box__text-input
-      {{@inputProps.class}}
-
-      {{if @isFocused "focus"}}"
+    class={{concat
+      "sui-search-box__text-input "
+      (if @isFocused " focus ")
+      @inputProps.class
+    }}
     @value={{@value}}
     @placeholder={{@inputProps.placeholder}}
     {{on "input" @onChange}}
-		{{did-insert @didInsertInput}}
+    {{on "keydown" @onOpen}}
+    {{on "focus" @onFocus}}
+    {{on "blur" @onBlur}}
+    {{did-insert @didInsertInput}}
   />
-	<Input type="submit" class="button sui-search-box__submit" @value="Search" />
 </div>
+<Input type="submit" class="button sui-search-box__submit" @value="Search" />

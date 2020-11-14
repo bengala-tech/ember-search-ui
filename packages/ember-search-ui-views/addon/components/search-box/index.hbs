@@ -14,16 +14,10 @@
   @searchAsYouType={{@searchAsYouType}}
   ...attributes as |state|
 >
-  <BasicDropdown
-    @triggerComponent="search-box/empty"
-		@renderInPlace={{true}}
-    @matchTriggerWidth={{true}} as |dd|
-  >
+  <BasicDropdown @matchTriggerWidth={{true}} as |dd|>
     <form {{on "submit" state.onSubmit}}>
       <dd.Trigger
-        {{on "keydown" (fn this.open dd)}}
-        {{on "focus" state.inputProps.onFocus}}
-        {{on "blur" state.inputProps.onBlur}}
+        class={{concat "sui-search-box " (if dd.isOpen "autocomplete")}}
       >
         {{component
           (if state.inputView state.inputView "search-input")
@@ -32,6 +26,9 @@
           isFocused=state.isFocused
           inputProps=state.inputProps
           didInsertInput=this.didInsertInput
+          onOpen=(fn this.open dd)
+          onFocus=(optional state.inputProps.onFocus)
+          onBlur=(optional state.inputProps.onBlur)
         }}
       </dd.Trigger>
       <dd.Content>
@@ -45,9 +42,9 @@
           {{component
             (if state.autocompleteView state.autocompleteView "autocomplete")
             autocompleteResults=state.autocompleteResults
-						autocompletedResults=state.autocompletedResults
-						autocompleteSuggestions=state.autocompleteSuggestions
-						autocompletedSuggestions=state.autocompletedSuggestions
+            autocompletedResults=state.autocompletedResults
+            autocompleteSuggestions=state.autocompleteSuggestions
+            autocompletedSuggestions=state.autocompletedSuggestions
           }}
         {{/if}}
       </dd.Content>
