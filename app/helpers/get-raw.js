@@ -1,1 +1,0 @@
-export { default, getRaw } from 'ember-search-ui/helpers/get-raw';

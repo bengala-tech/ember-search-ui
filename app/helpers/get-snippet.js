@@ -1,1 +1,0 @@
-export { default, getSnippet } from 'ember-search-ui/helpers/get-snippet';

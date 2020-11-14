@@ -7,19 +7,24 @@
 # dependencies
 /bower_components/
 /node_modules/
+/packages/**/node_modules/
+/packages/**/dist/
 
 # misc
 /.env*
 /.pnp*
-/.sass-cache
-/connect.lock
-/coverage/
-/libpeerconnection.log
-/npm-debug.log*
-/testem.log
-/yarn-error.log
+/packages/**/.sass-cache
+/packages/**/connect.lock
+/packages/**/coverage/
+/packages/**/libpeerconnection.log
+/packages/**/npm-debug.log*
+/packages/**/testem.log
+yarn-error.log
 
 # ember-try
-/.node_modules.ember-try/
-/bower.json.ember-try
-/package.json.ember-try
+/packages/**/.node_modules.ember-try/
+/packages/**/bower.json.ember-try
+/packages/**/package.json.ember-try
+
+packages/deploy-docs/
+packages/docs/tmp/
