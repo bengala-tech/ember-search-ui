@@ -1,4 +1,4 @@
-{{#let (if @options (array 20 40 60)) as |options|}}
+{{#let (if @options @options (array 20 40 60)) as |options|}}
   <WithSearch
     @mapContextToProps={{map-context-to-props
       "resultsPerPage"
@@ -19,7 +19,7 @@
       {{yield
         (hash
           onChange=state.setResultsPerPage
-          options=@options
+          options=options
           value=state.resultsPerPage
         )
       }}

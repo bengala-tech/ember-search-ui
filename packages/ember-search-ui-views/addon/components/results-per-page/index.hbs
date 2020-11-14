@@ -1,0 +1,21 @@
+<Containers::ResultsPerPage @driver={{@driver}} as |state|>
+  {{#let (wrap-options state.options) as |wrappedOptions|}}
+    <div class="sui-results-per-page" ...attributes>
+      <div class="sui-results-per-page__label">
+        Show
+      </div>
+      <PowerSelect
+        class="sui-select sui-select--inline"
+        style="width: 100px;"
+        @tagName="div"
+        @matchTriggerWidth={{true}}
+        @renderInPlace={{true}}
+        @options={{wrappedOptions}}
+        @selected={{find-by "value" state.value wrappedOptions}}
+        @onChange={{pipe (pick-value "value") state.onChange}} as |option|
+      >
+        {{option.label}}
+      </PowerSelect>
+    </div>
+  {{/let}}
+</Containers::ResultsPerPage>

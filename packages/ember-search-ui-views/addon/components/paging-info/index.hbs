@@ -1,0 +1,20 @@
+<Containers::PagingInfo @driver={{@driver}} as |state|>
+	<div class="sui-paging-info" ...attributes>
+  Showing
+  <strong>
+    {{state.start}}
+    -
+    {{state.end}}
+  </strong>
+  out of
+  <strong>
+    {{state.totalResults}}
+  </strong>
+  {{#if state.searchTerm}}
+    for:
+    <em>
+      {{state.searchTerm}}
+    </em>
+  {{/if}}
+</div>
+</Containers::PagingInfo>

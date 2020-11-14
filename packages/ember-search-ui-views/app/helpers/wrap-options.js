@@ -1,0 +1,1 @@
+export { default, wrapOptions } from 'ember-search-ui-views/helpers/wrap-options';
