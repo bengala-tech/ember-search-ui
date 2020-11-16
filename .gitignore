@@ -28,3 +28,6 @@ yarn-error.log
 
 packages/deploy-docs/
 packages/docs/tmp/
+packages/.DS_Store
+
+.DS_Store
