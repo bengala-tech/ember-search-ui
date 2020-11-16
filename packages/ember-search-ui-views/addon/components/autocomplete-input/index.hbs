@@ -1,0 +1,56 @@
+<div
+  id={{this.guid}}
+  {{on 'pointerdown' this.onPointerDown}}
+  class={{if this.isOpen @classIfOpen}}
+  ...attributes
+>
+{{log this}}
+  {{yield (hash
+    closeMenu=this.close
+    isOpen=this.isOpen
+		Input=(
+			component 'autocomplete-input/input'
+      isOpen=this.isOpen
+			menuGuid=this.guid
+			itemsGuid=this.itemsGuid
+			value=@value
+			onInput=@onInput
+			onKeydown=this.open
+      closeMenu=this.close
+      openMenu=this.open
+			goToFirstItem=this.goToFirstItem
+      goToLastItem=this.goToLastItem
+      goToNextItem=this.goToNextItem
+      goToPreviousItem=this.goToPreviousItem
+		)
+    Button=(
+      component 'menu/button'
+      guid=this.buttonGuid
+      menuGuid=this.guid
+      itemsGuid=this.itemsGuid
+      isOpen=this.isOpen
+      onClick=this.toggle
+      openMenu=this.open
+      closeMenu=this.close
+      goToFirstItem=this.goToFirstItem
+      goToLastItem=this.goToLastItem
+      goToNextItem=this.goToNextItem
+      goToPreviousItem=this.goToPreviousItem
+    )
+    Items=(
+      component 'autocomplete-input/items'
+      guid=this.itemsGuid
+      buttonGuid=this.buttonGuid
+      isOpen=this.isOpen
+      closeMenu=this.close
+      activeItem=this.activeItem
+      registerItem=this.registerItem
+      unregisterItem=this.unregisterItem
+      goToFirstItem=this.goToFirstItem
+      goToLastItem=this.goToLastItem
+      goToNextItem=this.goToNextItem
+      goToPreviousItem=this.goToPreviousItem
+      goToItem=this.goToItem
+    )
+  )}}
+</div>

@@ -14,40 +14,62 @@
   @searchAsYouType={{@searchAsYouType}}
   ...attributes as |state|
 >
-  <BasicDropdown @matchTriggerWidth={{true}} as |dd|>
-    <form {{on "submit" state.onSubmit}}>
-      <dd.Trigger
-        class={{concat "sui-search-box " (if dd.isOpen "autocomplete")}}
+  {{#let
+    (build-autocomplete-groups
+      autocompleteResults=state.autocompleteResults
+      autocompletedResults=state.autocompletedResults
+      autocompleteSuggestions=state.autocompleteSuggestions
+      autocompletedSuggestions=state.autocompletedSuggestions
+    ) as |groups|
+  }}
+    <form {{on "submit" (fn this.onSubmit state.onChange state.value)}}>
+      <AutocompleteInput
+        class="sui-search-box"
+        @classIfOpen="autocomplete" as |menu|
       >
-        {{component
-          (if state.inputView state.inputView "search-input")
-          value=state.value
-          onChange=state.onChange
-          isFocused=state.isFocused
-          inputProps=state.inputProps
-          didInsertInput=this.didInsertInput
-          onOpen=(fn this.open dd)
-          onFocus=(optional state.inputProps.onFocus)
-          onBlur=(optional state.inputProps.onBlur)
-        }}
-      </dd.Trigger>
-      <dd.Content>
-        {{#if
-          (and
-            dd.isOpen
-            state.useAutocomplete
-            (gt state.allAutocompletedItemsCount 0)
-          )
-        }}
-          {{component
-            (if state.autocompleteView state.autocompleteView "autocomplete")
-            autocompleteResults=state.autocompleteResults
-            autocompletedResults=state.autocompletedResults
-            autocompleteSuggestions=state.autocompleteSuggestions
-            autocompletedSuggestions=state.autocompletedSuggestions
-          }}
+        <menu.Input @value={{state.value}} @onInput={{state.onChange}} />
+        {{#if (gt state.allAutocompletedItemsCount 0)}}
+          <menu.Items
+            role="listbox"
+            class="sui-search-box__autocomplete-container" as |items|
+          >
+            <div>
+              {{#each groups as |group|}}
+                {{#if (and group.groupName group.options)}}
+                  <div class="sui-search-box__section-title">
+                    {{group.groupName}}
+                  </div>
+                {{/if}}
+                <ul class={{group.class}}>
+                  {{#each group.options as |opt|}}
+                    <items.Item as |item|>
+                      <item.Element
+                        @tagName="li"
+                        aria-selected="{{item.isActive}}"
+                        @onClick={{pipe
+                          (if
+                            group.isSuggestionGroup
+                            (fn
+                              state.completeSuggestion
+                              (call (fn group.getText opt))
+                            )
+                            (fn state.onSelectAutocomplete opt)
+                          )
+                          menu.closeMenu
+                        }}
+                      >
+                        <span>
+                          {{{call (fn group.getText opt)}}}
+                        </span>
+                      </item.Element>
+                    </items.Item>
+                  {{/each}}
+                </ul>
+              {{/each}}
+            </div>
+          </menu.Items>
         {{/if}}
-      </dd.Content>
+      </AutocompleteInput>
     </form>
-  </BasicDropdown>
+  {{/let}}
 </Containers::SearchBox>

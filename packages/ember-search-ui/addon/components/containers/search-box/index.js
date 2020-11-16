@@ -52,12 +52,12 @@ export default class SearchBoxContainerComponent extends GlimmerComponent {
   }
 
   @action
-  defaultOnSelectAutocomplete(selection) {
+  defaultOnSelectAutocomplete(trackAutocompleteClickThrough, selection) {
     if (!selection) return;
 
     const { autocompleteResults } = this.args;
 
-    this.handleNotifyAutocompleteSelected(selection);
+    this.handleNotifyAutocompleteSelected(trackAutocompleteClickThrough, selection);
     if (!selection.suggestion) {
       const url = selection[autocompleteResults.urlField]
         ? selection[autocompleteResults.urlField].raw

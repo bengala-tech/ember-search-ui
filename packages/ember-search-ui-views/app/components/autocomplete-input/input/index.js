@@ -1,0 +1,1 @@
+export { default } from 'ember-search-ui-views/components/autocomplete-input/input';

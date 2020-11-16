@@ -1,0 +1,23 @@
+<div class="sui-search-box__wrapper" >
+  <input
+    type="search"
+    value={{@value}}
+    autocomplete="off"
+    placeholder={{@inputProps.placeholder}}
+    class={{concat
+      "sui-search-box__text-input "
+      (if @isFocused " focus ")
+      @inputProps.class
+    }}
+    id="{{@menuGuid}}-button"
+    {{on "input" @onInput}}
+    {{on "keydown" this.onKeydown}}
+  />
+  {{!-- {{#if (and (or @select.selected this.text) (not @select.disabled))
+  }}
+    <button tabindex="-1" type="button" {{on "click" this.clear}}>
+     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+  {{/if}} --}}
+</div>
+<input type="submit" class="button sui-search-box__submit" value="Search" />

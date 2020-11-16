@@ -40,7 +40,7 @@
           @onSelectAutocomplete={{if
             @handleOnSelectAutocomplete
             @handleOnSelectAutocomplete
-            this.defaultOnSelectAutocomplete
+            (fn this.defaultOnSelectAutocomplete state.trackAutocompleteClickThrough)
           }}
           @onSubmit={{fn this.handleSubmit state.setSearchTerm state.searchTerm
           }}
@@ -73,7 +73,7 @@
           onSelectAutocomplete=(if
             @handleOnSelectAutocomplete
             @handleOnSelectAutocomplete
-            this.defaultOnSelectAutocomplete
+            (fn this.defaultOnSelectAutocomplete state.trackAutocompleteClickThrough)
           )
           onSubmit=(fn this.handleSubmit state.setSearchTerm state.searchTerm)
           useAutocomplete=useAutocomplete
