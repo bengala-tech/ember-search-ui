@@ -1,13 +1,15 @@
 {
   "name": "ember-search-ui-views",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "The default blueprint for ember-cli addons.",
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "search-ui",
+    "styles"
   ],
-  "repository": "",
+  "repository": "https://github.com/bengala-tech/ember-search-ui",
   "license": "MIT",
-  "author": "",
+  "author": "Alberto Cantu <betocantu93@gmail.com> (https://betocantu93.com)",
   "directories": {
     "doc": "doc",
     "test": "tests"

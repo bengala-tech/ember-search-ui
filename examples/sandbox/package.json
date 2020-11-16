@@ -1,11 +1,11 @@
 {
   "name": "sandbox",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Small description for sandbox goes here",
   "repository": "",
   "license": "MIT",
-  "author": "",
+  "author": "Alberto Cantu <betocantu93@gmail.com> (https://betocantu93.com)",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -52,7 +52,7 @@
     "ember-power-select": "^4.0.6",
     "ember-qunit": "^4.6.0",
     "ember-resolver": "^8.0.2",
-    "ember-search-ui": "*",
+    "ember-search-ui": "0.0.1",
     "ember-set-helper": "^2.0.0",
     "ember-source": "~3.22.0",
     "ember-template-lint": "^2.14.0",

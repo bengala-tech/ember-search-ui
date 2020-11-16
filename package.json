@@ -2,6 +2,7 @@
 {
   "name": "root",
   "private": true,
+  "author": "Alberto Cantu <betocantu93@gmail.com> (https://betocantu93.com)",
   "workspaces": [
     "packages/*",
     "examples/*"
