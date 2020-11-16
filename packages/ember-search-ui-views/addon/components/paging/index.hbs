@@ -8,13 +8,13 @@
     >
       <a class="rc-pagination-item-link"></a>
     </li>
-		{{#each (range 1 state.totalPages) as |i|}}
+		{{#each (range 0 state.totalPages) as |i|}}
 			<li
-				class="rc-pagination-item rc-pagination-item-{{i}} {{if (eq state.current i) " rc-pagination-item-active"}}"
+				class="rc-pagination-item rc-pagination-item-{{i}} {{if (eq state.current (add i 1)) " rc-pagination-item-active"}}"
 				tabindex="0"
-        {{on "click" (fn this.goTo state.onChange state.current i)}}
+        {{on "click" (fn this.goTo state.onChange state.current (add i 1))}}
 			>
-				<a>{{i}}</a>
+				<a>{{add i 1}}</a>
 			</li>
 		{{/each}}
 		<li
