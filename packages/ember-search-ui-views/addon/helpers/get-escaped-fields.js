@@ -1,5 +1,6 @@
 import { helper } from "@ember/component/helper";
 import { getEscapedField } from "./get-escaped-field";
+import { isFieldValueWrapper } from './is-field-value-wrapper';
 
 export default helper(function ([result] /*, hash*/) {
   return Object.keys(result).reduce((acc, field) => {

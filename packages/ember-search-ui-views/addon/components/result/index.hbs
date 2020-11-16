@@ -3,6 +3,7 @@
   (get-escaped-field @result @titleField)
   (get-url-sanitizer @result @urlField) as |fields title url|
 }}
+{{!-- {{log fields title url}} --}}
   <li class="sui-result" ...attributes>
     <div class="sui-result__header">
       {{#if (and title (not url))}}
@@ -24,13 +25,13 @@
     </div>
     <div class="sui-result__body">
       <ul class="sui-result__details">
-        {{#each (entries @fields) as |entry|}}
+        {{#each (entries fields) as |entry|}}
           <li>
             <span class="sui-result__key">
-              {{entry.fieldName}}
+              {{object-at 0 entry}}
             </span>
             <span class="sui-result__value">
-              {{{entry.fieldValue}}}
+              {{{object-at 1 entry}}}
             </span>
           </li>
         {{/each}}
