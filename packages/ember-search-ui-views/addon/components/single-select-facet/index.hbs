@@ -15,8 +15,6 @@
       @selected={{selectBoxOptions.selectedSelectBoxOption}}
       @onChange={{pipe (pick-value "value") @onChange}} as |option|
     >
-		{{log selectBoxOptions.selectedSelectBoxOption}}
-		{{log option}}
       <span class="sui-select__option-label">
         {{option.label}}
       </span>

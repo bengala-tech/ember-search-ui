@@ -1,0 +1,34 @@
+{{#let (find-by "value" "true" @options) as |truthyOptions|}}
+  {{#if truthyOptions}}
+    {{#let (contains "true" @values) as |isSelected|}}
+      <fieldset class="sui-facet" ...attributes>
+        <legend class="sui-facet__title">
+          {{@label}}
+        </legend>
+        <div class="sui-boolean-facet">
+          <div class="sui-boolean-facet__option-input-wrapper">
+            <label class="sui-boolean-facet__option-label">
+              <div class="sui-boolean-facet__option-input-wrapper">
+                <input
+                  class="sui-boolean-facet__checkbox"
+                  type="checkbox"
+                  checked={{isSelected}}
+                  {{on
+                    "change"
+                    (if isSelected (fn @onRemove "true") (fn @onChange "true"))
+                  }}
+                />
+                <span class="sui-boolean-facet__input-text">
+                  {{@label}}
+                </span>
+              </div>
+              <span class="sui-boolean-facet__option-count">
+                {{truthyOptions.count}}
+              </span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+    {{/let}}
+  {{/if}}
+{{/let}}
