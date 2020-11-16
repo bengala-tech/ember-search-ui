@@ -8,7 +8,7 @@
     Show Filters
   </button>
 {{/if}}
-<div class={{if this.isSidebarToggled "toggled"}} ...attributes>
+<div class="sui-layout-sidebar sui-layout-sidebar--{{if this.isSidebarToggled "toggled"}}" ...attributes>
   {{#if (has-block)}}
     <button
       hidden
