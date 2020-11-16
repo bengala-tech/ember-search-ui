@@ -1,11 +1,10 @@
-
 /* 
   ⚠️ The contents below are a straight copy from the @elastic/react-search-ui-views styles, this could easily
   be imported via treeForStyles or something like that later, but that would mean to have a react dependency
 */
 .rc-pagination {
   font-size: 12px;
-  font-family: "Arial";
+  font-family: 'Arial';
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -24,7 +23,7 @@
   margin: 0 8px 0 0;
 }
 .rc-pagination:after {
-  content: " ";
+  content: ' ';
   display: block;
   height: 0;
   clear: both;
@@ -75,7 +74,7 @@
 }
 .rc-pagination-jump-prev:after,
 .rc-pagination-jump-next:after {
-  content: "\2022\2022\2022";
+  content: '\2022\2022\2022';
   display: block;
   letter-spacing: 2px;
   color: #ccc;
@@ -87,10 +86,10 @@
   color: #2db7f5;
 }
 .rc-pagination-jump-prev:hover:after {
-  content: "\AB";
+  content: '\AB';
 }
 .rc-pagination-jump-next:hover:after {
-  content: "\BB";
+  content: '\BB';
 }
 .rc-pagination-jump-prev-custom-icon,
 .rc-pagination-jump-next-custom-icon {
@@ -105,7 +104,7 @@
   left: 0;
   margin: auto;
   transition: all 0.2s;
-  content: "\2022\2022\2022";
+  content: '\2022\2022\2022';
   opacity: 1;
   display: block;
   letter-spacing: 2px;
@@ -153,11 +152,11 @@
   text-align: center;
 }
 .rc-pagination-prev a:after {
-  content: "\2039";
+  content: '\2039';
   display: block;
 }
 .rc-pagination-next a:after {
-  content: "\203A";
+  content: '\203A';
   display: block;
 }
 .rc-pagination-prev,
@@ -350,7 +349,7 @@ html {
   background: #fcfcfc;
 }
 .sui-layout-body:after {
-  content: "";
+  content: '';
   height: 80px;
   width: 100%;
   display: block;
@@ -430,7 +429,7 @@ html {
     width: 100%;
     margin-top: 20px;
     padding: 10px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
       Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -478,7 +477,7 @@ html {
   justify-content: space-around;
 }
 .sui-search-error {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -490,7 +489,7 @@ html {
   height: calc(100vh - 180px);
 }
 .sui-search-error.no-error {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -502,7 +501,7 @@ html {
   height: calc(100vh - 180px);
 }
 .sui-facet {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -634,7 +633,7 @@ html {
   font-weight: bold;
 }
 .sui-single-option-facet__link:after {
-  content: "";
+  content: '';
   opacity: 0;
   position: absolute;
   top: -1px;
@@ -716,7 +715,7 @@ html {
 }
 .sui-paging .rc-pagination-jump-next:hover:after {
   color: #3a56e4;
-  content: "\BB";
+  content: '\BB';
   font-size: 16px;
   line-height: 1.5;
 }
@@ -728,12 +727,12 @@ html {
 }
 .sui-paging .rc-pagination-jump-prev:hover:after {
   color: #3a56e4;
-  content: "\AB";
+  content: '\AB';
   font-size: 16px;
   line-height: 1.5;
 }
 .sui-paging-info {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -742,7 +741,7 @@ html {
   display: inline-block;
 }
 .sui-result {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -767,7 +766,7 @@ html {
   font-style: inherit;
 }
 .sui-result em:after {
-  content: "";
+  content: '';
   position: absolute;
   top: -3px;
   left: -3px;
@@ -841,7 +840,7 @@ html {
   list-style: none;
 }
 .sui-results-per-page {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -865,7 +864,7 @@ html {
   position: relative;
   justify-content: center;
   align-items: stretch;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
 }
 .sui-search-box__submit {
@@ -969,7 +968,7 @@ html {
   color: #3a56e4;
   background: #edf0fd;
 }
-.sui-search-box__autocomplete-container li:hover  {
+.sui-search-box__autocomplete-container li:hover {
   background: #3a56e4;
   color: #ffffff;
 }
@@ -977,11 +976,11 @@ html {
   background: transparent;
   color: #ffffff;
 }
-.sui-search-box__autocomplete-container li[aria-selected="true"] {
+.sui-search-box__autocomplete-container li[aria-selected='true'] {
   background: #3a56e4;
   color: #ffffff;
 }
-.sui-search-box__autocomplete-container li[aria-selected="true"] em {
+.sui-search-box__autocomplete-container li[aria-selected='true'] em {
   background: transparent;
   color: #ffffff;
 }
@@ -994,7 +993,7 @@ html {
   text-transform: uppercase;
 }
 .sui-sorting {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -1008,7 +1007,7 @@ html {
   letter-spacing: 1px;
 }
 .sui-select {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -1086,28 +1085,152 @@ html {
   Some fixes needed to @elastic/react-search-ui-views styles and power select
 */
 
-.sui-search-box__autocomplete-container:focus{
-  outline: unset;
+.ember-basic-dropdown-trigger--below.ember-power-select-trigger[aria-expanded='true'],
+.ember-basic-dropdown-trigger--in-place.ember-power-select-trigger[aria-expanded='true'] {
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.ember-power-select-dropdown.ember-basic-dropdown-content--below,
+.ember-power-select-dropdown.ember-basic-dropdown-content--in-place {
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.ember-power-select-selected-item {
+  padding: 2px 8px;
+  margin-left: 0;
 }
 
-.autocomplete-fix {
-  z-index: 1000;
+.ember-power-select-selected-item > .sui-select__option-count {
+  display: none;
+}
+.sui-select__menu {
+  flex-direction: column;
+  left: 0;
+  right: 0;
+  top: 110%;
+  margin: 0;
+  line-height: 1.5;
+  background: white;
+  position: absolute;
+  box-shadow: rgba(59, 69, 79, 0.3) 0px 2px 4px;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.ember-power-select-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 400;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.ember-power-select-option .sui-select__option-label {
+  color: #4f4f4f;
+}
+
+.ember-power-select-selected-item {
+  font-weight: 700;
+  color: #333333;
+  flex-grow: 1;
+  align-self: center;
 }
 
 .ember-power-select-trigger {
   padding: 0;
-  border: unset;
 }
 
-.autocomplete-outside-clicked {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+.ember-power-select-option[aria-current="true"] {
+  background-color: #f8f8f8;
+  color: #4f4f4f;
 }
 
-input[type="search"]::-webkit-search-decoration,
-input[type="search"]::-webkit-search-cancel-button,
-input[type="search"]::-webkit-search-results-button,
-input[type="search"]::-webkit-search-results-decoration { display: none; }
+.ember-power-select-option[aria-selected="true"] {
+  background-color: white;
+  font-weight: 700;
+}
+
+.ember-power-select-option[aria-selected="true"]:hover {
+  background-color: #f8f8f8;
+  font-weight: 700;
+}
+
+.sui-select__control {
+  background-color: #f8f8f8;
+  border: 1px solid #a6a6a6;
+  border-radius: 4px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.sui-select__control--is-focused {
+  border: 1px solid #3a56e4;
+}
+.sui-select__value-container {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.sui-select__value-container--has-value {
+  font-weight: 700;
+  color: #333333;
+}
+.sui-select__placeholder {
+  white-space: nowrap;
+  position: static;
+  transform: none;
+  color: #333333;
+}
+.sui-select__dropdown-indicator {
+  display: flex;
+  height: 32px;
+  width: 32px;
+  align-items: center;
+  justify-content: center;
+}
+.sui-select__option-count {
+  color: #888888;
+  font-size: 0.8em;
+}
+
+.sui-select__option--is-selected {
+  color: #333333;
+  background: #ffffff;
+  font-weight: 700;
+}
+.sui-select__option--is-selected .sui-search-select__option-label {
+  color: #333333;
+  position: relative;
+}
+.sui-select__option:hover {
+  background: #f8f8f8;
+}
+
+.sui-search-box__autocomplete-container:focus {
+  outline: unset;
+}
+
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  display: none;
+}

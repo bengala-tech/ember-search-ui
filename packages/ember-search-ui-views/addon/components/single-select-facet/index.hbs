@@ -4,18 +4,23 @@
       {{@label}}
     </div>
     <PowerSelect
-      class="sui-select sui-select--inline"
+      class="sui-select"
       @tagName="div"
+			@triggerClass="sui-select__control"
+			@dropdownClass="sui-select__menu"
+			@triggerComponent="trigger"
       @matchTriggerWidth={{true}}
       @renderInPlace={{true}}
       @options={{selectBoxOptions.options}}
       @selected={{selectBoxOptions.selectedSelectBoxOption}}
       @onChange={{pipe (pick-value "value") @onChange}} as |option|
     >
-      <span className="sui-select__option-label">
+		{{log selectBoxOptions.selectedSelectBoxOption}}
+		{{log option}}
+      <span class="sui-select__option-label">
         {{option.label}}
       </span>
-      <span className="sui-select__option-count">
+      <span class="sui-select__option-count">
         {{to-locale-string option.count}}
       </span>
     </PowerSelect>

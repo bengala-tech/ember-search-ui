@@ -12,6 +12,12 @@
       </div>
     {{/if}}
     <PowerSelect
+      class="sui-select"
+      @tagName="div"
+      @triggerClass="sui-select__control"
+			@dropdownClass="sui-select__menu"
+      @triggerComponent="trigger"
+      @renderInPlace={{true}}
       @options={{state.options}}
 			@selected={{find-by "value" state.value state.options}}
       @onChange={{state.onChange}} as |option|

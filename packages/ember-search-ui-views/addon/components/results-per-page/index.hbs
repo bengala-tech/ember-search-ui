@@ -7,6 +7,9 @@
       <PowerSelect
         class="sui-select sui-select--inline"
         style="width: 100px;"
+        @triggerClass="sui-select__control"
+        @dropdownClass="sui-select__menu"
+        @triggerComponent="trigger"
         @tagName="div"
         @matchTriggerWidth={{true}}
         @renderInPlace={{true}}
