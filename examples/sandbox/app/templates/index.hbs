@@ -1,0 +1,79 @@
+<SearchProvider @config={{this.config}} as |driver|>
+  <WithSearch
+    @driver={{driver}}
+    @mapContextToProps={{map-context-to-props "wasSearched"}} as |state|
+  >
+    <div class="App">
+      <ErrorBoundary @driver={{driver}}>
+        <Layout>
+          <:header>
+            <SearchBox
+              @driver={{driver}}
+              @autocompleteMinimumCharacters={{3}}
+              @autocompleteResults={{hash
+                linkTarget="_blank"
+                sectionTitle="Results"
+                titleField="title"
+                urlField="nps_link"
+                shouldTrackClickThrough=true
+                clickThroughTags="test"
+              }}
+              @autocompleteSuggestions={{true}}
+							@debounceLength=}}0}}
+            />
+          </:header>
+          <:sideContent>
+            <div>
+              {{#if state.wasSearched}}
+                <Sorting
+                  @driver={{driver}}
+                  @sortOptions={{array
+                    (hash name="Relevance" value="" direction="")
+                    (hash name="Title" value="title" direction="asc")
+                  }}
+                  @label="Sort by"
+                />
+              {{/if}}
+              <Facet
+                @driver={{driver}}
+                @field="states"
+                @label="States"
+                @filterType="any"
+                @isFilterable={{true}}
+              />
+              <Facet
+                @driver={{driver}}
+                @field="world_heritage_site"
+                @label="World Heritage Site?"
+              />
+              <Facet
+                @driver={{driver}}
+                @field="visitors"
+                @label="Visitors"
+                @filterType="any"
+              />
+              <Facet @driver={{driver}} @field="acres" @label="Acres" />
+            </div>
+          </:sideContent>
+          <:bodyContent>
+            <Results
+              @driver={{driver}}
+              @urlField="nps_link"
+              @titleField="title"
+              @shouldTrackClickThrough={{true}}
+            />
+          </:bodyContent>
+          <:bodyHeader>
+            {{#if state.wasSearched}}
+              <PagingInfo @driver={{driver}} />
+              <ResultsPerPage @driver={{driver}} />
+            {{/if}}
+          </:bodyHeader>
+          <:bodyFooter>
+            <Paging @driver={{driver}} />
+          </:bodyFooter>
+        </Layout>
+      </ErrorBoundary>
+    </div>
+  </WithSearch>
+</SearchProvider>
