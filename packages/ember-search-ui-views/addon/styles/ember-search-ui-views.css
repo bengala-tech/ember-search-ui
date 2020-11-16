@@ -1147,6 +1147,11 @@ html {
   color: #4f4f4f;
 }
 
+.ember-power-select-placeholder {
+  flex-grow: 1;
+  align-self: center;
+}
+
 .ember-power-select-selected-item {
   font-weight: 700;
   color: #333333;

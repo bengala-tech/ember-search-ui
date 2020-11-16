@@ -11,6 +11,7 @@
 			@triggerComponent="trigger"
       @matchTriggerWidth={{true}}
       @renderInPlace={{true}}
+      @placeholder="Select..."
       @options={{selectBoxOptions.options}}
       @selected={{selectBoxOptions.selectedSelectBoxOption}}
       @onChange={{pipe (pick-value "value") @onChange}} as |option|
