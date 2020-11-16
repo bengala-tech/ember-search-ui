@@ -19,7 +19,7 @@
                 clickThroughTags="test"
               }}
               @autocompleteSuggestions={{true}}
-							@debounceLength=}}0}}
+              @debounceLength={{0}}
             />
           </:header>
           <:sideContent>
@@ -70,7 +70,9 @@
             {{/if}}
           </:bodyHeader>
           <:bodyFooter>
-            <Paging @driver={{driver}} />
+            {{#if state.wasSearched}}
+              <Paging @driver={{driver}} />
+            {{/if}}
           </:bodyFooter>
         </Layout>
       </ErrorBoundary>
