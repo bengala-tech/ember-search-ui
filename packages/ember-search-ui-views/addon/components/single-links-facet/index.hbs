@@ -1,0 +1,39 @@
+{{#let (object-at 0 (map-by "value" (filter-by "selected" @options))) as |value|
+}}
+  <div class="sui-facet" ...attributes>
+    <div>
+      <div class="sui-facet__title">
+        {{@label}}
+      </div>
+      <ul class="sui-single-option-facet">
+        {{#if value}}
+          <li class="sui-single-option-facet__selected">
+            {{get-filter-value-display value}}
+            <span class="sui-single-option-facet__remove">
+              (
+              <a href="/" {{on "click" (prevent-default (fn @onRemove value))}}>
+                Remove
+              </a>
+              )
+            </span>
+          </li>
+        {{else}}
+          {{#each @options as |option|}}
+            <li class="sui-single-option-facet__item">
+              <a
+                class="sui-single-option-facet__link"
+                href="/"
+                {{on "click" (prevent-default (fn @onSelect option.value))}}
+              >
+                {{get-filter-value-display option.value}}
+              </a>
+              <span class="sui-facet__count">
+                {{option.count}}
+              </span>
+            </li>
+          {{/each}}
+        {{/if}}
+      </ul>
+    </div>
+  </div>
+{{/let}}
