@@ -1,17 +1,18 @@
-{{log @totalPages @current}}
+<Containers::Paging @driver={{@driver}} as |state|>
   <ul class="rc-pagination sui-paging" unselectable="unselectable">
     <li
+      class="{{if (eq state.current 1) "rc-pagination-disabled"}} rc-pagination-prev"
       title="Previous Page"
-      aria-disabled="true"
-      class="{{if (eq @current 0) "rc-pagination-disabled"}} rc-pagination-prev"
+      aria-disabled={{if (eq state.current 1) "true"}}
+      {{on "click" (fn this.prev state.onChange state.current state.totalPages)}}
     >
       <a class="rc-pagination-item-link"></a>
     </li>
-		{{log @totalPages}}
-		{{#each (repeat @totalPages) as |i|}}
+		{{#each (range 1 state.totalPages) as |i|}}
 			<li
-				class="rc-pagination-item rc-pagination-item-{{i}} {{if (eq @current i) " rc-pagination-item-active"}}"
+				class="rc-pagination-item rc-pagination-item-{{i}} {{if (eq state.current i) " rc-pagination-item-active"}}"
 				tabindex="0"
+        {{on "click" (fn this.goTo state.onChange state.current i)}}
 			>
 				<a>{{i}}</a>
 			</li>
@@ -19,8 +20,11 @@
 		<li
       title="Next Page"
       aria-disabled="false"
-      class="{{if (eq @current 0) "rc-pagination-disabled"}} rc-pagination-next"
+      class="{{if (gte state.current state.totalPages) "rc-pagination-disabled"}} rc-pagination-next"
+      {{on "click" (fn this.next state.onChange state.current state.totalPages)}}
     >
       <a class="rc-pagination-item-link"></a>
     </li>
   </ul>
+</Containers::Paging>
+  
