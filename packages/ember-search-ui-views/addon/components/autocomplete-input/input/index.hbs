@@ -3,15 +3,15 @@
     type="search"
     value={{@value}}
     autocomplete="off"
-    placeholder={{@inputProps.placeholder}}
+    placeholder={{if @placeholder @placeholder "Search"}}
     class={{concat
       "sui-search-box__text-input "
       (if @isFocused " focus ")
-      @inputProps.class
     }}
     id="{{@menuGuid}}-button"
     {{on "input" @onInput}}
     {{on "keydown" this.onKeydown}}
+    ...attributes
   />
   {{!-- {{#if (and (or @select.selected this.text) (not @select.disabled))
   }}

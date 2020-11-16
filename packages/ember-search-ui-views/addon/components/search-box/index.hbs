@@ -27,7 +27,12 @@
         class="sui-search-box"
         @classIfOpen="autocomplete" as |menu|
       >
-        <menu.Input @value={{state.value}} @onInput={{state.onChange}} />
+        <menu.Input
+          class={{state.inputProps.class}}
+          @value={{state.value}}
+          @onInput={{state.onChange}}
+          @placeholder={{state.inputProps.placeholder}}
+        />
         {{#if (and (gt state.allAutocompletedItemsCount 0) menu.isOpen)}}
           <menu.Items
             role="listbox"

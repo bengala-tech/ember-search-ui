@@ -7,7 +7,6 @@ export default class InputComponent extends GlimmerComponent {
   onKeydown(event) {
     switch (event.key) {
       case 'Escape':
-        event.preventDefault();
         this.args.onInput('');
         this.args.closeMenu(false);
         break;

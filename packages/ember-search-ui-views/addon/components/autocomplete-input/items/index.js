@@ -7,6 +7,7 @@ export default class Items extends Component {
   constructor() {
     super(...arguments);
     window.addEventListener('click', this.maybeClose);
+    window.addEventListener('keydown', this.maybeClose);
   }
 
   @action
@@ -16,8 +17,13 @@ export default class Items extends Component {
 
   @action
   maybeClose(e) {
-    if (!this.list?.contains(e.target)) {
+    if(e.key === 'Escape') {
       this.args.closeMenu();
+    }
+    if(!e.key) {
+      if (!this.list?.contains(e.target)) {
+        this.args.closeMenu();
+      }
     }
   }
 
