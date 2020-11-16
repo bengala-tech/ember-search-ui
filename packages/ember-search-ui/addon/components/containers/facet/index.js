@@ -3,31 +3,36 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 export default class FacetContainerComponent extends GlimmerComponent {
-  @tracked more = this.args.show;
+  @tracked more = this.args.show || 5;
   @tracked searchTerm = '';
 
   @action
-  removeFilter(removeFilter, value, field, filterType) {
+  removeFilter(removeFilter, field, filterType, value) {
     removeFilter(field, value, filterType);
   }
 
   @action
-  onChange(setFilter, value, field, filterType) {
+  setFilter(setFilter, field, filterType, value) {
     setFilter(field, value, filterType);
   }
 
   @action
-  onSelect(addFilter, value, field, filterType) {
+  addFilter(addFilter, field, filterType, value) {
     addFilter(field, value, filterType);
   }
 
   @action
   handleClickMore(a11yNotify, opts) {
-    let visibleOptionsCount = more + 10;
-    const showingAll = visibleOptionsCount >= totalOptions;
-    if (showingAll) visibleOptionsCount = totalOptions;
+    let visibleOptionsCount = this.more + 10;
+    const showingAll = visibleOptionsCount >= opts;
+    if (showingAll) visibleOptionsCount = opts;
 
     a11yNotify('moreFilters', { visibleOptionsCount, showingAll });
     this.more = visibleOptionsCount;
-	}
+  }
+  
+  @action
+  onSearch(e) {
+    this.searchTerm = e.target.value;
+  }
 }

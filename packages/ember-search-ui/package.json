@@ -25,14 +25,18 @@
     "test:ember": "ember test",
     "test:ember-compatibility": "ember try:each"
   },
-  "nohoist": ["@elastic/search-ui", "@elastic/search-ui/**"],
+  "nohoist": [
+    "@elastic/search-ui",
+    "@elastic/search-ui/**"
+  ],
   "dependencies": {
     "@elastic/search-ui": "^1.5.0",
-    "ember-search-ui-views": "*",
+    "deep-equal": "^2.0.4",
     "ember-auto-import": "^1.6.0",
     "ember-cli-babel": "^7.22.1",
     "ember-cli-htmlbars": "^5.3.1",
-    "ember-named-blocks-polyfill": "^0.2.3"
+    "ember-named-blocks-polyfill": "^0.2.3",
+    "ember-search-ui-views": "*"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",

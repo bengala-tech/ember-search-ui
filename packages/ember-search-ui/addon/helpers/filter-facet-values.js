@@ -7,7 +7,7 @@ export const accentFold = (str = '') =>
 export default helper(function (
   [facetValues = [], searchTerm = '']
 ) {
-	if (searchTerm.trim()) {
+	if (searchTerm?.trim()) {
 		return facetValues.filter(option =>
 			accentFold(option.value)
 				.toLowerCase()

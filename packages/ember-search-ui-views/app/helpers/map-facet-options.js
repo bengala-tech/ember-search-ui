@@ -1,0 +1,1 @@
+export { default, mapFacetOptions } from 'ember-search-ui-views/helpers/map-facet-options';

@@ -1,0 +1,23 @@
+{{#let (map-facet-options @options) as |selectBoxOptions|}}
+  <div class="sui-facet" ...attributes>
+    <div class="sui-facet__title">
+      {{@label}}
+    </div>
+    <PowerSelect
+      class="sui-select sui-select--inline"
+      @tagName="div"
+      @matchTriggerWidth={{true}}
+      @renderInPlace={{true}}
+      @options={{selectBoxOptions.options}}
+      @selected={{selectBoxOptions.selectedSelectBoxOption}}
+      @onChange={{pipe (pick-value "value") @onChange}} as |option|
+    >
+      <span className="sui-select__option-label">
+        {{option.label}}
+      </span>
+      <span className="sui-select__option-count">
+        {{to-locale-string option.count}}
+      </span>
+    </PowerSelect>
+  </div>
+{{/let}}

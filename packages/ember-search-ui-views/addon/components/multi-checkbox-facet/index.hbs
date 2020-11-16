@@ -8,7 +8,7 @@
         class="sui-facet-search__text-input"
         type="search"
         placeholder={{if @searchPlaceholder @searchPlaceholder "Search"}}
-        {{on "change" @onSearch}}
+        {{on "input" @onSearch}}
       />
     </div>
   {{/if}}
@@ -49,20 +49,20 @@
           {{to-locale-string option.count "en"}}
         </span>
       </label>
-      {{#if @showMore}}
-        <button
-          type="button"
-          class="sui-facet-view-more"
-					{{on "click" @onMoreClick}}
-          aria-label="Show more options"
-        >
-          + More
-        </button>
-      {{/if}}
     {{else}}
       <div>
         No matching options
       </div>
     {{/each}}
   </div>
+  {{#if @showMore}}
+    <button
+      type="button"
+      class="sui-facet-view-more"
+      aria-label="Show more options"
+      {{on "click" @onMoreClick}}
+    >
+      + More
+    </button>
+  {{/if}}
 </fieldset>

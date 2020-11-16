@@ -1,4 +1,4 @@
-{{#let (if @filterType "all") as |filterType|}}
+{{#let (if @filterType @filterType "all") as |filterType|}}
   <WithSearch
     @mapContextToProps={{map-context-to-props
       "filters"
@@ -15,7 +15,7 @@
         {{#let
           (get
             (mark-selected-facet-values-from-filters
-              (object-at 0 facetsForField) state.filters @field @filterType
+              (object-at 0 facetsForField) state.filters @field filterType
             )
             "data"
           ) as |facetValues|
@@ -28,11 +28,12 @@
             {{#if
               (not (and (eq facetValues.length 0) (eq selectedValues.length 0)))
             }}
-              {{#each
+              {{#let
                 (filter-facet-values
-                  facetValues state.searchTerm
+                  facetValues this.searchTerm
                 ) as |filteredFacetValues|
               }}
+                {{log this.searchTerm}}
                 {{#if @view}}
                   {{#let (component @view) as |View|}}
                     <View
@@ -42,14 +43,29 @@
                         state.a11yNotify
                         filteredFacetValues.length
                       }}
-                      @onRemove={{fn this.removeFilter state.removeFilter}}
-                      @onChange={{fn this.setFilter state.setFilter}}
-                      @onSelect={{fn this.addFilter state.addFilter}}
-                      @options={{slice 0 this.more @options}}
+                      @onRemove={{fn
+                        this.removeFilter
+                        state.removeFilter
+                        @field
+                        filterType
+                      }}
+                      @onChange={{fn
+                        this.setFilter
+                        state.setFilter
+                        @field
+                        filterType
+                      }}
+                      @onSelect={{fn
+                        this.addFilter
+                        state.addFilter
+                        @field
+                        filterType
+                      }}
+                      @options={{slice 0 this.more filteredFacetValues}}
                       @showMore={{gt filteredFacetValues.length 0}}
                       @values={{selectedValues}}
                       @showSearch={{@isFilterable}}
-                      @onSearch={{set this.searchTerm}}
+                      @onSearch={{this.onSearch}}
                       @searchPlaceholder={{concat "Field " @field}}
                       ...attributes
                     />
@@ -63,19 +79,25 @@
                         state.a11yNotify
                         filteredFacetValues.length
                       )
-                      onRemove=(fn this.removeFilter state.removeFilter)
-                      onChange=(fn this.setFilter state.setFilter)
-                      onSelect=(fn this.addFilter state.addFilter)
+                      onRemove=(fn
+                        this.removeFilter state.removeFilter @field filterType
+                      )
+                      onChange=(fn
+                        this.setFilter state.setFilter @field filterType
+                      )
+                      onSelect=(fn
+                        this.addFilter state.addFilter @field filterType
+                      )
                       options=(slice 0 this.more @options)
                       showMore=(gt filteredFacetValues.length 0)
                       values=selectedValues
                       showSearch=@isFilterable
-                      onSearch=(set this.searchTerm)
+                      onSearch=this.onSearch
                       searchPlaceholder=(concat "Field " @field)
                     )
                   }}
                 {{/if}}
-              {{/each}}
+              {{/let}}
             {{/if}}
           {{/let}}
         {{/let}}

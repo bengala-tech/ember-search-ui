@@ -52,7 +52,12 @@
                 @label="Visitors"
                 @filterType="any"
               />
-              <Facet @driver={{driver}} @field="acres" @label="Acres" />
+              <Facet
+                @driver={{driver}}
+                @field="acres"
+                @label="Acres"
+                @view="single-select-facet"
+              />
             </div>
           </:sideContent>
           <:bodyContent>
