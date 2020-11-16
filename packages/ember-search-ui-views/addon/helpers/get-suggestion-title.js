@@ -16,5 +16,5 @@ export function getSuggestionTitle(suggestionType, autocompleteSuggestions) {
 export default helper(function (
   [suggestionType, autocompleteSuggestions] /*, hash*/
 ) {
-  return getSnippet(suggestionType, autocompleteSuggestions);
+  return getSuggestionTitle(suggestionType, autocompleteSuggestions);
 });

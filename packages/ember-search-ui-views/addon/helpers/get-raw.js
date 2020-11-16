@@ -1,8 +1,8 @@
 import { helper } from '@ember/component/helper';
-import { get } from '@ember/object';
 
 export function getRaw(result, value) {
-  return result?.value?.raw || get(result, value)
+  if (!result[value] || !result[value].raw) return;
+  return result[value].raw;
 }
 
 export default helper(function ([result, value] /*, hash*/) {
