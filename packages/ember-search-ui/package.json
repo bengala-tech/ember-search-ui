@@ -1,6 +1,6 @@
 {
   "name": "ember-search-ui",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Components for @elastic/search-ui",
   "keywords": [
     "ember-addon",
@@ -36,7 +36,7 @@
     "ember-cli-babel": "^7.22.1",
     "ember-cli-htmlbars": "^5.3.1",
     "ember-named-blocks-polyfill": "^0.2.3",
-    "ember-search-ui-views": "0.0.2"
+    "ember-search-ui-views": "0.0.3"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
