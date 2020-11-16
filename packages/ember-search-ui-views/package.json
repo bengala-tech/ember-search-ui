@@ -25,8 +25,8 @@
   "dependencies": {
     "ember-cli-babel": "^7.22.1",
     "ember-cli-htmlbars": "^5.3.1",
-    "ember-named-blocks-polyfill": "^0.2.3",
-    "ember-headlessui": "github:betocantu93/ember-headlessui"
+    "ember-headlessui": "github:betocantu93/ember-headlessui",
+    "ember-named-blocks-polyfill": "^0.2.3"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
@@ -44,6 +44,7 @@
     "ember-export-application-global": "^2.0.1",
     "ember-load-initializers": "^2.1.1",
     "ember-maybe-import-regenerator": "^0.1.6",
+    "ember-on-helper": "^0.1.0",
     "ember-qunit": "^4.6.0",
     "ember-resolver": "^8.0.2",
     "ember-source": "~3.22.0",

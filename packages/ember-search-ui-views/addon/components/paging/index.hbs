@@ -1,0 +1,26 @@
+{{log @totalPages @current}}
+  <ul class="rc-pagination sui-paging" unselectable="unselectable">
+    <li
+      title="Previous Page"
+      aria-disabled="true"
+      class="{{if (eq @current 0) "rc-pagination-disabled"}} rc-pagination-prev"
+    >
+      <a class="rc-pagination-item-link"></a>
+    </li>
+		{{log @totalPages}}
+		{{#each (repeat @totalPages) as |i|}}
+			<li
+				class="rc-pagination-item rc-pagination-item-{{i}} {{if (eq @current i) " rc-pagination-item-active"}}"
+				tabindex="0"
+			>
+				<a>{{i}}</a>
+			</li>
+		{{/each}}
+		<li
+      title="Next Page"
+      aria-disabled="false"
+      class="{{if (eq @current 0) "rc-pagination-disabled"}} rc-pagination-next"
+    >
+      <a class="rc-pagination-item-link"></a>
+    </li>
+  </ul>

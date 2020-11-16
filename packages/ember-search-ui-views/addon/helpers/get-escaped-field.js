@@ -11,6 +11,5 @@ export function getEscapedField(result, field) {
 }
 
 export default helper(function ([result, field] /*, hash*/) {
-  console.log(result, field)
   return getEscapedField(result, field)
 });

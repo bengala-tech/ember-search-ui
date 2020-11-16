@@ -22,13 +22,13 @@
       autocompletedSuggestions=state.autocompletedSuggestions
     ) as |groups|
   }}
-    <form {{on "submit" (fn this.onSubmit state.onChange state.value)}}>
+    <form {{on "submit" state.onSubmit}}>
       <AutocompleteInput
         class="sui-search-box"
         @classIfOpen="autocomplete" as |menu|
       >
         <menu.Input @value={{state.value}} @onInput={{state.onChange}} />
-        {{#if (gt state.allAutocompletedItemsCount 0)}}
+        {{#if (and (gt state.allAutocompletedItemsCount 0) menu.isOpen)}}
           <menu.Items
             role="listbox"
             class="sui-search-box__autocomplete-container" as |items|

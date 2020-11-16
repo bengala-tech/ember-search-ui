@@ -15,11 +15,13 @@ export default class MenuComponent extends Menu {
 	}
 
 	@action
-	close() {
+	close(focusInput = true) {
 		this.isOpen = false;
-		Ember.run.next(() => {
-			document.getElementById(this.buttonGuid).focus();
-		});
+		if(focusInput) {
+			Ember.run.next(() => {
+				document.getElementById(this.buttonGuid).focus();
+			});
+		}
 	}
 
 	@action

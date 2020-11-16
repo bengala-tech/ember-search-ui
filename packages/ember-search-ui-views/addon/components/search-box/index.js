@@ -8,10 +8,4 @@ export default class SearchBoxComponent extends GlimmerComponent {
 		onChange(term);
 	}
 
-	@action
-	onSubmit(onChange, value, e) {
-		e.preventDefault();
-		onChange(value)
-	}
-
 }

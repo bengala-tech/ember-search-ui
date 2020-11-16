@@ -4,6 +4,7 @@
     aria-labelledby={{@buttonGuid}}
     {{on "keydown" this.onKeydown}}
     tabindex="-1"
+    {{did-insert this.registerList}}
     ...attributes
   >
     {{yield (hash
