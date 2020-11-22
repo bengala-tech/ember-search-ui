@@ -4,6 +4,22 @@ Ember implementation for @elastic/search-ui
 
 ## Still needs documentation, but here's a quick example.
 
+### This repo comes with a handy example, look at examples/sandbox. 
+
+Running the example locally, clone the repo, 
+`yarn install`, 
+`cd ember-search-ui/examples/sandbox`, 
+`ember s` 
+
+[Live Demo](https://ember-search-ui.netlify.app/)
+
+
+
+You can basically refer to @elastic/search-ui for the documentation and use the example/sandbox's code to get a grip of what's going on for ember specifics.
+
+
+
+## Custom UI example
 
 ```ts
 import Controller from '@ember/controller';
