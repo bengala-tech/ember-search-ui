@@ -44,6 +44,7 @@ export default class SomeController extends Controller {
 
 
 ```hbs
+//here's the <Table /> Component
 <div class="flex flex-col overflow-x-auto rounded">
   <div>
     <div class="inline-block min-w-full align-middle">
