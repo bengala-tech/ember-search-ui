@@ -9,7 +9,7 @@ Ember implementation for [@elastic/search-ui](https://github.com/elastic/search-
 Running the example locally, clone the repo,
 `cd ember-search-ui`,
 `yarn install`, 
-`cd ember-search-ui/examples/sandbox`, 
+`cd examples/sandbox`, 
 `ember s` 
 
 ### [Live Demo](https://ember-search-ui.netlify.app/)
