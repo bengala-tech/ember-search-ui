@@ -12,7 +12,7 @@ Running the example locally, clone the repo,
 `cd ember-search-ui/examples/sandbox`, 
 `ember s` 
 
-[Live Demo](https://ember-search-ui.netlify.app/)
+### [Live Demo](https://ember-search-ui.netlify.app/)
 
 
 
