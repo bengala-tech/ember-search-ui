@@ -6,7 +6,8 @@ Ember implementation for @elastic/search-ui
 
 ### This repo comes with a handy example, look at examples/sandbox. 
 
-Running the example locally, clone the repo, 
+Running the example locally, clone the repo,
+`cd ember-search-ui`,
 `yarn install`, 
 `cd ember-search-ui/examples/sandbox`, 
 `ember s` 
