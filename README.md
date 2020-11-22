@@ -1,5 +1,5 @@
 # ember-search-ui
-Ember implementation for @elastic/search-ui
+Ember implementation for (@elastic/search-ui)[https://github.com/elastic/search-ui]
 
 
 ## Still needs documentation, but here's a quick example.
