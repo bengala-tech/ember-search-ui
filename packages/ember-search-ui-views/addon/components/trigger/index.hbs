@@ -1,12 +1,10 @@
 {{#if @select.selected}}
   {{#if @selectedItemComponent}}
-    {{ensure-safe-component
-      (component
-        @selectedItemComponent
-        extra=(readonly @extra)
-        option=(readonly @select.selected)
-        select=(readonly @select)
-      )
+    {{component
+      (ensure-safe-component @selectedItemComponent)
+      extra=(readonly @extra)
+      option=(readonly @select.selected)
+      select=(readonly @select)
     }}
   {{else}}
     <span class="ember-power-select-selected-item">
@@ -24,8 +22,9 @@
     </span>
   {{/if}}
 {{else}}
-  {{ensure-safe-component
-    (component @placeholderComponent placeholder=@placeholder)
+  {{component
+    (ensure-safe-component @placeholderComponent)
+    placeholder=@placeholder
   }}
 {{/if}}
 <div class="css-1wy0on6 sui-select__indicators">
