@@ -1,6 +1,6 @@
 {{#if @select.selected}}
   {{#if @selectedItemComponent}}
-    {{ensure-component-safe
+    {{ensure-safe-component
       (component
         @selectedItemComponent
         extra=(readonly @extra)
@@ -24,7 +24,7 @@
     </span>
   {{/if}}
 {{else}}
-  {{ensure-component-safe
+  {{ensure-safe-component
     (component @placeholderComponent placeholder=@placeholder)
   }}
 {{/if}}
