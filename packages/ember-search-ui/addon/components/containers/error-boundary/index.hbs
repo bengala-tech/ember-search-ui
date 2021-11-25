@@ -4,7 +4,7 @@
   as |state|
 >
   {{#if @view}}
-    {{#let (ensure-safe-component (component @view)) as |View|}}
+    {{#let (component (ensure-safe-component @view)) as |View|}}
       <View @error={{state.error}} ...attributes />
     {{/let}}
   {{else}}
