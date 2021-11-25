@@ -1,9 +1,10 @@
 <WithSearch
   @mapContextToProps={{map-context-to-props "error"}}
-  @driver={{@driver}} as |state|
+  @driver={{@driver}}
+  as |state|
 >
   {{#if @view}}
-    {{#let (component @view) as |View|}}
+    {{#let (ensure-safe-component (component @view)) as |View|}}
       <View @error={{state.error}} ...attributes />
     {{/let}}
   {{else}}

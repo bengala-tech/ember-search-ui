@@ -8,7 +8,7 @@
   @driver={{@driver}} as |state|
 >
   {{#if @view}}
-    {{#let (component @view) as |View|}}
+    {{#let (component (ensure-safe-component @view)) as |View|}}
       <View
         @searchTerm={{state.resultSearchTerm}}
         @start={{state.pagingStart}}

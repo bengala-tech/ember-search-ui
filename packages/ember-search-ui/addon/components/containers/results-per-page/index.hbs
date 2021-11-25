@@ -7,7 +7,7 @@
     @driver={{@driver}} as |state|
   >
     {{#if @view}}
-      {{#let (component @view) as |View|}}
+      {{#let (component (ensure-safe-component @view)) as |View|}}
         <View
           @onChange={{state.setResultsPerPage}}
           @options={{options}}

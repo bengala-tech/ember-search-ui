@@ -18,7 +18,7 @@
     ) as |useAutocomplete autocompletedSuggestionsCount|
   }}
     {{#if @view}}
-      {{#let (component @view) as |View|}}
+      {{#let (component (ensure-safe-component @view)) as |View|}}
         <View
           @allAutocompletedItemsCount={{add
             autocompletedSuggestionsCount

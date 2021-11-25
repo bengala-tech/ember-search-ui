@@ -1,10 +1,12 @@
 {{#if @select.selected}}
   {{#if @selectedItemComponent}}
-    {{component
-      @selectedItemComponent
-      extra=(readonly @extra)
-      option=(readonly @select.selected)
-      select=(readonly @select)
+    {{ensure-component-safe
+      (component
+        @selectedItemComponent
+        extra=(readonly @extra)
+        option=(readonly @select.selected)
+        select=(readonly @select)
+      )
     }}
   {{else}}
     <span class="ember-power-select-selected-item">
@@ -13,6 +15,7 @@
   {{/if}}
   {{#if (and @allowClear (not @select.disabled))}}
     <span
+      role="button"
       class="ember-power-select-clear-btn"
       {{on "mousedown" this.clear}}
       {{on "touchstart" this.clear}}
@@ -21,7 +24,9 @@
     </span>
   {{/if}}
 {{else}}
-  {{component @placeholderComponent placeholder=@placeholder}}
+  {{ensure-component-safe
+    (component @placeholderComponent placeholder=@placeholder)
+  }}
 {{/if}}
 <div class="css-1wy0on6 sui-select__indicators">
   <span class="css-0 sui-select__indicator-separator"></span>
