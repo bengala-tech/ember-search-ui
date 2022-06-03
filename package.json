@@ -1,4 +1,3 @@
-
 {
   "name": "root",
   "private": true,
@@ -6,5 +5,11 @@
   "workspaces": [
     "packages/*",
     "examples/*"
-	]
+  ],
+  "resolutions": {
+    "@embroider/macros": "^1.7.1",
+    "@embroider/shared-internals": "^1.7.1",
+    "@embroider/util": "^1.7.1",
+    "@embroider/test-setup": "^1.7.1"
+  }
 }

@@ -1,6 +1,6 @@
 {{#let (find-by "value" "true" @options) as |truthyOptions|}}
   {{#if truthyOptions}}
-    {{#let (contains "true" @values) as |isSelected|}}
+    {{#let (includes "true" @values) as |isSelected|}}
       <fieldset class="sui-facet" ...attributes>
         <legend class="sui-facet__title">
           {{@label}}
