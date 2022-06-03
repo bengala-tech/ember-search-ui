@@ -1,8 +1,6 @@
-import GlimmerComponent from '@glimmer/component';
+import Component from '@glimmer/component';
 import EmberObject from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { setComponentTemplate } from '@ember/component';
-import { hbs } from 'ember-cli-htmlbars';
 import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
@@ -14,11 +12,7 @@ function giveMeJustWhatINeeded(stateOrContext, mapContextToProps, args) {
   return mapContextToPropsToUse(stateOrContext, args) || {};
 }
 
-const template = hbs`
-	{{yield this.wantedState}}
-`;
-
-class WithSearchComponent extends GlimmerComponent {
+export default class WithSearchComponent extends Component {
   @tracked wantedState = null;
   @tracked driverActions = null;
 
@@ -51,16 +45,15 @@ class WithSearchComponent extends GlimmerComponent {
     driver.subscribeToStateChanges(this.subscription);
   }
 
-	scheduleStateChange(newState) {
-		scheduleOnce('afterRender', this, function() {
-			this.wantedState.setProperties(newState)
-		})
-	}
+  scheduleStateChange(newState) {
+    scheduleOnce('afterRender', this, function () {
+      this.wantedState.setProperties(newState);
+    });
+  }
 
   @action
   subscription(state) {
     if (!this.isDestroyed || !this.isDestroying) {
-			
       let newState = giveMeJustWhatINeeded(
         {
           ...this.driverActions,
@@ -71,11 +64,9 @@ class WithSearchComponent extends GlimmerComponent {
       );
       this.scheduleStateChange(newState);
     }
-	}
-	
+  }
+
   willDestroy() {
     this.args.driver.unsubscribeToStateChanges(this.subscription);
   }
 }
-
-export default setComponentTemplate(template, WithSearchComponent);
