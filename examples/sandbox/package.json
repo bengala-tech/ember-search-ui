@@ -53,6 +53,7 @@
     "ember-qunit": "^4.6.0",
     "ember-resolver": "^8.0.2",
     "ember-search-ui": "^0.4.4",
+    "ember-search-ui-views": "^0.4.4",
     "ember-set-helper": "^2.0.0",
     "ember-source": "~3.22.0",
     "ember-template-lint": "^2.14.0",
