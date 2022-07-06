@@ -10,6 +10,11 @@
     "@embroider/macros": "^1.7.1",
     "@embroider/shared-internals": "^1.7.1",
     "@embroider/util": "^1.7.1",
-    "@embroider/test-setup": "^1.7.1"
+    "@embroider/test-setup": "^1.7.1",
+    "@ember/test-helpers": "^2.8.1",
+    "qunit": "^2.17.2",
+    "**/@types/ember-qunit": "^5.0.0",
+    "**/@types/qunit": "^2.19.0",
+    "ember-element-helper": "^0.6.0"
   }
 }

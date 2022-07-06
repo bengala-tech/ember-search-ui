@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
+import moment from 'moment';
 
 const config = {
   alwaysSearchOnInitialLoad: true,
@@ -106,7 +107,13 @@ const config = {
       size: 4,
     },
   },
-  apiConnector: connector,
+  apiConnector: {
+    onSearch() {
+      return {
+        results: [],
+      };
+    },
+  },
   hasA11yNotifications: true,
 };
 

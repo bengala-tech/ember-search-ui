@@ -4,6 +4,7 @@ import { tracked } from '@glimmer/tracking';
 import { assert } from '@ember/debug';
 import { action } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
+import { helper } from '@ember/component/helper';
 
 /* For a given object execute mapContextToProps to pluck out the relevant
 properties */
@@ -15,6 +16,11 @@ function giveMeJustWhatINeeded(stateOrContext, mapContextToProps, args) {
 export default class WithSearchComponent extends Component {
   @tracked wantedState = null;
   @tracked driverActions = null;
+  _lastDriver = null;
+
+  setupDriver = helper(function ([driver, mapContextToProps, callback]) {
+    return callback(driver, mapContextToProps);
+  });
 
   constructor() {
     super(...arguments);
@@ -23,11 +29,17 @@ export default class WithSearchComponent extends Component {
       this.args.mapContextToProps || this.mapContextToProps
     );
     assert('WithSearch requires a driver', this.args.driver);
-    const { driver, mapContextToProps } = this.args;
-    this.setup(driver, mapContextToProps);
   }
 
+  @action
   setup(driver, mapContextToProps) {
+    if (this._lastDriver === driver) {
+      return;
+    } else {
+      this.unsubscribe();
+      this._lastDriver = driver;
+    }
+
     const initialState = driver.getState();
     this.driverActions = driver.getActions();
 
@@ -46,9 +58,10 @@ export default class WithSearchComponent extends Component {
   }
 
   scheduleStateChange(newState) {
-    scheduleOnce('afterRender', this, function () {
+    const update = () => {
       this.wantedState.setProperties(newState);
-    });
+    };
+    scheduleOnce('afterRender', this, update);
   }
 
   @action
@@ -66,7 +79,13 @@ export default class WithSearchComponent extends Component {
     }
   }
 
+  @action
+  unsubscribe() {
+    this._lastDriver?.unsubscribeToStateChanges?.(this.subscription);
+  }
+
   willDestroy() {
-    this.args.driver.unsubscribeToStateChanges(this.subscription);
+    super.willDestroy();
+    this.unsubscribe();
   }
 }
