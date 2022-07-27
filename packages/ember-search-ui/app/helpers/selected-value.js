@@ -1,1 +1,0 @@
-export { default, selectedValue } from 'ember-search-ui/helpers/selected-value';
