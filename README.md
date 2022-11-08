@@ -3,7 +3,7 @@ Ember implementation for [@elastic/search-ui](https://github.com/elastic/search-
 
 ## Installation
 
-This addon has @elastic/search-ui as peer dependencies. Install the your desired version.
+This addon has @elastic/search-ui as peer dependencies. Install your desired version.
 
 ```
 yarn add @elastic/search-ui
