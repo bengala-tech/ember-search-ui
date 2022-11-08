@@ -39,7 +39,7 @@ You can basically refer to @elastic/search-ui for the documentation and use the 
 import Controller from '@ember/controller';
 
 export default class SomeController extends Controller {
- columns = [
+ properties = [
     {
       name: 'Name',
       relation: 'contact',
@@ -67,7 +67,7 @@ export default class SomeController extends Controller {
 //some.hbs
 
 <SearchProvider @config={{this.config}} as |driver|>
-  <Table @driver={{driver}} @columns={{this.columns}} />
+  <Table @driver={{driver}} @properties={{this.properties}} />
 </SearchProvider>
 
 ```
@@ -90,7 +90,7 @@ export default class SomeController extends Controller {
           >
             <thead>
               <tr>
-                {{#each @columns as |column|}}
+                {{#each @properties as |column|}}
                   <th
                     scope="col"
                     class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-gray-50"
