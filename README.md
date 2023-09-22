@@ -43,6 +43,7 @@ export default class SomeController extends Controller {
     {
       name: 'Name',
       relation: 'contact',
+      valuePath: 'name',
       component: 'table/custom/contact-name',
       mayBeSorted: false,
     },
@@ -54,11 +55,29 @@ export default class SomeController extends Controller {
     {
       name: 'City / State',
       component: 'table/custom/city-state',
+      valuePath: 'cityName',
       mayBeSorted: false,
     },
   ];
-  
-  config = {} //check @elastic/search-ui for config documentation
+  //check @elastic/search-ui for config documentation
+  config = {
+   onSearch: () => {
+      return [
+        {
+          cityName: 'Monterrey',
+          contact: {
+            company: 'Prysmex'
+          }
+        },
+        {
+          cityName: 'Madrid',
+          contact: {
+            company: 'Prysmex'
+          }
+        }
+      ]
+   }
+  } 
 }
 
 ```
