@@ -486,15 +486,16 @@ export interface PrysmexBackendOptions extends PrysmexCodecOptions {
 }
 
 /** A driver backend for Prysmex search endpoints. */
-export function prysmexBackend(
+export function prysmexBackend<Doc = unknown>(
   options: PrysmexBackendOptions,
-): Backend<PrysmexRequest, PrysmexResponse> {
+): Backend<PrysmexRequest, PrysmexResponse, Doc> {
   return {
     codec: prysmexCodec(options),
     search: (request, signal) => options.request(request, signal),
     normalize: (response) => {
       const { total_count, total_pages, ...rest } = response.meta ?? {};
-      const results = response.results ?? response.data ?? [];
+      // the client decides what records look like (e.g. store models)
+      const results = (response.results ?? response.data ?? []) as Doc[];
       return {
         results,
         total: total_count ?? results.length,

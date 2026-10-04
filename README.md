@@ -97,6 +97,8 @@ pnpm lint
 
 Each package's tests run with Vite + testem in its own directory (`pnpm test` in `packages/*`).
 
+`examples/query-builder` shows the new driver end to end: one filter tree sent to a fake Prysmex server as the legacy `filters` list and as the documented groups spec (see its README).
+
 `examples/sandbox` is a classic Ember 4.4 app and is not part of the pnpm workspace yet.
 
 ## Custom UI example

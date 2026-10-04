@@ -1,6 +1,7 @@
 import { isDateValue } from '../operators.ts';
 import { createState, DEFAULT_PER_PAGE } from '../state.ts';
 import { ROOT_ID } from '../tree.ts';
+import type { FieldSchema } from '../codec.ts';
 import type { SearchDriver } from '../driver.ts';
 import type {
   ConditionNode,
@@ -78,12 +79,18 @@ const RANGE_KEYS = ['gt', 'gte', 'lt', 'lte'];
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** A search-ui filter (field + values + type) as a condition node. */
-export function filterToNode(filter: {
-  field: string;
-  values: unknown[];
-  type?: string;
-}): ConditionNode | undefined {
+/**
+ * A search-ui filter (field + values + type) as a condition node. With a
+ * schema, a string on a text field means "contains" (as Prysmex reads it).
+ */
+export function filterToNode(
+  filter: {
+    field: string;
+    values: unknown[];
+    type?: string;
+  },
+  schema?: FieldSchema,
+): ConditionNode | undefined {
   const values = filter.values.flatMap((v) =>
     Array.isArray(v) ? (v as unknown[]) : [v],
   );
@@ -129,7 +136,14 @@ export function filterToNode(filter: {
         };
       }
     }
-    return { ...base, ...negate, operator: 'eq', value: value as FilterValue };
+    const textual =
+      schema?.[filter.field]?.type === 'text' && typeof value === 'string';
+    return {
+      ...base,
+      ...negate,
+      operator: textual ? 'contains' : 'eq',
+      value: value as FilterValue,
+    };
   }
   return {
     ...base,
@@ -175,6 +189,7 @@ export function nodeToFilter(node: ConditionNode): SearchUiFilter {
 export function fromSearchUiState(
   request: SearchUiRequestState,
   defaults: SearchState = createState(),
+  schema?: FieldSchema,
 ): SearchState {
   const perPage =
     request.resultsPerPage ??
@@ -182,7 +197,7 @@ export function fromSearchUiState(
       ? defaults.page.perPage
       : DEFAULT_PER_PAGE);
   const filterNodes = (request.filters ?? [])
-    .map(filterToNode)
+    .map((filter) => filterToNode(filter, schema))
     .filter((n): n is ConditionNode => n !== undefined);
   return {
     ...defaults,
@@ -320,7 +335,7 @@ export class SearchUiCompat<Doc = unknown> {
         field,
         isBlank(value)
           ? undefined
-          : filterToNode({ field, values: [value], type }),
+          : filterToNode({ field, values: [value], type }, this.driver.schema),
       );
     },
 
@@ -333,7 +348,10 @@ export class SearchUiCompat<Doc = unknown> {
       const current = this.#filter(field);
       const values = current ? nodeToFilter(current).values : [];
       if (!values.some((v) => sameValue(v, value))) values.push(value);
-      this.#replace(field, filterToNode({ field, values, type }));
+      this.#replace(
+        field,
+        filterToNode({ field, values, type }, this.driver.schema),
+      );
     },
 
     /** Removes one value from the field's filter, or the whole filter. */
@@ -350,7 +368,10 @@ export class SearchUiCompat<Doc = unknown> {
       }
       const filter = nodeToFilter(current);
       const values = filter.values.filter((v) => !sameValue(v, value));
-      this.#replace(field, filterToNode({ field, values, type: filter.type }));
+      this.#replace(
+        field,
+        filterToNode({ field, values, type: filter.type }, this.driver.schema),
+      );
     },
 
     /** Removes every field filter except those for `except` fields. */

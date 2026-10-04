@@ -18,6 +18,7 @@ import {
 import {
   conditionOf,
   conditionsFor,
+  formatInput,
   parseInput,
   switchCondition,
   type Bound,
@@ -121,7 +122,10 @@ export function setSingle(
   field: FieldDefinition | undefined,
   event: Event,
 ) {
-  driver.update(node.id, { value: parseInput(inputValue(event), field) });
+  const raw = inputValue(event);
+  // option values keep their type (an option `3` is the number 3, not "3")
+  const option = field?.options?.find((o) => formatInput(o.value) === raw);
+  driver.update(node.id, { value: option ? option.value : parseInput(raw, field) });
 }
 
 /** One side of a range: a bound condition, or either end of "between". */

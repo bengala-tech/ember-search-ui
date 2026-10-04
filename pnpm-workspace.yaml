@@ -1,5 +1,6 @@
 packages:
   - packages/*
+  - examples/query-builder
 
 # examples/sandbox is a classic Ember 4.4 app and is not part of the
 # workspace until it is upgraded to an Ember version the v2 addons support.

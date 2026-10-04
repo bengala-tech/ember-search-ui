@@ -60,7 +60,9 @@ const driver = new SearchDriver({
       page: { kind: 'offset', page: 1, perPage: 10 },
       extensions: { 'prysmex.include': this.include },
     }),
+    schema, // field types: a string on a text field means "contains"
   ),
+  schema,
   debounceMs: 0,
 });
 
@@ -82,6 +84,10 @@ Notes:
   `__disable`) and enables OR groups and negation, e.g. from `QueryBuilder`.
   Nested (per-item) queries are not mapped yet: their Prysmex syntax is the
   open question.
+- Give the driver a field schema (types per field, e.g. derived from the
+  schema templates). Prysmex reads a bare string as "contains" on text fields
+  and "equals" elsewhere; with the schema, `setFilter` on a text field becomes
+  `contains` and the codec refuses an `equals` it could not express.
 - Old URLs keep working: `fromSearchUiState` reads the existing `query` param
   shape, and the codec's `parse` reads both filter formats.
 - Offline lists (`LocalSearchDriverResource`) can use `memoryBackend(records)`

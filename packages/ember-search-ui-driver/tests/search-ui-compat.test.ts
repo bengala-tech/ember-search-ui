@@ -279,3 +279,28 @@ test('onRequestStateChange reports request changes only (for URL query params)',
   compat.actions.setCurrent(2);
   expect(seen).toHaveLength(1);
 });
+
+test('with a schema, a string on a text field is "contains" (how Prysmex reads it)', async () => {
+  const driver = new SearchDriver<Doc>({
+    backend: memoryBackend(DOCS),
+    schema: { state: { path: 'state', type: 'text' } },
+  });
+  const compat = searchUiCompat(driver);
+  compats.push(compat);
+  compat.actions.setFilter('state', 'don', 'any');
+  expect(driver.findNode('filter:state')).toMatchObject({
+    operator: 'contains',
+    value: 'don',
+  });
+  await driver.settled();
+  expect(ids(compat.state)).toEqual([3, 5]);
+  expect(compat.state.filters).toEqual([
+    { field: 'state', values: ['don'], type: 'any' },
+  ]);
+  const restored = fromSearchUiState(
+    { filters: [{ field: 'state', values: ['don'] }] },
+    undefined,
+    { state: { path: 'state', type: 'text' } },
+  );
+  expect(restored.filter.children[0]).toMatchObject({ operator: 'contains' });
+});

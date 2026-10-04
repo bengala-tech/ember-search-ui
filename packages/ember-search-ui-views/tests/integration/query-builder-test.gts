@@ -258,6 +258,32 @@ module('Integration | Component | QueryBuilder', function (hooks) {
     assert.dom(`${row(ROOT, 2)} .sui-qb-value input`).hasValue('30');
   });
 
+  test('option values keep their type', async function (assert) {
+    const fields: FieldSchema = {
+      owner: {
+        path: 'owner',
+        type: 'keyword',
+        label: 'Owner',
+        options: [
+          { value: 1, label: 'Ana' },
+          { value: 2, label: 'Bo' },
+        ],
+      },
+    };
+    const d = driver;
+    await render(
+      <template>
+        <Search @driver={{d}} as |search|>
+          <QueryBuilder @search={{search}} @fields={{fields}} />
+        </Search>
+      </template>,
+    );
+    await click(footer(ROOT, 'condition'));
+    await select(`${row(ROOT, 1)} .sui-qb-value select`, '2');
+    const node = driver.state.filter.children[0];
+    assert.strictEqual(node?.kind === 'condition' ? node.value : undefined, 2);
+  });
+
   test('incomplete rows are skipped, not errors', async function (assert) {
     await renderBuilder();
     await click(footer(ROOT, 'condition'));
