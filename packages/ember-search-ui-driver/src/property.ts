@@ -1,4 +1,5 @@
 import type { FieldDefinition, FieldSchema } from './codec.ts';
+import { toProperty, type AnyProperty } from './legacy-property.ts';
 import type { EvaluateOptions } from './evaluate.ts';
 import type { ConditionNode, FieldPath, OperatorId, Scalar } from './types.ts';
 
@@ -31,6 +32,12 @@ export interface RouteLink {
   route: string;
   models?: readonly unknown[];
   query?: Readonly<Record<string, unknown>>;
+  target?: string;
+}
+
+/** A link to a URL, opened in `target` (e.g. `_blank`). */
+export interface UrlLink {
+  url: string;
   target?: string;
 }
 
@@ -98,8 +105,8 @@ export interface PropertyInput<Rec = unknown, Value = unknown> {
   /** false = not filterable. */
   filter?: false | FilterSpec<Rec>;
   views?: PropertyViews;
-  /** Where a record links to. */
-  link?: (record: Rec) => string | RouteLink | undefined;
+  /** Where a record links to: a URL, a URL with a target, or a route. */
+  link?: (record: Rec) => string | UrlLink | RouteLink | undefined;
   /** false = left out of exports. */
   export?: false | PropertyExport<Rec>;
   /** App data the library never reads (a JSON schema, a template...). */
@@ -199,9 +206,10 @@ function merge(base: unknown, override: unknown): unknown {
  * field.path follows a new field.path.
  */
 export function extendProperty<Rec = unknown, Value = unknown>(
-  base: Property<Rec, Value>,
+  input: AnyProperty<Rec, Value>,
   overrides: PropertyOverrides<Rec, Value>,
 ): Property<Rec, Value> {
+  const base = toProperty(input);
   const merged = merge(base, overrides) as PropertyInput<Rec, Value>;
   const keyFollows =
     overrides.key === undefined &&
@@ -235,38 +243,41 @@ export function readPath(record: unknown, path: FieldPath): unknown {
 
 /** The display value: `value(record)`, or the value at field.path. */
 export function propertyValue<Rec, Value>(
-  property: Property<Rec, Value>,
+  input: AnyProperty<Rec, Value>,
   record: Rec,
   get: (record: Rec, path: FieldPath) => unknown = readPath,
 ): Value {
+  const property = toProperty(input);
   return property.value
     ? property.value(record)
     : (get(record, property.field.path) as Value);
 }
 
-export const isSortable = (property: Property<never, unknown>) =>
-  property.sort !== false;
+export const isSortable = (property: AnyProperty<never, unknown>) =>
+  toProperty(property).sort !== false;
 
-export const isFilterable = (property: Property<never, unknown>) =>
-  property.filter !== false;
+export const isFilterable = (property: AnyProperty<never, unknown>) =>
+  toProperty(property).filter !== false;
 
-export const isExportable = (property: Property<never, unknown>) =>
-  property.export !== false;
+export const isExportable = (property: AnyProperty<never, unknown>) =>
+  toProperty(property).export !== false;
 
 /** The path to sort on, or undefined when the property is not sortable. */
 export function sortPath(
-  property: Property<never, unknown>,
+  input: AnyProperty<never, unknown>,
 ): FieldPath | undefined {
+  const property = toProperty(input);
   if (property.sort === false) return undefined;
   return property.sort?.path ?? property.field.path;
 }
 
 /** The exported value: `export.value(record)`, or the display value. */
 export function exportValue<Rec, Value>(
-  property: Property<Rec, Value>,
+  input: AnyProperty<Rec, Value>,
   record: Rec,
   get?: (record: Rec, path: FieldPath) => unknown,
 ): unknown {
+  const property = toProperty(input);
   const spec = property.export;
   if (spec && spec.value) return spec.value(record);
   return propertyValue(property, record, get);
@@ -284,9 +295,9 @@ const KEYWORD_WITH_OPTIONS: readonly OperatorId[] = ['in', 'eq', 'exists'];
 
 /** The operators a filter UI offers; empty when not filterable. */
 export function operatorsFor(
-  property: Property<never, unknown>,
+  property: AnyProperty<never, unknown>,
 ): readonly OperatorId[] {
-  const { filter, field } = property;
+  const { filter, field } = toProperty(property);
   if (filter === false) return [];
   if (filter?.operators) return filter.operators;
   if (field.operators) return field.operators;
@@ -297,9 +308,9 @@ export function operatorsFor(
 
 /** The operator a new condition on this property starts with. */
 export function defaultOperator(
-  property: Property<never, unknown>,
+  property: AnyProperty<never, unknown>,
 ): OperatorId | undefined {
-  const { filter } = property;
+  const { filter } = toProperty(property);
   if (filter && filter.defaultOperator) return filter.defaultOperator;
   return operatorsFor(property)[0];
 }
@@ -326,9 +337,9 @@ export function staticOptions<T = unknown>(
 
 /** The property's options: `filter.options`, else `field.options`. */
 export function optionsFor(
-  property: Property<never, unknown>,
+  property: AnyProperty<never, unknown>,
 ): OptionsSource | undefined {
-  const { filter, field } = property;
+  const { filter, field } = toProperty(property);
   if (filter === false) return undefined;
   if (filter?.options) return filter.options;
   return field.options ? staticOptions(field.options) : undefined;
@@ -338,24 +349,27 @@ export function optionsFor(
 
 /** The property with this key, else the first on this field path. */
 export function findProperty<Rec, Value>(
-  properties: readonly Property<Rec, Value>[],
+  properties: readonly AnyProperty<Rec, Value>[],
   keyOrPath: string,
 ): Property<Rec, Value> | undefined {
+  const all = properties.map((p) => toProperty(p));
   return (
-    properties.find((p) => p.key === keyOrPath) ??
-    properties.find((p) => p.field.path === keyOrPath)
+    all.find((p) => p.key === keyOrPath) ??
+    all.find((p) => p.field.path === keyOrPath)
   );
 }
 
 /**
- * The driver's field schema, keyed by field path. Properties sharing a path
- * must agree on its type.
+ * The driver's field schema of the filterable properties, keyed by field
+ * path. Properties sharing a path must agree on its type.
  */
 export function schemaFrom(
-  properties: readonly Property<never, unknown>[],
+  properties: readonly AnyProperty<never, unknown>[],
 ): FieldSchema {
   const schema: Record<FieldPath, FieldDefinition> = {};
-  for (const { field, key } of properties) {
+  for (const property of properties) {
+    const { field, key, filter } = toProperty(property);
+    if (filter === false) continue;
     const known = schema[field.path];
     if (known) {
       if (known.type !== field.type) {
@@ -375,13 +389,14 @@ export function schemaFrom(
  * conditions on its field path. For the memory backend and local search.
  */
 export function propertyMatcher(
-  properties: readonly Property<never, unknown>[],
+  properties: readonly AnyProperty<never, unknown>[],
 ): NonNullable<EvaluateOptions['match']> {
   const local = new Map<
     FieldPath,
     (record: never, c: ConditionNode) => boolean
   >();
-  for (const { field, filter } of properties) {
+  for (const property of properties) {
+    const { field, filter } = toProperty(property);
     if (filter && filter.local && !local.has(field.path))
       local.set(field.path, filter.local);
   }

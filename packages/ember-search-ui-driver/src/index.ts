@@ -140,6 +140,7 @@ export {
   type OptionsSource,
   type Option,
   type RouteLink,
+  type UrlLink,
 } from './property.ts';
 export {
   withPaths,
@@ -149,3 +150,21 @@ export {
   type PathMap,
   type PathMaps,
 } from './paths.ts';
+export {
+  toProperty,
+  toProperties,
+  isLegacyProperty,
+  legacyOf,
+  legacyOptions,
+  legacyValueHooks,
+  legacyFilterPath,
+  legacyUseFilter,
+  configureLegacyProperties,
+  type AnyProperty,
+  type LegacyProperty,
+  type LegacyOptions,
+  type LegacyCollection,
+  type LegacyFilterComponentDefinition,
+  type LegacyListValueDefinition,
+  type LegacyNotice,
+} from './legacy-property.ts';

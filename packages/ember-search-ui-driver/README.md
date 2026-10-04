@@ -152,6 +152,37 @@ Helpers: `propertyValue`, `sortPath`, `exportValue`, `operatorsFor`,
 `isSortable`, `isFilterable`, `isExportable`. Views add their own config
 under `views` by declaration merging on `PropertyViews`.
 
+### Legacy properties
+
+The legacy property shape (a mutable class with `name`, `valuePath`,
+`filteredBy`, `sortedBy`, `componentsForFiltering`, `collection`,
+`viewConfig`, `localFilteringFunction`...) is supported for the long term.
+Every API above takes either shape, and lists can mix them:
+
+```ts
+import {
+  toProperty,
+  legacyValueHooks,
+  configureLegacyProperties,
+} from 'ember-search-ui-driver';
+
+schemaFrom([...legacyProperties, newProperty]);
+memoryBackend(records, { match: propertyMatcher(legacyProperties) }); // localFilteringFunction, unchanged
+searchApiBackend({ request, ...legacyValueHooks(legacyProperties) }); // serialize / deserialize, unchanged
+localSearch({ data, properties: legacyProperties });
+
+const property = toProperty(legacy, { get }); // Ember's get for proxies
+property.meta.legacy === legacy; // legacy components still get the original
+```
+
+Legacy objects are read live and never frozen or changed. `toProperty`
+caches its result until a field of the legacy object changes. Links follow
+the legacy rules (`routeName`, then `customRoute` / `propertyRoute` with
+dynamic segments, then `getUrl`), and collections become options sources.
+Each legacy field's comment names its Property equivalent;
+`configureLegacyProperties({ hints: true })` logs the fields an app uses,
+once each, for teams planning a move. Hints are off by default.
+
 ## Semantics
 
 - A disabled node, or an incomplete condition, has no effect.

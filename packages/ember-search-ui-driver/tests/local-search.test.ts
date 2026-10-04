@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import {
+  defineProperty,
   emberLikeCompare,
   eq,
   or,
@@ -285,6 +286,41 @@ describe('localSearch: the semantics of a search-ui local connector', () => {
 
   test('it is a class apps can export as LocalSearchDriver (instanceof checks)', () => {
     expect(local()).toBeInstanceOf(LocalSearchCompat);
+  });
+});
+
+describe('localSearch with Property definitions', () => {
+  test('new properties filter by operator meaning or filter.local, next to legacy ones', async () => {
+    const state = defineProperty<Row>({
+      label: 'State',
+      field: { path: 'state', type: 'keyword' },
+    });
+    const late = defineProperty<Row>({
+      label: 'Due',
+      field: { path: 'due', type: 'date' },
+      // "late" means due before March
+      filter: {
+        local: (row, condition) =>
+          condition.value === 'late' && row.due < new Date('2026-03-01'),
+      },
+    });
+    const hidden = defineProperty<Row>({
+      label: 'Id',
+      field: { path: 'id', type: 'number' },
+      filter: false,
+    });
+    const driver = local({
+      properties: [state, late, hidden, new Property({ valuePath: 'name' })],
+    });
+    driver.setFilter('state', 'open', 'any');
+    expect(await settle(driver)).toEqual([1, 3, 4]);
+    driver.setFilter('due', 'late', 'any');
+    expect(await settle(driver)).toEqual([1]);
+    driver.clearFilters();
+    driver.setSearchTerm('pump'); // legacy `name` and the new properties are searched
+    expect(await settle(driver)).toEqual([2]);
+    driver.setSearchTerm('3', { shouldClearFilters: false });
+    expect(await settle(driver)).toEqual([]); // `id` is not filterable
   });
 });
 

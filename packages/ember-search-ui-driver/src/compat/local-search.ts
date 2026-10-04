@@ -1,11 +1,13 @@
 import { SearchDriver } from '../driver.ts';
 import { matches } from '../evaluate.ts';
+import type { Property } from '../property.ts';
 import { createState } from '../state.ts';
 import {
   SearchUiCompat,
   filterNodeId,
   fromSearchUiState,
   nodeToFilter,
+  filterToNode,
   type SearchUiFilter,
   type SearchUiRequestState,
 } from './search-ui.ts';
@@ -27,6 +29,40 @@ import type { ConditionNode, GroupNode, SearchState } from '../types.ts';
 // Nodes made outside the search-ui filters (a query builder) are applied
 // too, with the driver's own operators.
 
+const adapted = new WeakMap<object, LocalSearchProperty>();
+
+/**
+ * A Property seen as a local-search property: its field path, filterable
+ * unless `filter: false`, matched by `filter.local` or else by its
+ * operator's meaning. Legacy properties are used as they are.
+ */
+function asLocal(property: LocalSearchInput): LocalSearchProperty {
+  const field = (property as { field?: unknown }).field;
+  if (typeof field !== 'object' || field === null) {
+    return property as LocalSearchProperty;
+  }
+  const cached = adapted.get(property);
+  if (cached) return cached;
+  const modern = property as Property<never, unknown>;
+  const path = modern.field.path;
+  const filter = modern.filter;
+  const local: LocalSearchProperty = {
+    filteredBy: path,
+    useFilter: filter !== false,
+    localFilteringFunction: (row: never, values: unknown[]) => {
+      const node = filterToNode({ field: path, values });
+      if (!node) return true;
+      if (filter && filter.local) return filter.local(row, node);
+      return matches(
+        { kind: 'group', id: 'root', op: 'and', children: [node] },
+        row,
+      );
+    },
+  };
+  adapted.set(property, local);
+  return local;
+}
+
 /** The parts of a list property (column) the local search reads. */
 export interface LocalSearchProperty {
   filteredBy?: string | undefined;
@@ -39,9 +75,12 @@ export interface LocalSearchProperty {
   ) => unknown;
 }
 
+/** A legacy property (or anything with its local-search fields), or a Property. */
+export type LocalSearchInput = LocalSearchProperty | Property<never, unknown>;
+
 export interface LocalSearchOptions<Doc> {
   data?: Doc[];
-  properties?: LocalSearchProperty[];
+  properties?: LocalSearchInput[];
   /** Default true. */
   filteringIgnoreCase?: boolean;
   /** Default true. false returns every match on one page. */
@@ -164,7 +203,7 @@ export function emberLikeCompare(v: unknown, w: unknown): number {
 /** What the local search reads; changed by setData / setProperties. */
 interface LocalSource<Doc> {
   data: Doc[];
-  properties: LocalSearchProperty[];
+  properties: LocalSearchInput[];
 }
 
 function localBackend<Doc>(
@@ -181,7 +220,7 @@ function localBackend<Doc>(
     if (!Array.isArray(data)) return [];
     if (request.filters.length === 0 && !request.searchTerm) return [...data];
 
-    const filterable = properties.filter((p) => p.useFilter);
+    const filterable = properties.map(asLocal).filter((p) => p.useFilter);
     if (filterable.length === 0) return [...data];
 
     // the search term, over every filterable property
@@ -299,7 +338,7 @@ export class LocalSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
     return this.#source.data;
   }
 
-  get properties(): readonly LocalSearchProperty[] {
+  get properties(): readonly LocalSearchInput[] {
     return this.#source.properties;
   }
 
@@ -310,7 +349,7 @@ export class LocalSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   };
 
   /** Replaces the properties and searches again, on the current page. */
-  setProperties = (properties: LocalSearchProperty[]): void => {
+  setProperties = (properties: LocalSearchInput[]): void => {
     this.#source.properties = properties;
     this.runSearch();
   };
