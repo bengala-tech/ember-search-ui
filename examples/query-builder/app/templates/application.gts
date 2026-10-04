@@ -12,6 +12,7 @@ import { LinkTo } from '@ember/routing';
         legacy drop-in</LinkTo>
       <LinkTo @route="groups-template" data-test-nav="groups-template">Template:
         new spec</LinkTo>
+      <LinkTo @route="properties" data-test-nav="properties">Properties</LinkTo>
     </nav>
   </header>
   <main class="app-main">

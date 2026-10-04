@@ -353,3 +353,122 @@ body {
   color: var(--muted);
   margin-left: 6px;
 }
+
+/* properties page */
+.filters-panel {
+  margin-bottom: 16px;
+}
+
+.advanced {
+  margin-top: 12px;
+}
+
+.advanced summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.view-tabs button[aria-pressed="true"] {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.view-tabs .total {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.property-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.property-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.property-card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.property-card dl {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.property-card dl div {
+  display: flex;
+  gap: 6px;
+}
+
+.property-card dt {
+  color: var(--muted);
+}
+
+.property-card dd {
+  margin: 0;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.calendar-day {
+  min-height: 72px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.calendar-day.is-outside {
+  opacity: 0.4;
+}
+
+.calendar-number {
+  display: block;
+  color: var(--muted);
+}
+
+.calendar-item {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legacy-picker {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.state-badge {
+  list-style: none;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  font-size: 13px;
+}

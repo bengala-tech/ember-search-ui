@@ -11,4 +11,5 @@ Router.map(function () {
   this.route('groups');
   this.route('legacy-template', { path: '/templates/legacy' });
   this.route('groups-template', { path: '/templates/groups' });
+  this.route('properties');
 });

@@ -3,12 +3,13 @@
 Every page runs the same driver and keeps the same internal state, a filter
 tree of groups and conditions. Only the serialization of the request differs.
 
-| Page                | UI                                                                                                                                        | Sends                                                     |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `/legacy`           | a legacy filter UI (one filter per property, AND only), driven through `searchUiCompat`                                                   | the legacy `filters` list: `[{ field, values }]`          |
-| `/groups`           | `QueryBuilder`: nested any/all groups, NOT and on/off on every row and group                                                              | the groups spec: `{ type, filters, __negate, __disable }` |
-| `/templates/legacy` | a list template written for a search-ui driver (`WithSearch`, containers, an Excel export, a `query` param), unchanged, on `serverSearch` | the legacy list                                           |
-| `/templates/groups` | the same list with `<Search>` and a `QueryBuilder`, next to an unchanged `WithSearch` view                                                | the groups spec                                           |
+| Page                | UI                                                                                                                                               | Sends                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `/legacy`           | a legacy filter UI (one filter per property, AND only), driven through `searchUiCompat`                                                          | the legacy `filters` list: `[{ field, values }]`          |
+| `/groups`           | `QueryBuilder`: nested any/all groups, NOT and on/off on every row and group                                                                     | the groups spec: `{ type, filters, __negate, __disable }` |
+| `/templates/legacy` | a list template written for a search-ui driver (`WithSearch`, containers, an Excel export, a `query` param), unchanged, on `serverSearch`        | the legacy list                                           |
+| `/templates/groups` | the same list with `<Search>` and a `QueryBuilder`, next to an unchanged `WithSearch` view                                                       | the groups spec                                           |
+| `/properties`       | one property list (new and legacy shapes) driving a filter bar, chips, the QueryBuilder, a table, a card list, a month calendar and a CSV export | the groups spec                                           |
 
 A fake server (`app/demo/fake-server.ts`) receives only the JSON request,
 decodes it with the codec's server side, and answers with `data` and `meta`
@@ -16,6 +17,11 @@ totals. The `/legacy` and `/groups` pages show the internal tree, the exact
 request sent, and the same state serialized in the other format. When the
 legacy list cannot express a tree (OR groups, NOT), the page says why instead
 of guessing.
+
+The properties page shows the Property pattern: `app/properties/properties.ts`
+defines the fields once (two of them in the legacy shape), and every view in
+`app/properties/` reads them without naming a field. The calendar narrows the
+search with its own `view:calendar` condition.
 
 The template pages show the code to copy: `app/example/` (the controller
 base and the client), `app/controllers/*-template.ts` and
