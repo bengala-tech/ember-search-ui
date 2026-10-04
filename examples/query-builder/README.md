@@ -22,7 +22,7 @@ The state is kept in the URL (`legacy.*` / `groups.*` parameters).
 pnpm install            # from the repository root
 pnpm build              # builds the packages the app uses
 cd examples/query-builder
-pnpm start              # http://localhost:4200/legacy and /groups
+pnpm start              # http://localhost:5173/legacy and /groups
 pnpm test               # acceptance tests for both formats
 ```
 
