@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  examples/query-builder:
+  docs:
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -132,13 +132,13 @@ importers:
         version: 13.2.0
       ember-search-ui:
         specifier: workspace:*
-        version: link:../../packages/ember-search-ui
+        version: link:../packages/ember-search-ui
       ember-search-ui-driver:
         specifier: workspace:*
-        version: link:../../packages/ember-search-ui-driver
+        version: link:../packages/ember-search-ui-driver
       ember-search-ui-views:
         specifier: workspace:*
-        version: link:../../packages/ember-search-ui-views
+        version: link:../packages/ember-search-ui-views
       ember-source:
         specifier: ~7.3.0
         version: 7.3.0(@glimmer/component@2.1.1)
@@ -163,6 +163,9 @@ importers:
       globals:
         specifier: ^16.5.0
         version: 16.5.0
+      markdown-it:
+        specifier: ^14.1.0
+        version: 14.3.2
       prettier:
         specifier: ^3.9.6
         version: 3.9.9

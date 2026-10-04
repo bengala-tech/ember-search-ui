@@ -127,6 +127,7 @@ Differences from a typical local connector:
 
 ## Seeing both side by side
 
-`examples/query-builder` has a legacy list template running unchanged on
-`serverSearch` (`/templates/legacy`), and the same list on the new spec with
-`<Search>` and a `QueryBuilder` (`/templates/groups`).
+The docs site has a legacy list template running unchanged on `serverSearch`
+([/examples/templates/legacy](/examples/templates/legacy)), and the same list
+on the new spec with `<Search>` and a `QueryBuilder`
+([/examples/templates/groups](/examples/templates/groups)).
