@@ -7,6 +7,7 @@ import type { Inspection } from '../demo/data.ts';
 import { PROPERTIES } from '../properties/properties.ts';
 import PropertyTable from '../properties/property-table.gts';
 import { demoDriver } from './demo-driver.ts';
+import QueryInspector from '../components/query-inspector.gts';
 
 /** The example properties driving a filter bar, chips and a table. */
 export default class FilterBarDemo extends Component {
@@ -19,6 +20,7 @@ export default class FilterBarDemo extends Component {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
+      <QueryInspector @search={{search}} />
       <FilterBar @search={{search}} @properties={{PROPERTIES}} />
       <FilterChips @search={{search}} @properties={{PROPERTIES}} />
       <p data-test-bar-total>{{search.total}} inspections</p>

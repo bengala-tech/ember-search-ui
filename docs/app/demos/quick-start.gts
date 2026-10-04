@@ -6,6 +6,7 @@ import type { SearchDriver } from 'ember-search-ui-driver';
 import { Search, type TrackedSearch } from 'ember-search-ui';
 import type { Inspection } from '../demo/data.ts';
 import { demoDriver } from './demo-driver.ts';
+import QueryInspector from '../components/query-inspector.gts';
 
 const pageOf = (search: TrackedSearch<Inspection>) =>
   search.state.page.kind === 'offset' ? search.state.page.page : 1;
@@ -27,6 +28,7 @@ export default class QuickStart extends Component {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
+      <QueryInspector @search={{search}} />
       <input
         type="search"
         placeholder="Search inspections"

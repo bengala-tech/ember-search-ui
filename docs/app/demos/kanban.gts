@@ -15,6 +15,7 @@ import type { Inspection } from '../demo/data.ts';
 import { PROPERTIES } from '../properties/properties.ts';
 import { display } from '../properties/display.ts';
 import { demoDriver } from './demo-driver.ts';
+import QueryInspector from '../components/query-inspector.gts';
 
 interface Signature {
   Args: {
@@ -75,6 +76,7 @@ export default class KanbanDemo extends Component<Signature> {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
+      <QueryInspector @search={{search}} />
       <FilterBar @search={{search}} @properties={{PROPERTIES}} />
       <div class="kanban">
         {{#each (columnsOf search PROPERTIES this.groupBy) as |column|}}

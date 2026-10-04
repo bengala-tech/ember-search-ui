@@ -816,3 +816,73 @@ body {
   color: var(--shiki-light);
 }
 /* stylelint-enable selector-class-pattern */
+
+/* query inspector */
+.inspector-open {
+  float: right;
+  margin-left: 8px;
+}
+
+.inspector {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.inspector::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.inspector header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inspector h3 {
+  margin: 0;
+}
+
+.inspector header button {
+  border: 0;
+  background: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.inspector-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inspector-tabs button {
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.inspector-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.inspector-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inspector pre {
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.inspector pre.is-refused {
+  color: var(--danger);
+}

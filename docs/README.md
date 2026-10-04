@@ -13,14 +13,42 @@ every example on the site is a real, tested component.
 
 ## Writing guides
 
-Guides are Markdown files in `app/guides/`, listed in reading order in
-`app/guides/index.ts`. A small Vite plugin (`markdown.mjs`) renders them at
-build time: headings get ids, the page gets a table of contents, and a
-`<!-- demo:name -->` comment marks where the page renders a live demo from
-the guide's `demos` map. Links to `/...` navigate inside the app.
+Guides are Markdown files in `guides/`, compiled by
+[Docfy](https://github.com/josemarluedke/docfy) (`@docfy/ember-vite`) into
+Ember route templates under `/guides/...`, so a page can use components
+inline. Import them in the page's front matter, then use them in the text:
 
-The migration guide is the driver package's own
-`docs/migrating-from-search-ui.md`, so it has one source.
+```md
+---
+order: 1
+imports:
+  - import QuickStart from 'docs/demos/quick-start';
+---
+
+<div class="demo">
+  <QuickStart />
+</div>
+```
+
+`order` sets the page's place in the navigation. Code blocks get Shiki
+highlighting (Glimmer templates included) and a copy button. The generated
+templates (`app/templates/guides/`) are git-ignored. The migration guide is
+the driver package's own `docs/migrating-from-search-ui.md` (see
+`docfy.config.mjs`), so it has one source.
+
+Every demo has a "Show query" button: a modal with the current search
+converted, live, into the internal state, the legacy list request, the
+groups request and the URL.
+
+## Deploying
+
+`vercel.json` at the repository root builds the packages and the site and
+serves `docs/dist` with every path falling back to the app. From the root:
+
+```sh
+npx vercel login
+npx vercel --prod
+```
 
 ## The API reference
 

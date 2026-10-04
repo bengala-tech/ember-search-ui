@@ -22,6 +22,7 @@ import { PROPERTIES } from './properties.ts';
 import PropertyTable from './property-table.gts';
 import PropertyList from './property-list.gts';
 import PropertyCalendar from './property-calendar.gts';
+import QueryInspector from '../components/query-inspector.gts';
 
 type View = 'table' | 'list' | 'calendar';
 const VIEWS: { id: View; name: string }[] = [
@@ -87,6 +88,7 @@ export default class PropertiesPage extends Component {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
+      <QueryInspector @search={{search}} />
       <div class="layout">
         <div class="main">
           <section class="filters-panel" aria-label="Filters">

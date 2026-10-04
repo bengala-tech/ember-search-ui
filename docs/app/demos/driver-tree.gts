@@ -6,6 +6,7 @@ import { Search } from 'ember-search-ui';
 import { describeFilter } from 'ember-search-ui-views';
 import { FIELDS, type Inspection } from '../demo/data.ts';
 import { demoDriver } from './demo-driver.ts';
+import QueryInspector from '../components/query-inspector.gts';
 
 const describe = (filter: Parameters<typeof describeFilter>[0]) =>
   describeFilter(filter, FIELDS);
@@ -46,6 +47,7 @@ export default class DriverTree extends Component {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
+      <QueryInspector @search={{search}} />
       <p class="demo-buttons">
         <button
           type="button"

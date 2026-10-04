@@ -158,3 +158,34 @@ module('Acceptance | API reference', function (hooks) {
     assert.strictEqual(currentURL(), '/guides/properties');
   });
 });
+
+module('Acceptance | query inspector', function (hooks) {
+  setupApplicationTest(hooks);
+
+  test('shows the demo search in every format', async function (assert) {
+    await visit('/guides/driver');
+    await click('[data-test-tree-add]');
+    await click('[data-test-demo="driver-tree"] [data-test-show-query]');
+    assert.dom('[data-test-inspector]').exists();
+
+    // groups: the OR group as the documented spec
+    assert.dom('[data-test-inspector-output]').includesText('"type": "any"');
+    assert.dom('[data-test-inspector-output]').includesText('"state": "done"');
+
+    // the legacy list cannot express OR: refused, with the reason
+    await click('[data-test-inspector-tab="list"]');
+    assert.dom('[data-test-inspector-output]').hasClass('is-refused');
+    assert
+      .dom('[data-test-inspector-output]')
+      .includesText('can only AND conditions');
+
+    await click('[data-test-inspector-tab="state"]');
+    assert.dom('[data-test-inspector-output]').includesText('"op": "or"');
+
+    await click('[data-test-inspector-tab="url"]');
+    assert.dom('[data-test-inspector-output]').includesText('?f=');
+
+    await click('[data-test-inspector-close]');
+    assert.dom('[data-test-inspector]').doesNotExist();
+  });
+});
