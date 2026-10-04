@@ -818,7 +818,7 @@ body {
 /* stylelint-enable selector-class-pattern */
 
 /* query inspector */
-.inspector-open {
+.demo .inspector-open {
   float: right;
   margin-left: 8px;
 }

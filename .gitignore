@@ -37,3 +37,4 @@ packages/.DS_Store
 /packages/**/dist-tests/
 .eslintcache
 .prettiercache
+.vercel

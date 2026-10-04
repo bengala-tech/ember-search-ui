@@ -88,7 +88,6 @@ export default class PropertiesPage extends Component {
 
   <template>
     <Search @driver={{this.driver}} as |search|>
-      <QueryInspector @search={{search}} />
       <div class="layout">
         <div class="main">
           <section class="filters-panel" aria-label="Filters">
@@ -125,6 +124,7 @@ export default class PropertiesPage extends Component {
               data-test-export
               {{on "click" this.exportCsv}}
             >Export CSV</button>
+            <QueryInspector @search={{search}} />
           </div>
 
           {{#if (eq this.view "table")}}
