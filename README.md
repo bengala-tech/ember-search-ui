@@ -99,7 +99,7 @@ pnpm lint
 
 Each package's tests run with Vite + testem in its own directory (`pnpm test` in `packages/*`).
 
-`examples/query-builder` shows the new driver end to end: one filter tree sent to a fake server as a legacy `filters` list and as the groups spec, plus a legacy list template running unchanged on the new driver (see its README). Moving from a search-ui driver: `packages/ember-search-ui-driver/docs/migrating-from-search-ui.md`.
+`docs/` is the documentation site: guides with live demos, an API reference checked against the packages, and full examples (one filter tree sent as a legacy `filters` list and as the groups spec, a legacy list template running unchanged on the new driver, and one property list driving every view). `cd docs && pnpm start` runs it.
 
 `examples/sandbox` is a classic Ember 4.4 app and is not part of the pnpm workspace yet.
 
