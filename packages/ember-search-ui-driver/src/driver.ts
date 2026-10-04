@@ -133,9 +133,22 @@ export class SearchDriver<Doc = unknown> {
     return findNode(this.state.filter, id);
   }
 
-  subscribe(listener: Listener<Doc>): () => void {
+  /**
+   * The integration point for frameworks and plugins. `listener` is called
+   * synchronously with a new immutable snapshot after every change of state
+   * or result, in order. Store it in your reactive layer (an Ember tracked
+   * field, a React external store, a signal). `immediate` also calls it once
+   * now with the current snapshot. Returns the unsubscribe function.
+   */
+  subscribe(
+    listener: Listener<Doc>,
+    options: { immediate?: boolean } = {},
+  ): () => void {
     this.#listeners.add(listener);
-    return () => this.#listeners.delete(listener);
+    if (options.immediate) listener(this.#snapshot);
+    return () => {
+      this.#listeners.delete(listener);
+    };
   }
 
   // --- filter tree commands -------------------------------------------------
@@ -411,7 +424,10 @@ export class SearchDriver<Doc = unknown> {
 
   #emit(snapshot: Snapshot<Doc>): void {
     this.#snapshot = snapshot;
-    for (const listener of [...this.#listeners]) listener(snapshot);
+    for (const listener of [...this.#listeners]) {
+      // skip listeners removed by an earlier listener during this emit
+      if (this.#listeners.has(listener)) listener(snapshot);
+    }
   }
 }
 

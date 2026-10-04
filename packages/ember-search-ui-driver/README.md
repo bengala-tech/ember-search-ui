@@ -48,6 +48,63 @@ await driver.settled();
 driver.result; // { status, results, total, pageCount, aggregations, warnings }
 ```
 
+## Using it from a framework
+
+`subscribe` is the only hook a framework needs. The listener gets a new,
+immutable snapshot (`{ state, result }`) synchronously after every change;
+put it in your reactive layer and render from there. The snapshot keeps its
+identity until something changes.
+
+```ts
+// Ember: a tracked field
+class TrackedSearch {
+  @tracked snapshot = driver.snapshot;
+  constructor(readonly driver: SearchDriver) {
+    driver.subscribe((s) => (this.snapshot = s));
+  }
+}
+
+// React
+const snapshot = useSyncExternalStore(
+  (onChange) => driver.subscribe(onChange),
+  () => driver.snapshot,
+);
+
+// anything with signals (Preact, Solid, Vue refs, Svelte stores...)
+const snapshot = signal(driver.snapshot);
+driver.subscribe((s) => (snapshot.value = s));
+```
+
+`subscribe(listener, { immediate: true })` also calls the listener once with
+the current snapshot.
+
+## URL sync (optional)
+
+Nothing touches the URL unless you ask for it:
+
+```ts
+import { syncUrl } from 'ember-search-ui-driver';
+
+const stop = syncUrl(driver); // restores from the URL, then keeps it updated
+stop(); // disconnects
+```
+
+- Only values that differ from the driver's state when sync starts are
+  written, so an untouched search keeps a clean URL.
+- Filters keep their ids, negation, disabled flags and nesting (`f` holds the
+  tree as compact JSON); `q`, `sort`, `page` and `per` stay readable:
+  `?q=zion&sort=-visitors,title&page=2`.
+- Changes are debounced (`debounceMs`, default 300) and pushed as history
+  entries (`history: 'replace'` to rewrite instead); back/forward update the
+  driver. Other query parameters are left alone.
+- Several searches on one page: `syncUrl(driver, { prefix: 'reports.' })`.
+- A broken or hand-edited parameter is ignored (`onInvalid` reports it); the
+  rest of the URL still applies.
+- It hooks in through `subscribe` like any other integration. To use a
+  framework router instead of `window.history`, pass an `adapter`
+  (`{ read, write, listen }`); `memoryHistory()` works outside the browser.
+- The codec on its own: `urlCodec().serialize(state)` / `.parse(search)`.
+
 ## Semantics
 
 - A disabled node, or an incomplete condition, has no effect.

@@ -59,3 +59,11 @@ export {
   type MemoryBackendOptions,
   type MemoryResponse,
 } from './memory-backend.ts';
+export { urlCodec, type UrlCodec, type UrlCodecOptions } from './codecs/url.ts';
+export {
+  syncUrl,
+  browserHistory,
+  memoryHistory,
+  type UrlAdapter,
+  type UrlSyncOptions,
+} from './url-sync.ts';
