@@ -30,6 +30,7 @@ export default class Items extends Component {
   willDestroy() {
     super.willDestroy(...arguments);
     window.removeEventListener('click', this.maybeClose);
+    window.removeEventListener('keydown', this.maybeClose);
     this.list = null;
   }
 

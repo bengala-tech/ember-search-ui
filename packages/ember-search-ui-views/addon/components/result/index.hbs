@@ -16,7 +16,7 @@
           href={{url}}
           target="_blank"
           rel="noopener noreferrer"
-          {{on "click" @onClickLink}}
+          {{on "click" (optional @onClickLink)}}
         >
           {{{title}}}
         </a>

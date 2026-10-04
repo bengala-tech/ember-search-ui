@@ -1,6 +1,7 @@
 import Menu from 'ember-headlessui/components/menu';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { next } from '@ember/runloop';
 
 export default class MenuComponent extends Menu {
   @tracked isOpen = true;
@@ -18,7 +19,7 @@ export default class MenuComponent extends Menu {
   close(focusInput = true) {
     this.isOpen = false;
     if (focusInput) {
-      Ember.run.next(() => {
+      next(() => {
         document.getElementById(this.buttonGuid).focus();
       });
     }
@@ -41,7 +42,7 @@ export default class MenuComponent extends Menu {
     this._setActiveItem(previousItem);
 
     if (previousItem === undefined) {
-      Ember.run.next(() => {
+      next(() => {
         document.getElementById(this.buttonGuid).focus();
       });
     }
