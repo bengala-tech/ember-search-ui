@@ -1,3 +1,7 @@
+import { pageTitle } from 'ember-page-title';
+import ApiPage from '../api/api-page.gts';
+
 <template>
-  <section class="docs-article"><h1>API reference</h1></section>
+  {{pageTitle "API reference"}}
+  <ApiPage />
 </template>

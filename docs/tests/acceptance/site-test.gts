@@ -144,3 +144,16 @@ module('Acceptance | docs site', function (hooks) {
       .hasAttribute('data-test-guide', 'getting-started');
   });
 });
+
+module('Acceptance | API reference', function (hooks) {
+  setupApplicationTest(hooks);
+
+  test('lists every package and filters', async function (assert) {
+    await visit('/api');
+    assert.dom('[data-test-api-package]').exists({ count: 3 });
+    await fillIn('[data-test-api-filter]', 'defineProperty');
+    assert.dom('[data-test-api-entry]').exists({ count: 1 });
+    await click('[data-test-api-entry="defineProperty"] a');
+    assert.strictEqual(currentURL(), '/guides/properties');
+  });
+});
