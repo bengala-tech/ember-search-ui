@@ -51,6 +51,43 @@ edits its rows. Conditions owned by a view (`view:calendar`) are not shown.
   <QueryBuilderDemo />
 </div>
 
+The last three presets filter lists inside records: each
+inspection has a list of `checks`, and a nested scope says whether **some**,
+**every** or **none** of them must match. Conditions inside one scope hold
+for the same item, which flat conditions cannot express. A property over a
+list is declared with `nested: true` and the fields of each item:
+
+```ts
+const checks = defineProperty<Inspection>({
+  label: 'Checks',
+  field: { path: 'checks', type: 'object', nested: true, fields: CHECK_FIELDS },
+});
+```
+
+The FilterBar leaves such properties out (one condition cannot scope a
+list); the QueryBuilder offers them as nested scopes. The groups request has
+no form for nested queries yet, so these presets run against the in-memory
+backend only.
+
+### From a UI to code
+
+**Show query → Code** prints the current tree as the builder calls that make
+it, ready to paste into an app. The same comes from `filterToCode`:
+
+```ts
+import { filterToCode } from 'ember-search-ui-driver';
+
+filterToCode(driver.state.filter, { imports: true });
+// import { and, eq, nested } from 'ember-search-ui-driver';
+//
+// and(nested('checks', and(eq('result', 'fail'), eq('item', 'gas lines'))))
+```
+
+Generated ids and node `meta` are left out; ids with a colon
+(`filter:state`) are kept as `withId(...)`, since UIs find nodes by them.
+Every demo also keeps its search in the URL under its own prefix, so
+**Show query** offers a link to the exact search on screen.
+
 ## One property's filter
 
 To build your own filter UI, render one property at a time:

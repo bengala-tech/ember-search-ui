@@ -12,22 +12,41 @@ import type { TrackedSearch } from 'ember-search-ui';
 import { PRESETS, type FilterPreset } from '../demos/presets.ts';
 
 interface Signature {
-  Args: { search: TrackedSearch<never> | TrackedSearch<unknown> };
+  Args: {
+    search: TrackedSearch<never> | TrackedSearch<unknown>;
+    /** The request format this page sends; presets it cannot express are off. */
+    sends?: 'groups';
+  };
 }
 
 const LIST = searchApiCodec({ filters: 'list' });
+const GROUPS = searchApiCodec({ filters: 'groups' });
 
-/** Can the flat legacy list format express this preset? */
-function fitsList(
+type Reach = 'list' | 'groups' | 'memory';
+
+const BADGES: Record<Reach, string> = {
+  list: 'legacy list too',
+  groups: 'groups only',
+  memory: 'in-memory only',
+};
+
+/** The widest format that can express this preset. */
+function reachOf(
   preset: FilterPreset,
   search: Signature['Args']['search'],
-): boolean {
+): Reach {
   const tree = materialize(
     { ...preset.filter, id: 'root' },
     sequentialIds('preset'),
   ) as GroupNode;
-  return LIST.supports(tree, search.driver.codecContext).ok;
+  const ctx = search.driver.codecContext;
+  if (LIST.supports(tree, ctx).ok) return 'list';
+  return GROUPS.supports(tree, ctx).ok ? 'groups' : 'memory';
 }
+
+const badge = (reach: Reach) => BADGES[reach];
+const unsendable = (reach: Reach, sends: Signature['Args']['sends']) =>
+  sends === 'groups' && reach === 'memory';
 
 const eq = (a: unknown, b: unknown) => a === b;
 
@@ -53,19 +72,22 @@ export default class FilterPresets extends Component<Signature> {
       <p class="presets-title">Try a preset:</p>
       <div class="presets-list">
         {{#each PRESETS as |preset|}}
-          <button
-            type="button"
-            class="preset {{if (eq preset.id this.active.id) 'is-active'}}"
-            data-test-preset={{preset.id}}
-            {{on "click" (fn this.apply preset)}}
-          >
-            {{preset.title}}
-            {{#if (fitsList preset @search)}}
-              <span class="preset-badge">legacy list too</span>
-            {{else}}
-              <span class="preset-badge is-groups">groups only</span>
-            {{/if}}
-          </button>
+          {{#let (reachOf preset @search) as |reach|}}
+            <button
+              type="button"
+              class="preset {{if (eq preset.id this.active.id) 'is-active'}}"
+              disabled={{unsendable reach @sends}}
+              title={{if
+                (unsendable reach @sends)
+                "Lists inside records need a nested query, which the groups request has no form for yet. Try it in the Filtering guide's in-memory demo."
+              }}
+              data-test-preset={{preset.id}}
+              {{on "click" (fn this.apply preset)}}
+            >
+              {{preset.title}}
+              <span class="preset-badge is-{{reach}}">{{badge reach}}</span>
+            </button>
+          {{/let}}
         {{/each}}
         <button
           type="button"

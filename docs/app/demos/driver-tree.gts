@@ -18,7 +18,7 @@ export default class DriverTree extends Component {
 
   constructor(owner: Owner, args: object) {
     super(owner, args);
-    this.driver = demoDriver(this);
+    this.driver = demoDriver(this, 'tree.');
   }
 
   addGroup = () => {

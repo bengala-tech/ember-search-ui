@@ -1,6 +1,5 @@
 import {
   SearchDriver,
-  memoryHistory,
   searchApiBackend,
   searchApiCodec,
   searchUiCompat,
@@ -10,6 +9,7 @@ import {
 import config from 'docs/config/environment';
 import { FIELDS, type Inspection } from './data.ts';
 import { NetworkLog, fakeServer } from './fake-server.ts';
+import { shareable } from './share.ts';
 
 export type Format = 'list' | 'groups';
 
@@ -46,14 +46,7 @@ export class DemoSession {
       },
     });
     this.compat = searchUiCompat(this.driver);
-    this.urlSync = {
-      prefix,
-      debounceMs: config.environment === 'test' ? 0 : 250,
-      // tests must not rewrite the test runner's URL
-      ...(config.environment === 'test'
-        ? { adapter: memoryHistory(TEST_URL.value) }
-        : {}),
-    };
+    this.urlSync = shareable(this.driver, prefix);
   }
 
   /** The same internal state serialized in the other format. */
@@ -79,5 +72,4 @@ export class DemoSession {
   }
 }
 
-/** Tests set the starting URL here (the app uses the real one). */
-export const TEST_URL = { value: '' };
+export { TEST_URL } from './share.ts';

@@ -18,7 +18,7 @@ export default class QuickStart extends Component {
 
   constructor(owner: Owner, args: object) {
     super(owner, args);
-    this.driver = demoDriver(this);
+    this.driver = demoDriver(this, 'start.');
   }
 
   search = (event: Event) => this.driver.setQuery(termOf(event));

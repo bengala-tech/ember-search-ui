@@ -12,6 +12,15 @@ export interface Inspection {
   cost?: number;
   created_at: string;
   due_at: string | null;
+  /** A list inside the record: what was checked and how it went. */
+  checks: Check[];
+}
+
+export interface Check {
+  item: string;
+  result: 'pass' | 'fail' | 'n/a';
+  /** Failures only. */
+  severity?: 'minor' | 'major';
 }
 
 const STATES = [
@@ -63,11 +72,48 @@ export const INSPECTIONS: Inspection[] = Array.from({ length: 36 }, (_, i) => {
     created_at: `2026-${pad(month)}-${pad(day)}T10:00:00Z`,
     due_at:
       i % 4 === 1 ? null : `2026-${pad(Math.min(month + 1, 12))}-${pad(day)}`,
+    checks: checksFor(i),
   };
 });
 
+/** Two to four checks; some fail, a few do not apply. */
+function checksFor(i: number): Check[] {
+  return Array.from({ length: 2 + (i % 3) }, (_, j) => {
+    const item = CHECKS[(i + j * 2) % CHECKS.length]!;
+    if ((i * 3 + j * 5) % 7 === 0)
+      return {
+        item,
+        result: 'fail',
+        severity: (i + j) % 3 === 0 ? 'major' : 'minor',
+      };
+    return { item, result: (i + j) % 6 === 5 ? 'n/a' : 'pass' };
+  });
+}
+
 const options = (values: readonly string[]) =>
   values.map((value) => ({ value, label: value.replace('_', ' ') }));
+
+/** The fields of each item in `checks`, relative to it. */
+export const CHECK_FIELDS: FieldSchema = {
+  item: {
+    path: 'item',
+    type: 'keyword',
+    label: 'Item',
+    options: options(CHECKS),
+  },
+  result: {
+    path: 'result',
+    type: 'keyword',
+    label: 'Result',
+    options: options(['pass', 'fail', 'n/a']),
+  },
+  severity: {
+    path: 'severity',
+    type: 'keyword',
+    label: 'Severity',
+    options: options(['minor', 'major']),
+  },
+};
 
 /** The filterable properties, as the server describes its fields. */
 export const FIELDS: FieldSchema = {
@@ -106,6 +152,20 @@ export const FIELDS: FieldSchema = {
   cost: { path: 'cost', type: 'number', label: 'Cost' },
   created_at: { path: 'created_at', type: 'date', label: 'Created' },
   due_at: { path: 'due_at', type: 'date', label: 'Due' },
+  checks: {
+    path: 'checks',
+    type: 'object',
+    label: 'Checks',
+    nested: true,
+    fields: CHECK_FIELDS,
+  },
 };
 
 export const userName = (id: number) => USERS[id - 1] ?? String(id);
+
+/**
+ * The fields the groups request can filter on: lists inside records need a
+ * nested query, which it has no form for yet.
+ */
+export const flatFields = (schema: FieldSchema): FieldSchema =>
+  Object.fromEntries(Object.entries(schema).filter(([, f]) => !f.nested));

@@ -11,6 +11,8 @@ interface Heading {
 interface PageMetadata {
   url: string;
   title: string;
+  /** Set when docfy.config has a repository. */
+  editUrl: string;
   headings: Heading[];
   frontmatter: Record<string, unknown>;
 }
@@ -32,6 +34,8 @@ const headingsOf = (output: unknown) =>
     ...(h.headings ?? []),
   ]);
 const hasHeadings = (output: unknown) => headingsOf(output).length > 0;
+const editUrlOf = (output: unknown) =>
+  (output as PageMetadata | undefined)?.editUrl ?? '';
 const indent = (depth: number) => (depth === 3 ? 'toc-sub' : '');
 
 <template>
@@ -52,6 +56,18 @@ const indent = (depth: number) => (depth === 3 ? 'toc-sub' : '');
     </nav>
     <article class="docs-article prose">
       {{outlet}}
+      <DocfyOutput @fromCurrentURL={{true}} as |page|>
+        {{#if (editUrlOf page)}}
+          <p class="docs-edit">
+            <a
+              href={{editUrlOf page}}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-test-edit-page
+            >Edit this page on GitHub</a>
+          </p>
+        {{/if}}
+      </DocfyOutput>
       <DocfyPreviousAndNextPage @scope="guides" as |previous next|>
         <footer class="docs-pager">
           {{#if previous}}

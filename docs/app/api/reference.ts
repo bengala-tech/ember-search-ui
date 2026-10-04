@@ -118,6 +118,11 @@ export const API: ApiPackage[] = [
           ),
           fn('date', 'An exact date value.'),
           fn('dateMath', 'A relative date: now-7d, now/M.'),
+          fn(
+            'filterToCode',
+            'A filter tree printed as the builder calls that make it.',
+            'filtering',
+          ),
         ],
       },
       {

@@ -15,7 +15,7 @@ import {
 import { Search, type TrackedSearch } from 'ember-search-ui';
 import { FilterBar, FilterChips, QueryBuilder } from 'ember-search-ui-views';
 import config from 'docs/config/environment';
-import type { Inspection } from '../demo/data.ts';
+import { flatFields, type Inspection } from '../demo/data.ts';
 import { NetworkLog, fakeServer } from '../demo/fake-server.ts';
 import Pager from '../components/pager.gts';
 import { PROPERTIES } from './properties.ts';
@@ -23,6 +23,7 @@ import PropertyTable from './property-table.gts';
 import PropertyList from './property-list.gts';
 import PropertyCalendar from './property-calendar.gts';
 import QueryInspector from '../components/query-inspector.gts';
+import { share } from '../demo/share.ts';
 import FilterPresets from '../components/filter-presets.gts';
 
 type View = 'table' | 'list' | 'calendar';
@@ -32,6 +33,8 @@ const VIEWS: { id: View; name: string }[] = [
   { id: 'calendar', name: 'Calendar' },
 ];
 
+// lists inside records cannot be sent in the groups request yet
+const SENDABLE = flatFields(schemaFrom(PROPERTIES));
 const eq = (a: unknown, b: unknown) => a === b;
 const pretty = (body: string) => JSON.stringify(JSON.parse(body), null, 2);
 const pageOf = (search: TrackedSearch<unknown>) =>
@@ -69,6 +72,7 @@ export default class PropertiesPage extends Component {
       },
     });
     registerDestructor(this, () => this.driver.destroy());
+    share(this, this.driver, 'p.');
   }
 
   show = (view: View) => {
@@ -103,10 +107,14 @@ export default class PropertiesPage extends Component {
               @properties={{PROPERTIES}}
               data-test-chips
             />
-            <FilterPresets @search={{search}} />
+            <FilterPresets @search={{search}} @sends="groups" />
             <details class="advanced">
               <summary>Advanced: groups, OR, NOT</summary>
-              <QueryBuilder @search={{search}} @properties={{PROPERTIES}} />
+              <QueryBuilder
+                @search={{search}}
+                @properties={{PROPERTIES}}
+                @fields={{SENDABLE}}
+              />
             </details>
           </section>
 

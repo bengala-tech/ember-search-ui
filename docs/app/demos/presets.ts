@@ -7,6 +7,7 @@ import {
   disabled,
   eq,
   exists,
+  nested,
   not,
   or,
   range,
@@ -99,5 +100,35 @@ export const PRESETS: FilterPreset[] = [
     title: 'Created in the 90 days before September 30',
     note: 'Date math anchored to a date (2026-09-30||-90d), resolved by the backend.',
     filter: and(range('created_at', { gte: dateMath('2026-09-30||-90d') })),
+  },
+  // --- lists inside records: each inspection has a list of checks ---
+  {
+    id: 'failed-fire-gear',
+    title: 'A fire-gear check failed',
+    note: 'A nested scope: "failed" and "fire gear" must hold for the same check. As two flat conditions they could match different checks (14 inspections instead of 5).',
+    filter: and(
+      nested(
+        'checks',
+        and(
+          eq('result', 'fail'),
+          anyOf('item', ['fire extinguishers', 'emergency lights']),
+        ),
+      ),
+    ),
+  },
+  {
+    id: 'all-passed',
+    title: 'Every check passed',
+    note: 'The "every" quantifier: all items of the list match ("n/a" is not a pass).',
+    filter: and(nested('checks', eq('result', 'pass'), 'every')),
+  },
+  {
+    id: 'open-no-failures',
+    title: 'Still open, no check failed so far',
+    note: 'The "none" quantifier, next to a negated condition outside the list.',
+    filter: and(
+      not(anyOf('state', ['done', 'cancelled'])),
+      nested('checks', eq('result', 'fail'), 'none'),
+    ),
   },
 ];

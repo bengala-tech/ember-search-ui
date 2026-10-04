@@ -64,7 +64,7 @@ export default class KanbanDemo extends Component<Signature> {
 
   constructor(owner: Owner, args: Signature['Args']) {
     super(owner, args);
-    this.driver = demoDriver(this, {
+    this.driver = demoDriver(this, 'kanban.', {
       schema: schemaFrom(PROPERTIES),
       initialState: { page: { kind: 'offset', page: 1, perPage: 100 } },
     });

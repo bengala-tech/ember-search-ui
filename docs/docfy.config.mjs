@@ -20,5 +20,10 @@ export default {
       urlPrefix: 'guides',
     },
   ],
+  // "Edit this page" links (each page's editUrl)
+  repository: {
+    url: 'https://github.com/bengala-tech/ember-search-ui',
+    editBranch: 'main',
+  },
   rehypePlugins: [...docfyShiki()],
 };

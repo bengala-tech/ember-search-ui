@@ -4,13 +4,16 @@ import { on } from '@ember/modifier';
 import type Owner from '@ember/owner';
 import { Search, type TrackedSearch } from 'ember-search-ui';
 import { QueryBuilder } from 'ember-search-ui-views';
-import { FIELDS, type Inspection } from '../demo/data.ts';
+import { FIELDS, flatFields, type Inspection } from '../demo/data.ts';
 import { DemoSession, type Format } from '../demo/session.ts';
 import LegacyFilters from './legacy-filters.gts';
 import Pager from './pager.gts';
 import ResultsTable from './results-table.gts';
 import WirePanel from './wire-panel.gts';
 import FilterPresets from './filter-presets.gts';
+
+// lists inside records cannot be sent in the groups request yet
+const SENDABLE = flatFields(FIELDS);
 
 interface Signature {
   Args: { format: Format };
@@ -87,8 +90,8 @@ export default class DemoPage extends Component<Signature> {
           {{#if this.isLegacy}}
             <LegacyFilters @compat={{this.session.compat}} @search={{search}} />
           {{else}}
-            <FilterPresets @search={{search}} />
-            <QueryBuilder @search={{search}} @fields={{FIELDS}} />
+            <FilterPresets @search={{search}} @sends="groups" />
+            <QueryBuilder @search={{search}} @fields={{SENDABLE}} />
           {{/if}}
 
           <ResultsTable

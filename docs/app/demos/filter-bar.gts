@@ -15,7 +15,7 @@ export default class FilterBarDemo extends Component {
 
   constructor(owner: Owner, args: object) {
     super(owner, args);
-    this.driver = demoDriver(this, { schema: schemaFrom(PROPERTIES) });
+    this.driver = demoDriver(this, 'bar.', { schema: schemaFrom(PROPERTIES) });
   }
 
   <template>

@@ -34,6 +34,7 @@ module(
           'Cost',
           'Created',
           'Due',
+          'Checks',
         ],
         'Id is hidden from the table',
       );
@@ -125,7 +126,7 @@ module(
       ).split('\n');
       assert.strictEqual(
         header,
-        'Title,State,Priority,Project,Created by,Tags,Cost,Created,Due,Id',
+        'Title,State,Priority,Project,Created by,Tags,Cost,Created,Due,Checks,Id',
       );
       assert.ok(/^.+,\w+,\w+,/.test(first ?? ''), first);
     });

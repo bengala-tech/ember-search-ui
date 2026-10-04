@@ -19,7 +19,7 @@ export default class QueryBuilderDemo extends Component {
 
   constructor(owner: Owner, args: object) {
     super(owner, args);
-    this.driver = demoDriver(this, { schema: SCHEMA });
+    this.driver = demoDriver(this, 'qb.', { schema: SCHEMA });
   }
 
   <template>

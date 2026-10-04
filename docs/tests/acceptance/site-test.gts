@@ -62,6 +62,22 @@ module('Acceptance | docs site', function (hooks) {
     }
   });
 
+  test('each guide links to its source on GitHub', async function (assert) {
+    const edit = 'https://github.com/bengala-tech/ember-search-ui/edit/main';
+    await visit('/guides/filtering');
+    assert
+      .dom('[data-test-edit-page]')
+      .hasAttribute('href', `${edit}/docs/guides/filtering.md`);
+    // a guide that lives in a package links there
+    await visit('/guides/migrating-from-search-ui');
+    assert
+      .dom('[data-test-edit-page]')
+      .hasAttribute(
+        'href',
+        `${edit}/packages/ember-search-ui-driver/docs/migrating-from-search-ui.md`,
+      );
+  });
+
   test('links inside guides navigate in the app', async function (assert) {
     await visit('/guides/getting-started');
     await click('.docs-article a[href="/guides/driver"]');

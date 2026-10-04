@@ -6,7 +6,7 @@ import {
   type Option,
 } from 'ember-search-ui-driver';
 import type { Inspection } from '../demo/data.ts';
-import { userName } from '../demo/data.ts';
+import { CHECK_FIELDS, userName } from '../demo/data.ts';
 import LegacyStatePicker from './legacy-state-picker.gts';
 import StateBadge from './state-badge.gts';
 
@@ -127,6 +127,21 @@ const createdAt = extendProperty(date('created_at', 'Created'), {
 });
 const dueAt = date('due_at', 'Due');
 
+// a list inside each record: filtered through nested scopes ("some check
+// failed", "every check passed") in the query builder
+const checks = defineProperty<Inspection>({
+  label: 'Checks',
+  field: { path: 'checks', type: 'object', nested: true, fields: CHECK_FIELDS },
+  value: (row) => {
+    const failed = row.checks.filter((c) => c.result === 'fail').length;
+    return `${row.checks.length} checks${failed ? `, ${failed} failed` : ''}`;
+  },
+  sort: false,
+  export: {
+    value: (row) => row.checks.map((c) => `${c.item}: ${c.result}`).join('; '),
+  },
+});
+
 const id = defineProperty<Inspection>({
   label: 'Id',
   field: { path: 'id', type: 'number' },
@@ -144,5 +159,6 @@ export const PROPERTIES: readonly AnyProperty<Inspection, unknown>[] = [
   cost,
   createdAt,
   dueAt,
+  checks,
   id,
 ];

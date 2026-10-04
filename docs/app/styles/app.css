@@ -825,6 +825,11 @@ body {
 }
 /* stylelint-enable selector-class-pattern */
 
+.docs-edit {
+  margin-top: 32px;
+  font-size: 14px;
+}
+
 /* query inspector */
 .demo .inspector-open {
   float: right;
@@ -862,6 +867,7 @@ body {
 
 .inspector-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin: 12px 0 4px;
   border-bottom: 1px solid var(--line);
@@ -893,6 +899,39 @@ body {
 
 .inspector pre.is-refused {
   color: var(--danger);
+}
+
+.inspector-output {
+  display: flex;
+  flex-direction: column;
+}
+
+.inspector-copy {
+  align-self: flex-end;
+  order: -1;
+  margin-bottom: 4px;
+}
+
+.inspector-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.inspector-link label {
+  width: 100%;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inspector-link input {
+  flex: 1;
+  min-width: 0;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
 }
 
 /* phones */
@@ -975,6 +1014,16 @@ body {
 
 .preset-badge.is-groups {
   color: var(--groups);
+}
+
+.preset-badge.is-memory {
+  border: 1px dashed var(--line);
+  background: none;
+}
+
+.preset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .presets-note {

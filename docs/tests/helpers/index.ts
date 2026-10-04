@@ -4,6 +4,7 @@ import {
   setupTest as upstreamSetupTest,
   type SetupTestOptions,
 } from 'ember-qunit';
+import { TEST_URL } from 'docs/demo/share';
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is
@@ -11,6 +12,10 @@ import {
 
 function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupApplicationTest(hooks, options);
+  // demos read their starting URL from here: no test leaks one into the next
+  hooks.beforeEach(() => {
+    TEST_URL.value = '';
+  });
 
   // Additional setup for application tests can be done here.
   //

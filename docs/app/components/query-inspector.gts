@@ -4,13 +4,15 @@ import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { modifier } from 'ember-modifier';
 import {
+  filterToCode,
   searchApiCodec,
   urlCodec,
   type SearchState,
 } from 'ember-search-ui-driver';
 import type { TrackedSearch } from 'ember-search-ui';
+import { shareLink } from '../demo/share.ts';
 
-type Tab = 'state' | 'list' | 'groups' | 'url';
+type Tab = 'state' | 'list' | 'groups' | 'url' | 'code';
 
 const TABS: { id: Tab; name: string; note: string }[] = [
   {
@@ -32,6 +34,11 @@ const TABS: { id: Tab; name: string; note: string }[] = [
     id: 'url',
     name: 'URL',
     note: 'syncUrl / urlCodec: the state as URL parameters.',
+  },
+  {
+    id: 'code',
+    name: 'Code',
+    note: 'filterToCode: the filter tree as the builder calls that make it, to paste into an app.',
   },
 ];
 
@@ -58,6 +65,8 @@ const showModal = modifier((dialog: HTMLDialogElement) => {
 export default class QueryInspector extends Component<Signature> {
   @tracked isOpen = false;
   @tracked tab: Tab = 'groups';
+  /** What was just copied, for the button's feedback. */
+  @tracked copied: 'output' | 'link' | undefined;
 
   get state(): SearchState {
     return this.args.search.state;
@@ -82,6 +91,16 @@ export default class QueryInspector extends Component<Signature> {
           return { ok: true, text: pretty(LIST.serialize(this.state, ctx)) };
         case 'groups':
           return { ok: true, text: pretty(GROUPS.serialize(this.state, ctx)) };
+        case 'code': {
+          const [imports, code] = filterToCode(this.state.filter, {
+            imports: true,
+            width: 72,
+          }).split('\n\n');
+          return {
+            ok: true,
+            text: `${imports}\n\ndriver.replaceFilter(${code});`,
+          };
+        }
         case 'url': {
           const search = URL_CODEC.serialize(this.state, ctx);
           return {
@@ -98,6 +117,12 @@ export default class QueryInspector extends Component<Signature> {
     }
   }
 
+  /** A link to this page with this search, when the demo shares its URL. */
+  get link(): string | undefined {
+    void this.state; // recompute when the search changes
+    return shareLink(this.args.search.driver);
+  }
+
   get note(): string {
     return TABS.find((t) => t.id === this.tab)?.note ?? '';
   }
@@ -112,6 +137,18 @@ export default class QueryInspector extends Component<Signature> {
 
   show = (tab: Tab) => {
     this.tab = tab;
+    this.copied = undefined;
+  };
+
+  copy = async (what: 'output' | 'link') => {
+    const text = what === 'link' ? this.link : this.output.text;
+    try {
+      await navigator.clipboard.writeText(text ?? '');
+      this.copied = what;
+    } catch {
+      // no clipboard (permissions, insecure page): the text is selectable
+      this.copied = undefined;
+    }
   };
 
   <template>
@@ -150,10 +187,35 @@ export default class QueryInspector extends Component<Signature> {
           {{/each}}
         </div>
         <p class="inspector-note">{{this.note}}</p>
-        <pre
-          class="json {{unless this.output.ok 'is-refused'}}"
-          data-test-inspector-output
-        >{{this.output.text}}</pre>
+        <div class="inspector-output">
+          <pre
+            class="json {{unless this.output.ok 'is-refused'}}"
+            data-test-inspector-output
+          >{{this.output.text}}</pre>
+          <button
+            type="button"
+            class="inspector-copy"
+            data-test-inspector-copy
+            {{on "click" (fn this.copy "output")}}
+          >{{if (eq this.copied "output") "Copied" "Copy"}}</button>
+        </div>
+        {{#if this.link}}
+          <div class="inspector-link">
+            <label for="inspector-link">Link to this search</label>
+            <input
+              id="inspector-link"
+              type="text"
+              readonly
+              value={{this.link}}
+              data-test-share-link
+            />
+            <button
+              type="button"
+              data-test-share-copy
+              {{on "click" (fn this.copy "link")}}
+            >{{if (eq this.copied "link") "Copied" "Copy link"}}</button>
+          </div>
+        {{/if}}
       </dialog>
     {{/if}}
   </template>
