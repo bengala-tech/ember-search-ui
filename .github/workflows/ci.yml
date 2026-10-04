@@ -77,6 +77,7 @@ jobs:
         package: [ember-search-ui, ember-search-ui-views]
         # see each package's .try.mjs
         scenario:
+          - ember-lts-4.12
           - ember-lts-5.8
           - ember-lts-5.12
           - ember-lts-6.4
@@ -93,16 +94,21 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      # Build with the normal dependencies first: old ember-source has no
+      # types, so the declarations would not compile under the scenario.
+      # Consumers get this dist; the tests compile from src.
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build packages
+        run: pnpm build
       - name: Apply Scenario
         working-directory: packages/${{ matrix.package }}
         run: pnpm dlx @embroider/try apply ${{ matrix.scenario }}
-      - name: Install Dependencies
+      - name: Install Scenario Dependencies
         run: pnpm install --no-lockfile
-      - name: Build ember-search-ui
-        run: pnpm --filter ember-search-ui build
       - name: Run Tests
         working-directory: packages/${{ matrix.package }}
         run: pnpm test
         env:
-          # Ember 5.x scenarios run through the classic (compat) build
-          ENABLE_COMPAT_BUILD: ${{ startsWith(matrix.scenario, 'ember-lts-5') && 'true' || '' }}
+          # Ember 4.x and 5.x scenarios run through the classic (compat) build
+          ENABLE_COMPAT_BUILD: ${{ (startsWith(matrix.scenario, 'ember-lts-4') || startsWith(matrix.scenario, 'ember-lts-5')) && 'true' || '' }}

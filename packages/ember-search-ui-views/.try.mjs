@@ -26,6 +26,20 @@ const compatDeps = {
 export default {
   scenarios: [
     {
+      // what Prysmex runs
+      name: 'ember-lts-4.12',
+      npm: {
+        devDependencies: {
+          'ember-source': '~4.12.0',
+          ...compatDeps,
+        },
+      },
+      env: {
+        ENABLE_COMPAT_BUILD: true,
+      },
+      files: compatFiles,
+    },
+    {
       name: 'ember-lts-5.8',
       npm: {
         devDependencies: {
