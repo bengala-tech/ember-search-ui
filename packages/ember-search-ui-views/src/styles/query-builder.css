@@ -1,0 +1,219 @@
+/* Query builder. Themeable through custom properties. */
+.sui-query-builder {
+  --sui-qb-border: #d3dae6;
+  --sui-qb-bg: #ffffff;
+  --sui-qb-muted: #69707d;
+  --sui-qb-text: #1a1c21;
+  --sui-qb-accent: #0077cc;
+  --sui-qb-negate: #bd271e;
+  --sui-qb-radius: 6px;
+  --sui-qb-depth-0: #0077cc;
+  --sui-qb-depth-1: #00a69b;
+  --sui-qb-depth-2: #9170b8;
+  --sui-qb-depth-3: #d6890b;
+
+  color: var(--sui-qb-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.sui-qb-group,
+.sui-qb-nested {
+  margin: 0;
+  padding: 8px 12px 10px;
+  border: 1px solid var(--sui-qb-border);
+  border-left: 3px solid var(--sui-qb-group-color, var(--sui-qb-depth-0));
+  border-radius: var(--sui-qb-radius);
+  background: var(--sui-qb-bg);
+  min-width: 0;
+}
+
+.sui-qb-depth-0 {
+  --sui-qb-group-color: var(--sui-qb-depth-0);
+}
+.sui-qb-depth-1 {
+  --sui-qb-group-color: var(--sui-qb-depth-1);
+}
+.sui-qb-depth-2 {
+  --sui-qb-group-color: var(--sui-qb-depth-2);
+}
+.sui-qb-depth-3 {
+  --sui-qb-group-color: var(--sui-qb-depth-3);
+}
+
+.sui-qb-nested {
+  border-left-style: dashed;
+}
+
+.sui-qb-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.sui-qb-label {
+  color: var(--sui-qb-muted);
+  font-weight: 500;
+}
+
+.sui-qb-children {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sui-qb-empty {
+  color: var(--sui-qb-muted);
+  font-style: italic;
+}
+
+.sui-qb-condition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sui-qb-value {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sui-qb-input,
+.sui-qb-select {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--sui-qb-border);
+  border-radius: 4px;
+  background: #fbfcfd;
+  color: inherit;
+  font: inherit;
+}
+
+.sui-qb-input {
+  min-width: 140px;
+}
+
+.sui-qb-input:focus,
+.sui-qb-select:focus,
+.sui-qb-controls button:focus-visible,
+.sui-qb-segmented button:focus-visible,
+.sui-qb-add:focus-visible {
+  outline: 2px solid var(--sui-qb-accent);
+  outline-offset: 1px;
+}
+
+.sui-qb-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.sui-qb-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sui-qb-and {
+  color: var(--sui-qb-muted);
+}
+
+.sui-qb-controls {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.sui-qb-segmented {
+  display: inline-flex;
+  border: 1px solid var(--sui-qb-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sui-qb-segmented button,
+.sui-qb-toggle,
+.sui-qb-remove,
+.sui-qb-add {
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--sui-qb-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sui-qb-segmented button[aria-pressed="true"] {
+  background: var(--sui-qb-group-color, var(--sui-qb-accent));
+  color: #fff;
+}
+
+.sui-qb-toggle {
+  border: 1px solid var(--sui-qb-border);
+  border-radius: 4px;
+}
+
+.sui-qb-not[aria-pressed="true"] {
+  background: var(--sui-qb-negate);
+  border-color: var(--sui-qb-negate);
+  color: #fff;
+}
+
+.sui-qb-enabled[aria-pressed="false"] {
+  background: #f1f4fa;
+}
+
+.sui-qb-remove {
+  font-size: 16px;
+}
+
+.sui-qb-remove:hover {
+  color: var(--sui-qb-negate);
+}
+
+.sui-qb-not-badge {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--sui-qb-negate);
+  color: #fff;
+  font-size: 11px;
+}
+
+.sui-qb-footer {
+  display: flex;
+  gap: 4px;
+}
+
+.sui-qb-add {
+  color: var(--sui-qb-accent);
+  border: 1px dashed var(--sui-qb-border);
+  border-radius: 4px;
+}
+
+.is-negated > .sui-qb-header,
+.sui-qb-condition.is-negated {
+  text-decoration-color: var(--sui-qb-negate);
+}
+
+.sui-qb-condition.is-negated .sui-qb-operator {
+  border-color: var(--sui-qb-negate);
+}
+
+.is-disabled {
+  opacity: 0.55;
+}

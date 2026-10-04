@@ -58,7 +58,8 @@
     "ember-basic-dropdown": "^9.0.0",
     "ember-concurrency": "^5.1.0",
     "ember-power-select": "^9.0.0",
-    "ember-search-ui": "workspace:^"
+    "ember-search-ui": "workspace:^",
+    "ember-search-ui-driver": "workspace:^"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -90,6 +91,7 @@
     "ember-power-select": "^9.0.2",
     "ember-qunit": "^9.2.0",
     "ember-search-ui": "workspace:*",
+    "ember-search-ui-driver": "workspace:*",
     "ember-source": "^7.3.0",
     "ember-strict-application-resolver": "^0.1.1",
     "ember-template-lint": "^7.9.3",
@@ -133,6 +135,7 @@
       "./components/multi-checkbox-facet.js": "./dist/_app_/components/multi-checkbox-facet.js",
       "./components/paging-info.js": "./dist/_app_/components/paging-info.js",
       "./components/paging.js": "./dist/_app_/components/paging.js",
+      "./components/query-builder.js": "./dist/_app_/components/query-builder.js",
       "./components/result.js": "./dist/_app_/components/result.js",
       "./components/results-per-page.js": "./dist/_app_/components/results-per-page.js",
       "./components/results.js": "./dist/_app_/components/results.js",

@@ -4,6 +4,7 @@ import type {
   FieldPath,
   NormalizedResponse,
   OperatorId,
+  Scalar,
   SearchState,
 } from './types.ts';
 
@@ -16,6 +17,10 @@ export interface FieldDefinition {
   /** Restricts the operators a UI offers for this field. */
   operators?: OperatorId[];
   label?: string;
+  /** Known values, for pickers: states, statuses, users... */
+  options?: readonly { value: Scalar; label: string }[];
+  /** For `nested` fields: the fields of each item, relative to `path`. */
+  fields?: FieldSchema;
 }
 
 export type FieldSchema = Readonly<Record<FieldPath, FieldDefinition>>;

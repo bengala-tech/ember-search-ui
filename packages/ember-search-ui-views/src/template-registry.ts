@@ -17,6 +17,7 @@ import type LayoutSidebar from './components/layout-sidebar.gts';
 import type MultiCheckboxFacet from './components/multi-checkbox-facet.gts';
 import type Paging from './components/paging.gts';
 import type PagingInfo from './components/paging-info.gts';
+import type QueryBuilder from './components/query-builder.gts';
 import type Result from './components/result.gts';
 import type Results from './components/results.gts';
 import type ResultsPerPage from './components/results-per-page.gts';
@@ -54,6 +55,7 @@ export default interface Registry {
   MultiCheckboxFacet: typeof MultiCheckboxFacet;
   Paging: typeof Paging;
   PagingInfo: typeof PagingInfo;
+  QueryBuilder: typeof QueryBuilder;
   Result: typeof Result;
   Results: typeof Results;
   ResultsPerPage: typeof ResultsPerPage;

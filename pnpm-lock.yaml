@@ -294,6 +294,9 @@ importers:
       ember-search-ui:
         specifier: workspace:*
         version: link:../ember-search-ui
+      ember-search-ui-driver:
+        specifier: workspace:*
+        version: link:../ember-search-ui-driver
       ember-source:
         specifier: ^7.3.0
         version: 7.3.0(@glimmer/component@2.1.1)

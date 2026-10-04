@@ -1,3 +1,9 @@
+// New driver (ember-search-ui-driver) integration
+export { default as Search } from './components/search.gts';
+export { TrackedSearch, trackSearch } from './tracked-search.ts';
+export type { SearchSignature } from './components/search.gts';
+
+// @elastic/search-ui based components
 export {
   default as SearchProvider,
   setupDriver,

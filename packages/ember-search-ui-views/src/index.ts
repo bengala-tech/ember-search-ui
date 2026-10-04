@@ -16,3 +16,14 @@ export { default as SingleLinksFacet } from './components/single-links-facet.gts
 export { default as SingleSelectFacet } from './components/single-select-facet.gts';
 export { default as Sorting } from './components/sorting.gts';
 export { default as Trigger } from './components/trigger.gts';
+export { default as QueryBuilder } from './components/query-builder.gts';
+export type { QueryBuilderSignature } from './components/query-builder.gts';
+export { describeFilter } from './query-builder/describe.ts';
+export {
+  CONDITIONS,
+  DATE_PRESETS,
+  conditionsFor,
+  conditionOf,
+  switchCondition,
+  type ConditionKind,
+} from './query-builder/conditions.ts';
