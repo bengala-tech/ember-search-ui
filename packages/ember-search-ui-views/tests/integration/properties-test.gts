@@ -106,6 +106,18 @@ const owner: LegacyProperty = {
 };
 const PROPERTIES = [state, score, hidden, owner];
 
+// a list inside each record: only a nested scope can filter its items
+const notes = defineProperty<Doc>({
+  label: 'Notes',
+  field: {
+    path: 'notes',
+    type: 'object',
+    nested: true,
+    fields: { text: { path: 'text', type: 'text' } },
+  },
+});
+const WITH_NESTED = [...PROPERTIES, notes];
+
 const ROOT = '.sui-query-builder > .sui-qb-group';
 const row = (n: number) =>
   `${ROOT} > .sui-qb-children > li:nth-child(${n}) > .sui-qb-condition`;
@@ -222,6 +234,22 @@ module(
       await click('.sui-fb-clear');
       assert.dom('[data-test-ids]').hasText('1,2,3,4');
       assert.dom('.sui-fb-filters .sui-qb-empty').exists();
+    });
+
+    test('FilterBar leaves properties over nested lists out', async function (assert) {
+      await render(
+        <template>
+          <Search @driver={{ctx.driver}} as |search|>
+            <FilterBar @search={{search}} @properties={{WITH_NESTED}} />
+          </Search>
+        </template>,
+      );
+      assert.deepEqual(
+        [...document.querySelectorAll('.sui-fb-add option')].map((o) =>
+          o.textContent?.trim(),
+        ),
+        ['+ Filter…', 'State', 'Score', 'Owner'],
+      );
     });
 
     test('FilterBar shows filters set elsewhere, e.g. by legacy setFilter', async function (assert) {
