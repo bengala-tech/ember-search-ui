@@ -106,6 +106,52 @@ stop(); // disconnects
   (`{ read, write, listen }`); `memoryHistory()` works outside the browser.
 - The codec on its own: `urlCodec().serialize(state)` / `.parse(search)`.
 
+## Properties
+
+A property describes one field of a record once: how to read it, filter
+it, sort it and link it. Views (tables, calendars, maps, filter bars,
+exports) all read the same properties over the same driver, and never
+fetch.
+
+```ts
+import {
+  defineProperty,
+  extendProperty,
+  schemaFrom,
+  propertyMatcher,
+  memoryBackend,
+  searchApiBackend,
+} from 'ember-search-ui-driver';
+
+const project = defineProperty<Visit, string>({
+  key: 'project',
+  label: 'Project',
+  field: { path: 'project.id', type: 'keyword' }, // what filters use
+  value: (visit) => visit.project.name, // what views show
+  sort: { path: 'project.name' },
+  link: (visit) => ({ route: 'projects.show', models: [visit.project.id] }),
+});
+
+// builders are functions; overrides merge deeply
+const createdBy = extendProperty(userProperty, {
+  label: 'Created by',
+  field: { path: 'createdBy.id' },
+});
+
+const properties = [project, createdBy];
+const schema = schemaFrom(properties); // the driver's field schema
+
+// a property knows nothing about the backend: codecs rename paths
+searchApiBackend({ request, paths: { 'createdBy.id': 'created_by.id' } });
+// in memory, `filter.local` can replace an operator's meaning per property
+memoryBackend(records, { match: propertyMatcher(properties) });
+```
+
+Helpers: `propertyValue`, `sortPath`, `exportValue`, `operatorsFor`,
+`defaultOperator`, `optionsFor`, `staticOptions`, `findProperty`,
+`isSortable`, `isFilterable`, `isExportable`. Views add their own config
+under `views` by declaration merging on `PropertyViews`.
+
 ## Semantics
 
 - A disabled node, or an incomplete condition, has no effect.

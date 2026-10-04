@@ -1,5 +1,10 @@
 import type { Backend } from './codec.ts';
-import { fieldValues, matches } from './evaluate.ts';
+import {
+  fieldValues,
+  flattenValues,
+  matches,
+  type EvaluateOptions,
+} from './evaluate.ts';
 import type { OperatorRegistry } from './operators.ts';
 import type { FieldPath, SearchState } from './types.ts';
 
@@ -12,6 +17,10 @@ export interface MemoryBackendOptions {
   latencyMs?: number;
   /** Needed only when the driver uses custom operators. */
   operators?: OperatorRegistry;
+  /** Reads a path from a document (filters, sort, text search). */
+  get?: EvaluateOptions['get'];
+  /** Decides conditions itself, e.g. `propertyMatcher(properties)`. */
+  match?: EvaluateOptions['match'];
 }
 
 export interface MemoryResponse<Doc> {
@@ -38,21 +47,28 @@ export function memoryBackend<Doc>(
       const now = options.now?.() ?? Date.now();
       const term = state.query.term.trim().toLowerCase();
       const fields = state.query.fields ?? options.searchFields;
+      const read = (doc: unknown, path: FieldPath) =>
+        options.get
+          ? flattenValues(options.get(doc, path))
+          : fieldValues(doc, path);
 
       let hits = all.filter(
         (doc) =>
           matches(state.filter, doc, {
             now,
             ...(options.operators ? { operators: options.operators } : {}),
+            ...(options.get ? { get: options.get } : {}),
+            ...(options.match ? { match: options.match } : {}),
           }) &&
-          (term === '' || textOf(doc, fields).some((t) => t.includes(term))),
+          (term === '' ||
+            textOf(doc, fields, read).some((t) => t.includes(term))),
       );
 
       for (const { field, direction } of [...state.sort].reverse()) {
         const sign = direction === 'desc' ? -1 : 1;
         hits = [...hits].sort((a, b) => {
-          const x = first(a, field);
-          const y = first(b, field);
+          const x = read(a, field)[0];
+          const y = read(b, field)[0];
           // missing values go last in both directions, as in Elasticsearch
           if (x === undefined || y === undefined) return compareAny(x, y);
           return sign * compareAny(x, y);
@@ -74,10 +90,6 @@ export function memoryBackend<Doc>(
   };
 }
 
-function first(doc: unknown, field: FieldPath): unknown {
-  return fieldValues(doc, field)[0];
-}
-
 function compareAny(a: unknown, b: unknown): number {
   if (a === undefined) return b === undefined ? 0 : 1; // missing values last
   if (b === undefined) return -1;
@@ -90,9 +102,10 @@ function compareAny(a: unknown, b: unknown): number {
 function textOf(
   doc: unknown,
   fields: readonly FieldPath[] | undefined,
+  read: (doc: unknown, path: FieldPath) => unknown[],
 ): string[] {
   const values = fields
-    ? fields.flatMap((field) => fieldValues(doc, field))
+    ? fields.flatMap((field) => read(doc, field))
     : allLeaves(doc);
   return values
     .filter((v): v is string => typeof v === 'string')

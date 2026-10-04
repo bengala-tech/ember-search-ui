@@ -22,6 +22,28 @@ export interface EvaluateOptions {
   operators?: OperatorRegistry;
   /** Reference time for date math; defaults to Date.now(). */
   now?: number;
+  /**
+   * Reads a path from a document instead of walking plain keys, e.g. for
+   * records behind proxies. Its result is flattened like a plain read.
+   */
+  get?: (doc: unknown, path: FieldPath) => unknown;
+  /**
+   * Decides a condition itself: true / false, or undefined for the
+   * operator's own meaning. `path` is the condition's full path (nested
+   * scopes included). Negation and skipping still apply around it.
+   */
+  match?: (
+    condition: ConditionNode,
+    doc: unknown,
+    path: FieldPath,
+  ) => boolean | undefined;
+}
+
+interface Evaluation {
+  operators: OperatorRegistry;
+  ctx: EvaluationContext;
+  get: ((doc: unknown, path: FieldPath) => unknown) | undefined;
+  match: EvaluateOptions['match'];
 }
 
 /** Does `doc` match the filter tree? */
@@ -30,25 +52,30 @@ export function matches(
   doc: unknown,
   options: EvaluateOptions = {},
 ): boolean {
-  const operators = options.operators ?? new OperatorRegistry();
-  const ctx: EvaluationContext = { now: options.now ?? Date.now() };
-  return evaluateNode(filter, doc, operators, ctx) ?? true;
+  const evaluation: Evaluation = {
+    operators: options.operators ?? new OperatorRegistry(),
+    ctx: { now: options.now ?? Date.now() },
+    get: options.get,
+    match: options.match,
+  };
+  return evaluateNode(filter, doc, evaluation, '') ?? true;
 }
 
 /** true / false, or null when the node has no effect. */
 function evaluateNode(
   node: FilterNode,
   doc: unknown,
-  operators: OperatorRegistry,
-  ctx: EvaluationContext,
+  evaluation: Evaluation,
+  scope: FieldPath,
 ): boolean | null {
+  const { operators, ctx, get } = evaluation;
   if (node.disabled) return null;
   let result: boolean | null;
 
   switch (node.kind) {
     case 'group': {
       const results = node.children
-        .map((child) => evaluateNode(child, doc, operators, ctx))
+        .map((child) => evaluateNode(child, doc, evaluation, scope))
         .filter((r): r is boolean => r !== null);
       if (results.length === 0) return null;
       result =
@@ -57,8 +84,12 @@ function evaluateNode(
     }
     case 'nested': {
       if (!isActive(node, operators)) return null;
-      const per = nestedItems(doc, node.path).map(
-        (item) => evaluateNode(node.filter, item, operators, ctx) ?? true,
+      const items = get
+        ? objectsIn(get(doc, node.path))
+        : nestedItems(doc, node.path);
+      const inner = join(scope, node.path);
+      const per = items.map(
+        (item) => evaluateNode(node.filter, item, evaluation, inner) ?? true,
       );
       if (node.quantifier === 'every') result = per.every(Boolean);
       else if (node.quantifier === 'none') result = !per.some(Boolean);
@@ -67,9 +98,18 @@ function evaluateNode(
     }
     case 'condition': {
       if (!isValidCondition(node, operators)) return null;
-      result = operators
-        .get(node.operator)!
-        .evaluate(fieldValues(doc, node.field), node.value!, ctx);
+      const decided = evaluation.match?.(node, doc, join(scope, node.field));
+      result =
+        decided ??
+        operators
+          .get(node.operator)!
+          .evaluate(
+            get
+              ? flattenValues(get(doc, node.field))
+              : fieldValues(doc, node.field),
+            node.value!,
+            ctx,
+          );
       break;
     }
   }
@@ -108,6 +148,22 @@ export function fieldValues(doc: unknown, path: FieldPath): unknown[] {
   const out: unknown[] = [];
   collect(doc, path.split('.'), out, true);
   return out;
+}
+
+const join = (scope: FieldPath, path: FieldPath) =>
+  scope ? `${scope}.${path}` : path;
+
+/** A read value as evaluator values: arrays flattened, null/undefined dropped. */
+export function flattenValues(value: unknown): unknown[] {
+  const out: unknown[] = [];
+  collect(value, [], out, true);
+  return out;
+}
+
+function objectsIn(value: unknown): unknown[] {
+  return (Array.isArray(value) ? (value as unknown[]) : [value]).filter(
+    (item) => typeof item === 'object' && item !== null,
+  );
 }
 
 /** The objects in the list (or single object) at `path`. */

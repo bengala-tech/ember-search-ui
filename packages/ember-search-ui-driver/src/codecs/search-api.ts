@@ -10,6 +10,7 @@ import { isDateValue } from '../operators.ts';
 import { prune } from '../normalize.ts';
 import { createState } from '../state.ts';
 import { ROOT_ID } from '../tree.ts';
+import { withPaths, type PathMap } from '../paths.ts';
 import type {
   ConditionNode,
   DateValue,
@@ -72,6 +73,16 @@ export interface SearchApiCodecOptions extends SearchApiValueHooks {
   extensionsPrefix?: string;
   /** Keep disabled nodes as `__disable` (groups format), e.g. to save filters. */
   keepDisabled?: boolean;
+  /**
+   * The backend's names for fields: `{ createdAt: 'created_at' }` or a
+   * function. Filters, sorts and search fields are renamed when sent; a
+   * table is also inverted when parsing. See `withPaths`.
+   */
+  paths?: PathMap;
+  /** Sort fields only, before `paths`: `{ 'project.name': 'project.name.raw' }`. */
+  sortPaths?: PathMap;
+  /** Backend -> app names when parsing, for a function `paths`. */
+  parsePaths?: PathMap;
 }
 
 const SUPPORTED_OPERATORS = ['eq', 'in', 'range', 'exists', 'contains', 'raw'];
@@ -408,7 +419,7 @@ export function searchApiCodec(
   const groups = searchApiGroupFilters(options);
   const filterCodec = options.filters === 'groups' ? groups : list;
 
-  return {
+  const codec: SearchApiCodec = {
     filterCodec,
     supports: (node, ctx) => filterCodec.supports(node, ctx),
 
@@ -467,6 +478,17 @@ export function searchApiCodec(
         extensions,
       };
     },
+  };
+  if (!options.paths && !options.sortPaths) return codec;
+  const renamed = withPaths(codec, {
+    paths: options.paths ?? {},
+    ...(options.sortPaths ? { sort: options.sortPaths } : {}),
+    ...(options.parsePaths ? { parse: options.parsePaths } : {}),
+  });
+  return {
+    ...codec,
+    serialize: (state, ctx) => renamed.serialize(state, ctx),
+    parse: (request, ctx) => renamed.parse!(request, ctx),
   };
 }
 
