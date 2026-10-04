@@ -100,6 +100,18 @@ const isPrimitive = (value: unknown) =>
   typeof value === 'boolean';
 
 /**
+ * Node meta flag: the search-ui filter's values were ONE array value
+ * (`values: [['a', 'b']]`), as older search-ui versions store
+ * `setFilter(field, ['a', 'b'])`. The node holds the flat list; this flag
+ * gives the nesting back to search-ui state and the legacy list format.
+ */
+export const ARRAY_VALUE_META = 'searchUi.arrayValue';
+
+/** Is this node's value one array value in search-ui terms? */
+export const isArrayValue = (node: ConditionNode) =>
+  node.meta?.[ARRAY_VALUE_META] === true;
+
+/**
  * A search-ui filter (field + values + type) as a condition node. With a
  * schema, a string on a text field means "contains" (as the search API reads it).
  */
@@ -109,6 +121,16 @@ export function filterToNode(
     values: unknown[];
     type?: string;
   },
+  schema?: FieldSchema,
+): ConditionNode | undefined {
+  const node = toNode(filter, schema);
+  const [only] = filter.values;
+  if (!node || filter.values.length !== 1 || !Array.isArray(only)) return node;
+  return { ...node, meta: { ...node.meta, [ARRAY_VALUE_META]: true } };
+}
+
+function toNode(
+  filter: { field: string; values: unknown[]; type?: string },
   schema?: FieldSchema,
 ): ConditionNode | undefined {
   const values = filter.values
@@ -218,6 +240,7 @@ export function nodeToFilter(node: ConditionNode): SearchUiFilter {
     default:
       values = [toWire(node.value)];
   }
+  if (isArrayValue(node)) values = [values];
   return { field: node.field, values, type };
 }
 
@@ -261,6 +284,17 @@ export function fromSearchUiState(
   };
 }
 
+export interface SearchUiCompatOptions {
+  /**
+   * How `setFilter(field, ['a', 'b'])` stores an array value. `flatten`
+   * (search-ui 1.21 and later): `values: ['a', 'b']`. `keep` (older
+   * versions, e.g. 1.20): `values: [['a', 'b']]`, so code reading
+   * `values[0]` gets the array, and the legacy list format sends it nested.
+   * Default `flatten`.
+   */
+  arrays?: 'flatten' | 'keep';
+}
+
 /**
  * search-ui's driver API over a SearchDriver. Pass it wherever a search-ui
  * driver is expected (ember-search-ui's WithSearch, containers, app code).
@@ -271,8 +305,11 @@ export class SearchUiCompat<Doc = unknown> {
   #cache?: { snapshot: unknown; state: SearchUiState };
   #wasSearched = false;
 
-  constructor(driver: SearchDriver<Doc>) {
+  readonly #arrays: 'flatten' | 'keep';
+
+  constructor(driver: SearchDriver<Doc>, options: SearchUiCompatOptions = {}) {
     this.driver = driver;
+    this.#arrays = options.arrays ?? 'flatten';
   }
 
   get state(): SearchUiState {
@@ -371,7 +408,17 @@ export class SearchUiCompat<Doc = unknown> {
         field,
         isBlank(value)
           ? undefined
-          : filterToNode({ field, values: [value], type }, this.driver.schema),
+          : filterToNode(
+              {
+                field,
+                values:
+                  this.#arrays === 'flatten' && Array.isArray(value)
+                    ? value
+                    : [value],
+                type,
+              },
+              this.driver.schema,
+            ),
       );
     },
 
@@ -548,5 +595,7 @@ function errorMessage(error: unknown): string {
 }
 
 /** Wraps a driver in search-ui's API. */
-export const searchUiCompat = <Doc>(driver: SearchDriver<Doc>) =>
-  new SearchUiCompat(driver);
+export const searchUiCompat = <Doc>(
+  driver: SearchDriver<Doc>,
+  options?: SearchUiCompatOptions,
+) => new SearchUiCompat(driver, options);

@@ -5,6 +5,7 @@ import {
   eq,
   fromSearchUiState,
   memoryBackend,
+  nodeToFilter,
   or,
   searchApiCodec,
   searchUiCompat,
@@ -303,4 +304,85 @@ test('with a schema, a string on a text field is "contains" (how the search API 
     { state: { path: 'state', type: 'text' } },
   );
   expect(restored.filter.children[0]).toMatchObject({ operator: 'contains' });
+});
+
+describe('arrays: "keep" (search-ui 1.20 and older)', () => {
+  const codecCtx = {
+    operators: new OperatorRegistry(),
+    idFactory: sequentialIds(),
+  };
+
+  function keep() {
+    const driver = new SearchDriver<Doc>({
+      backend: memoryBackend(DOCS),
+      idFactory: sequentialIds(),
+      initialState: { page: { kind: 'offset', page: 1, perPage: 20 } },
+    });
+    const compat = searchUiCompat(driver, { arrays: 'keep' });
+    compats.push(compat);
+    return { driver, compat };
+  }
+
+  test('setFilter keeps an array as one value, as search-ui 1.20 did', async () => {
+    const { driver, compat } = keep();
+    compat.setFilter('state', ['created', 'pending'], 'any');
+    await driver.settled();
+    // code reading values[0] (legacy filter editors) gets the array
+    expect(compat.state.filters).toEqual([
+      { field: 'state', values: [['created', 'pending']], type: 'any' },
+    ]);
+    expect(ids(compat.state)).toEqual([1, 2, 4]);
+    // and the legacy list sends it nested, like the search-ui frontend
+    const seen: unknown[] = [];
+    const codec = searchApiCodec({
+      serializeValue: (_field, value) => {
+        seen.push(value);
+        return value;
+      },
+    });
+    expect(codec.serialize(driver.state, codecCtx).filters).toEqual([
+      { field: 'state', values: [['created', 'pending']] },
+    ]);
+    expect(seen).toEqual([['created', 'pending']]); // the hook sees the array once
+  });
+
+  test('a one-item array stays an array; scalars stay scalars', async () => {
+    const { driver, compat } = keep();
+    compat.setFilter('state', ['done'], 'any');
+    compat.setFilter('cost', { gte: 100 }, 'any');
+    await driver.settled();
+    expect(compat.state.filters).toEqual([
+      { field: 'state', values: [['done']], type: 'any' },
+      { field: 'cost', values: [{ gte: 100 }], type: 'any' },
+    ]);
+    expect(searchApiCodec().serialize(driver.state, codecCtx).filters).toEqual([
+      { field: 'state', values: [['done']] },
+      { field: 'cost', values: [{ gte: 100 }] },
+    ]);
+  });
+
+  test('nested values round-trip through the request and the query param', () => {
+    const codec = searchApiCodec();
+    const request = { filters: [{ field: 'state', values: [['a', 'b']] }] };
+    const parsed = codec.parse(request, codecCtx);
+    expect(codec.serialize(parsed, codecCtx).filters).toEqual(request.filters);
+    const restored = fromSearchUiState({
+      filters: [{ field: 'state', values: [['a', 'b']] }],
+    });
+    expect(nodeToFilter(restored.filter.children[0] as never)).toEqual({
+      field: 'state',
+      values: [['a', 'b']],
+      type: 'any',
+    });
+  });
+
+  test('the default flattens, as search-ui 1.21 and later', async () => {
+    const { driver, compat } = setup();
+    compat.setFilter('state', ['created', 'pending'], 'any');
+    await driver.settled();
+    expect(compat.state.filters[0]?.values).toEqual(['created', 'pending']);
+    expect(searchApiCodec().serialize(driver.state, codecCtx).filters).toEqual([
+      { field: 'state', values: ['created', 'pending'] },
+    ]);
+  });
 });

@@ -12,6 +12,7 @@ import {
   SearchUiCompat,
   filterNodeId,
   fromSearchUiState,
+  type SearchUiCompatOptions,
   type SearchUiRequestState,
 } from './search-ui.ts';
 import type { FieldSchema } from '../codec.ts';
@@ -61,7 +62,7 @@ export interface ApiConnector {
   ): Promise<unknown>;
 }
 
-export interface ServerSearchCompatOptions {
+export interface ServerSearchCompatOptions extends SearchUiCompatOptions {
   endpoint: string;
   send: SearchApiSend;
   /** The codec the driver's backend uses (same filter format and hooks). */
@@ -76,7 +77,7 @@ export class ServerSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   readonly #codec: SearchApiCodec;
 
   constructor(driver: SearchDriver<Doc>, options: ServerSearchCompatOptions) {
-    super(driver);
+    super(driver, options);
     this.#codec = options.codec;
     const { endpoint, include, send } = options;
 
@@ -162,7 +163,8 @@ export class ServerSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   }
 }
 
-export interface ServerSearchOptions extends SearchApiCodecOptions {
+export interface ServerSearchOptions
+  extends SearchApiCodecOptions, SearchUiCompatOptions {
   endpoint: string;
   /**
    * Sends every request, searches and makeSearch alike. Searches pass
@@ -244,6 +246,7 @@ export function serverSearch<Doc = unknown>(
       : { searchOnInit: options.searchOnInit }),
   });
   return new ServerSearchCompat(driver, {
+    ...(options.arrays ? { arrays: options.arrays } : {}),
     endpoint,
     send,
     codec: searchApiCodec(options),

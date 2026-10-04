@@ -8,6 +8,7 @@ import {
   fromSearchUiState,
   nodeToFilter,
   filterToNode,
+  type SearchUiCompatOptions,
   type SearchUiFilter,
   type SearchUiRequestState,
 } from './search-ui.ts';
@@ -78,7 +79,7 @@ export interface LocalSearchProperty {
 /** A legacy property (or anything with its local-search fields), or a Property. */
 export type LocalSearchInput = LocalSearchProperty | Property<never, unknown>;
 
-export interface LocalSearchOptions<Doc> {
+export interface LocalSearchOptions<Doc> extends SearchUiCompatOptions {
   data?: Doc[];
   properties?: LocalSearchInput[];
   /** Default true. */
@@ -329,8 +330,12 @@ function localBackend<Doc>(
 export class LocalSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   readonly #source: LocalSource<Doc>;
 
-  constructor(driver: SearchDriver<Doc>, source: LocalSource<Doc>) {
-    super(driver);
+  constructor(
+    driver: SearchDriver<Doc>,
+    source: LocalSource<Doc>,
+    options: SearchUiCompatOptions = {},
+  ) {
+    super(driver, options);
     this.#source = source;
   }
 
@@ -380,5 +385,9 @@ export function localSearch<Doc = unknown>(
     ),
     ...(options.schema ? { schema: options.schema } : {}),
   });
-  return new LocalSearchCompat(driver, source);
+  return new LocalSearchCompat(
+    driver,
+    source,
+    options.arrays ? { arrays: options.arrays } : {},
+  );
 }

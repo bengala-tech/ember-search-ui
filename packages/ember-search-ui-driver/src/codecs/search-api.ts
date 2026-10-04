@@ -11,6 +11,7 @@ import { prune } from '../normalize.ts';
 import { createState } from '../state.ts';
 import { ROOT_ID } from '../tree.ts';
 import { withPaths, type PathMap } from '../paths.ts';
+import { ARRAY_VALUE_META, isArrayValue } from '../compat/search-ui.ts';
 import type {
   ConditionNode,
   DateValue,
@@ -231,10 +232,14 @@ export function searchApiListFilters(
         if (node.kind === 'group') node.children.forEach(visit);
         else if (node.kind === 'condition') {
           const wire = encodeCondition(node, 'object');
-          // like the search-ui based frontend: hooks see one entry of `values` at a time
-          const values = (
-            Array.isArray(wire) ? (wire as unknown[]) : [wire]
-          ).map((v): unknown =>
+          // like the search-ui based frontend: hooks see one entry of `values`
+          // at a time. A one-array value (older search-ui) stays one entry.
+          const entries = isArrayValue(node)
+            ? [Array.isArray(wire) ? wire : [wire]]
+            : Array.isArray(wire)
+              ? (wire as unknown[])
+              : [wire];
+          const values = entries.map((v): unknown =>
             hooks.serializeValue ? hooks.serializeValue(node.field, v) : v,
           );
           list.push({ field: node.field, values });
@@ -256,12 +261,14 @@ export function searchApiListFilters(
           );
           // several values (or a nested list) = "any of"
           const wire = values.length === 1 ? values[0] : values;
+          const nested = values.length === 1 && Array.isArray(values[0]);
           return {
             kind: 'condition',
             id:
               n === 1 ? `filter:${entry.field}` : `filter:${entry.field}:${n}`,
             field: entry.field,
             ...decodeValue(entry.field, wire, ctx),
+            ...(nested ? { meta: { [ARRAY_VALUE_META]: true } } : {}),
           };
         });
       return { kind: 'group', id: ROOT_ID, op: 'and', children };
