@@ -1,5 +1,6 @@
 export * from './types.ts';
 export * from './builders.ts';
+export { filterToCode, type FilterToCodeOptions } from './code.ts';
 export { randomIds, sequentialIds, type IdFactory } from './ids.ts';
 export {
   ROOT_ID,
