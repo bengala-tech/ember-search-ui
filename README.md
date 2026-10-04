@@ -10,7 +10,7 @@ This repo holds two [v2 addons](https://rfcs.emberjs.com/id/0507-embroider-v2-pa
 
 ## Compatibility
 
-* Ember.js v5.8 or above (tested against 5.8, 5.12, 6.4, latest, beta)
+* Ember.js v5.8 or above (tested against 5.8, 5.12, 6.4, 6.8, 6.12, latest 7.x, beta)
 * Embroider, or ember-auto-import v2
 * Node.js v20 or above
 

@@ -60,6 +60,22 @@ export default {
       },
     },
     {
+      name: 'ember-lts-6.8',
+      npm: {
+        devDependencies: {
+          'ember-source': 'npm:ember-source@~6.8.0',
+        },
+      },
+    },
+    {
+      name: 'ember-lts-6.12',
+      npm: {
+        devDependencies: {
+          'ember-source': 'npm:ember-source@~6.12.0',
+        },
+      },
+    },
+    {
       name: 'ember-latest',
       npm: {
         devDependencies: {
