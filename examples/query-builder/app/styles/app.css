@@ -101,7 +101,7 @@ body {
   white-space: nowrap;
 }
 
-/* legacy filters (Prysmex style) */
+/* legacy filters */
 .legacy-filters {
   padding: 10px 12px;
   border: 1px solid var(--line);
@@ -330,4 +330,26 @@ body {
   border-left: 3px solid var(--danger);
   background: #fff;
   color: var(--danger);
+}
+
+/* template pages */
+.template-page {
+  max-width: 900px;
+}
+
+.template-page .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.template-results {
+  padding-left: 20px;
+}
+
+.template-results small {
+  color: var(--muted);
+  margin-left: 6px;
 }

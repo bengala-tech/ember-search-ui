@@ -2,10 +2,10 @@ import { tracked } from '@glimmer/tracking';
 import {
   OperatorRegistry,
   memoryBackend,
-  prysmexCodec,
+  searchApiCodec,
   sequentialIds,
-  type PrysmexRequest,
-  type PrysmexResponse,
+  type SearchApiRequest,
+  type SearchApiResponse,
 } from 'ember-search-ui-driver';
 import { FIELDS, INSPECTIONS, type Inspection } from './data.ts';
 
@@ -48,19 +48,19 @@ const serverContext = {
   schema: FIELDS,
 };
 
-// The "server" decodes either filter format (like the Prysmex backend would)
+// The "server" decodes either filter format (like a real backend would)
 // and searches with the same semantics the driver defines.
-const decoder = prysmexCodec();
+const decoder = searchApiCodec();
 const search = memoryBackend<Inspection>(INSPECTIONS, {
   searchFields: ['title', 'description', 'project'],
 });
 
-/** Handles one request body as the Prysmex API would. */
+/** Handles one request body as the search API would. */
 export async function handle(
   body: string,
   signal: AbortSignal,
-): Promise<PrysmexResponse> {
-  const request = JSON.parse(body) as PrysmexRequest;
+): Promise<SearchApiResponse> {
+  const request = JSON.parse(body) as SearchApiRequest;
   const state = decoder.parse(request, serverContext);
   const { results, total } = await search.search(state, signal);
   const per = state.page.kind === 'offset' ? state.page.perPage : 20;
@@ -71,18 +71,18 @@ export async function handle(
 }
 
 /**
- * A `request` function for prysmexBackend: serializes the request to JSON,
+ * A `request` function for searchApiBackend: serializes the request to JSON,
  * as the network would, and answers after `latencyMs`.
  */
-export function fakePrysmex(
+export function fakeServer(
   log: NetworkLog,
   options: { latencyMs?: number; endpoint?: string } = {},
 ) {
   const endpoint = options.endpoint ?? 'api/inspections/search';
   return async (
-    request: PrysmexRequest,
+    request: SearchApiRequest,
     signal: AbortSignal,
-  ): Promise<PrysmexResponse> => {
+  ): Promise<SearchApiResponse> => {
     const body = JSON.stringify(request);
     const entry = log.add({
       endpoint,

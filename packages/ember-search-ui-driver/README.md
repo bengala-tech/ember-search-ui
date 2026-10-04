@@ -3,8 +3,9 @@
 A framework-agnostic search driver. It keeps one search state, whose filter is
 a tree of AND/OR groups, conditions and nested scopes. Every node can be
 negated or disabled, and every node has a stable id for UIs to edit. Codecs
-(coming next: Prysmex, Elasticsearch, search-ui, URL) translate that state to
-and from external filter specs.
+(a search API with legacy list and groups formats, URL; Elasticsearch next)
+translate that state to and from external filter specs. Moving from a
+search-ui driver: see `docs/migrating-from-search-ui.md`.
 
 See the design doc for the full model and the codec contract.
 

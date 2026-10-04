@@ -362,9 +362,9 @@ describe('paging, sorting and state', () => {
 
   test('extensions are namespaced pass-through options', () => {
     const { driver } = setup(XUT_DOCS, { searchOnInit: false });
-    driver.setExtension('prysmex.refresh', true);
-    expect(driver.state.extensions).toEqual({ 'prysmex.refresh': true });
-    driver.setExtension('prysmex.refresh', undefined);
+    driver.setExtension('api.refresh', true);
+    expect(driver.state.extensions).toEqual({ 'api.refresh': true });
+    driver.setExtension('api.refresh', undefined);
     expect(driver.state.extensions).toEqual({});
   });
 });

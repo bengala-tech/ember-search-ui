@@ -38,7 +38,7 @@ const WirePanel: TOC<{
 
   <section class="panel" aria-labelledby="sent-title">
     <h2 id="sent-title">
-      Sent to Prysmex
+      Sent to the server
       <span class="tag tag-{{@session.format}}">{{formatLabel
           @session.format
         }}</span>

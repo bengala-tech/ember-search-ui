@@ -19,7 +19,7 @@ const pageOf = (search: TrackedSearch<Inspection>) =>
   search.state.page.kind === 'offset' ? search.state.page.page : 1;
 
 /**
- * A search page. `list` mimics today's Prysmex UI through the search-ui compat
+ * A search page. `list` mimics a legacy filter UI through the search-ui compat
  * API and sends the legacy list; `groups` uses the QueryBuilder and sends the
  * documented groups spec. Both keep the same internal state.
  */
@@ -42,7 +42,7 @@ export default class DemoPage extends Component<Signature> {
   search = (event: Event) => {
     const term = (event.target as HTMLInputElement).value;
     if (this.isLegacy) {
-      // Prysmex's search box keeps its filters
+      // the legacy search box keeps its filters
       this.session.compat.actions.setSearchTerm(term, {
         shouldClearFilters: false,
       });

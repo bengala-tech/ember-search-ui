@@ -11,12 +11,12 @@ import {
   type GroupNode,
 } from 'ember-search-ui-driver';
 import { TEST_URL } from 'query-builder/demo/session';
-import { panelJson, totalFor, truth } from '../helpers/prysmex';
+import { panelJson, totalFor, truth } from '../helpers/server';
 
 const sent = () => panelJson('[data-test-sent]');
 const row = (field: string) => `[data-test-filter="${field}"]`;
 
-module('Acceptance | legacy Prysmex (list format)', function (hooks) {
+module('Acceptance | legacy (list format)', function (hooks) {
   setupApplicationTest(hooks);
   hooks.beforeEach(() => {
     TEST_URL.value = '';
@@ -35,7 +35,7 @@ module('Acceptance | legacy Prysmex (list format)', function (hooks) {
     assert.dom('[data-test-page]').hasText('Page 1 of 5 · 36 inspections');
   });
 
-  test('filters built like Prysmex does today go out as the legacy list', async function (assert) {
+  test('filters built like a legacy UI does go out as the legacy list', async function (assert) {
     await visit('/legacy');
 
     // State is any of created, pending

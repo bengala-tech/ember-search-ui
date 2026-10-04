@@ -258,14 +258,14 @@ describe('fieldValues', () => {
   test('walks objects, fans out over arrays, prefers keys containing dots', () => {
     const doc = {
       a: [{ b: 1 }, { b: [2, 3] }, { b: null }],
-      'document.4-date': 'x',
+      'custom.4-date': 'x',
       document: { '4-date': 'y' },
     };
     expect(fieldValues(doc, 'a.b')).toEqual([1, 2, 3]);
-    expect(fieldValues(doc, 'document.4-date')).toEqual(['x']);
-    expect(
-      fieldValues({ document: { '4-date': 'y' } }, 'document.4-date'),
-    ).toEqual(['y']);
+    expect(fieldValues(doc, 'custom.4-date')).toEqual(['x']);
+    expect(fieldValues({ custom: { '4-date': 'y' } }, 'custom.4-date')).toEqual(
+      ['y'],
+    );
     expect(fieldValues(doc, 'missing.path')).toEqual([]);
   });
 });

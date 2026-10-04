@@ -18,10 +18,10 @@ import {
   not,
   or,
   prefix,
-  prysmexBackend,
-  prysmexCodec,
-  prysmexGroupFilters,
-  prysmexListFilters,
+  searchApiBackend,
+  searchApiCodec,
+  searchApiGroupFilters,
+  searchApiListFilters,
   range,
   sequentialIds,
   withId,
@@ -29,8 +29,8 @@ import {
   type FieldSchema,
   type GroupNode,
   type NodeInput,
-  type PrysmexFilterList,
-  type PrysmexRequest,
+  type SearchApiFilterList,
+  type SearchApiRequest,
   type SearchState,
 } from '../src/index.ts';
 
@@ -48,8 +48,8 @@ const root = (...children: NodeInput[]): GroupNode =>
 
 const state = (patch: Partial<SearchState>) => createState(patch);
 
-describe('prysmexCodec (list format: what Prysmex sends today)', () => {
-  const codec = prysmexCodec();
+describe('searchApiCodec (list format: the legacy requests)', () => {
+  const codec = searchApiCodec();
 
   test('produces the same request as the search-ui based frontend', () => {
     const request = codec.serialize(
@@ -57,11 +57,11 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
         query: { term: 'tank' },
         sort: [{ field: 'created_at', direction: 'desc' }],
         page: { kind: 'offset', page: 2, perPage: 10 },
-        extensions: { 'prysmex.include': 'author,project' },
+        extensions: { 'api.include': 'author,project' },
         filter: root(
           anyOf('state', ['created', 'pending']),
           eq('created_by_id', 50),
-          range('document.4-date_input455', {
+          range('custom.4-due_date', {
             gte: dateMath('now-1w/w'),
             lte: dateMath('now'),
           }),
@@ -83,7 +83,7 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
         { field: 'state', values: ['created', 'pending'] },
         { field: 'created_by_id', values: [50] },
         {
-          field: 'document.4-date_input455',
+          field: 'custom.4-due_date',
           values: [{ gte: 'now-1w/w', lte: 'now' }],
         },
         { field: 'cost', values: [{ gt: 1, lte: 5000 }] },
@@ -111,7 +111,7 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
   });
 
   test('parses a request back, with stable ids per field', () => {
-    const request: PrysmexRequest = {
+    const request: SearchApiRequest = {
       search: 'tank',
       sort: 'title',
       sort_direction: 'asc',
@@ -130,7 +130,7 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
     expect(parsed.query.term).toBe('tank');
     expect(parsed.sort).toEqual([{ field: 'title', direction: 'asc' }]);
     expect(parsed.page).toEqual({ kind: 'offset', page: 3, perPage: 25 });
-    expect(parsed.extensions).toEqual({ 'prysmex.include': 'author' });
+    expect(parsed.extensions).toEqual({ 'api.include': 'author' });
     expect(parsed.filter.children).toEqual([
       {
         kind: 'condition',
@@ -163,7 +163,7 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
     ]);
     expect(codec.serialize(parsed, ctx())).toEqual({
       ...request,
-      filters: (request.filters as PrysmexFilterList).slice(0, 4),
+      filters: (request.filters as SearchApiFilterList).slice(0, 4),
     });
   });
 
@@ -184,7 +184,7 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
   });
 
   test('refuses what the list cannot express, naming the node', () => {
-    const list = prysmexListFilters();
+    const list = searchApiListFilters();
     const cases: [NodeInput, string][] = [
       [withId('bad', or(eq('a', 1), eq('b', 2))), 'bad'],
       [withId('bad', not(eq('a', 1))), 'bad'],
@@ -205,21 +205,21 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
     ).toBe(true);
   });
 
-  test('value hooks run per value in both directions (e.g. Prysmex document adapters)', () => {
-    const hooked = prysmexCodec({
+  test('value hooks run per value in both directions (e.g. value adapters)', () => {
+    const hooked = searchApiCodec({
       serializeValue: (field, value) =>
-        field.startsWith('document.') && typeof value === 'number'
+        field.startsWith('custom.') && typeof value === 'number'
           ? String(value)
           : value,
       parseValue: (field, value) =>
-        field.startsWith('document.') && typeof value === 'string'
+        field.startsWith('custom.') && typeof value === 'string'
           ? Number(value)
           : value,
     });
-    const tree = root(anyOf('document.score', [1, 2]), eq('plain', 3));
+    const tree = root(anyOf('custom.score', [1, 2]), eq('plain', 3));
     const request = hooked.serialize(state({ filter: tree }), ctx());
     expect(request.filters).toEqual([
-      { field: 'document.score', values: ['1', '2'] },
+      { field: 'custom.score', values: ['1', '2'] },
       { field: 'plain', values: [3] },
     ]);
     expect(hooked.parse(request, ctx()).filter.children[0]).toMatchObject({
@@ -237,11 +237,11 @@ describe('prysmexCodec (list format: what Prysmex sends today)', () => {
   });
 });
 
-describe('prysmexCodec (groups format: the documented filter spec)', () => {
-  const groups = prysmexGroupFilters();
-  const keep = prysmexGroupFilters({ keepDisabled: true });
+describe('searchApiCodec (groups format: the documented filter spec)', () => {
+  const groups = searchApiGroupFilters();
+  const keep = searchApiGroupFilters({ keepDisabled: true });
 
-  // Every example from https://developers.prysmex.com/#filtering-pagination
+  // Examples of the groups spec
   const SPEC_EXAMPLES: Record<string, unknown>[] = [
     { id: 1 },
     { state: ['created', 'pending'], id: { gt: 1, lte: 5000 } },
@@ -377,7 +377,7 @@ describe('prysmexCodec (groups format: the documented filter spec)', () => {
     });
   });
 
-  test('nested queries are refused until the Prysmex syntax is mapped', () => {
+  test('nested queries are refused until their syntax is mapped', () => {
     const tree = root(withId('n', nested('requirements', eq('status', 'ok'))));
     expect(groups.supports(tree, ctx())).toMatchObject({
       ok: false,
@@ -385,8 +385,8 @@ describe('prysmexCodec (groups format: the documented filter spec)', () => {
     });
   });
 
-  test('prysmexCodec({ filters: "groups" }) sends the spec format; parse reads either', () => {
-    const codec = prysmexCodec({ filters: 'groups' });
+  test('searchApiCodec({ filters: "groups" }) sends the spec format; parse reads either', () => {
+    const codec = searchApiCodec({ filters: 'groups' });
     const request = codec.serialize(
       state({ filter: root(or(eq('a', 1), not(eq('b', 2)))) }),
       ctx(),
@@ -404,13 +404,13 @@ describe('prysmexCodec (groups format: the documented filter spec)', () => {
 });
 
 describe('with the driver', () => {
-  test('a backend built on the codec sends Prysmex requests', async () => {
-    const requests: PrysmexRequest[] = [];
-    const codec = prysmexCodec();
+  test('a backend built on the codec sends search API requests', async () => {
+    const requests: SearchApiRequest[] = [];
+    const codec = searchApiCodec();
     const driver = new SearchDriver({
       backend: {
         codec,
-        search: (request: PrysmexRequest) => {
+        search: (request: SearchApiRequest) => {
           requests.push(request);
           return Promise.resolve({
             results: [{ id: '1' }],
@@ -446,10 +446,10 @@ describe('with the driver', () => {
   });
 });
 
-test('prysmexBackend normalizes Prysmex responses and passes the abort signal', async () => {
-  const seen: { request: PrysmexRequest; aborted: boolean }[] = [];
+test('searchApiBackend normalizes responses and passes the abort signal', async () => {
+  const seen: { request: SearchApiRequest; aborted: boolean }[] = [];
   const driver = new SearchDriver({
-    backend: prysmexBackend({
+    backend: searchApiBackend({
       filters: 'groups',
       request: (request, signal) => {
         seen.push({ request, aborted: signal.aborted });
@@ -458,7 +458,7 @@ test('prysmexBackend normalizes Prysmex responses and passes the abort signal', 
           meta: {
             total_count: 42,
             total_pages: 21,
-            project_counts: { '1': 20 },
+            status_counts: { '1': 20 },
           },
         });
       },
@@ -475,7 +475,7 @@ test('prysmexBackend normalizes Prysmex responses and passes the abort signal', 
     total: 42,
     pageCount: 21,
     results: [{ id: '1' }, { id: '2' }],
-    aggregations: { project_counts: { '1': 20 } },
+    aggregations: { status_counts: { '1': 20 } },
   });
   driver.destroy();
 });

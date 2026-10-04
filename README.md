@@ -1,18 +1,19 @@
 # ember-search-ui
+
 Ember implementation for [@elastic/search-ui](https://github.com/elastic/search-ui)
 
 This repo holds two [v2 addons](https://rfcs.emberjs.com/id/0507-embroider-v2-package-format/), written in TypeScript with `<template>` tag components (`.gts`) and typed for [Glint](https://typed-ember.gitbook.io/glint/):
 
-| package | what it is |
-| --- | --- |
-| [`ember-search-ui`](packages/ember-search-ui) | `SearchProvider`, `WithSearch` and the headless `Containers::*` components that connect a search-ui `SearchDriver` to your UI |
-| [`ember-search-ui-views`](packages/ember-search-ui-views) | Default views (`SearchBox`, `Facet`, `Results`, `Paging`, `Sorting`, ...) and styles, matching search-ui's React views |
+| package                                                   | what it is                                                                                                                    |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [`ember-search-ui`](packages/ember-search-ui)             | `SearchProvider`, `WithSearch` and the headless `Containers::*` components that connect a search-ui `SearchDriver` to your UI |
+| [`ember-search-ui-views`](packages/ember-search-ui-views) | Default views (`SearchBox`, `Facet`, `Results`, `Paging`, `Sorting`, ...) and styles, matching search-ui's React views        |
 
 ## Compatibility
 
-* Ember.js v5.8 or above (tested against 5.8, 5.12, 6.4, 6.8, 6.12, latest 7.x, beta)
-* Embroider, or ember-auto-import v2
-* Node.js v20 or above
+- Ember.js v5.8 or above (tested against 5.8, 5.12, 6.4, 6.8, 6.12, latest 7.x, beta)
+- Embroider, or ember-auto-import v2
+- Node.js v20 or above
 
 ## Installation
 
@@ -71,7 +72,8 @@ import type EmberSearchUiRegistry from 'ember-search-ui/template-registry';
 import type EmberSearchUiViewsRegistry from 'ember-search-ui-views/template-registry';
 
 declare module '@glint/environment-ember-loose/registry' {
-  export default interface Registry extends EmberSearchUiRegistry, EmberSearchUiViewsRegistry {}
+  export default interface Registry
+    extends EmberSearchUiRegistry, EmberSearchUiViewsRegistry {}
 }
 ```
 
@@ -79,13 +81,13 @@ You can refer to @elastic/search-ui for the documentation of the driver config, 
 
 ## Upgrading from 1.x
 
-* Requires Ember 5.8+ with Embroider or ember-auto-import v2.
-* `ember-search-ui-views` now declares `ember-search-ui`, `ember-power-select` (^9), `ember-basic-dropdown` (^9) and `ember-concurrency` (^5) as peer dependencies; it no longer uses `ember-headlessui`.
-* Helpers are plain functions. Their named exports are unchanged; default exports are no longer `helper()` classes.
-* `<Results>` renders the addon's `Result` by default instead of looking up the app's `result` component; pass `@resultView` to customise it.
-* A string `@view` must name a component registered with a class or a co-located template.
-* `<AutocompleteInput>` no longer yields `Button` (it could not be clicked in 1.x).
-* A custom `selectedItemComponent` on the views' select trigger receives ember-power-select 9's `@selected`.
+- Requires Ember 5.8+ with Embroider or ember-auto-import v2.
+- `ember-search-ui-views` now declares `ember-search-ui`, `ember-power-select` (^9), `ember-basic-dropdown` (^9) and `ember-concurrency` (^5) as peer dependencies; it no longer uses `ember-headlessui`.
+- Helpers are plain functions. Their named exports are unchanged; default exports are no longer `helper()` classes.
+- `<Results>` renders the addon's `Result` by default instead of looking up the app's `result` component; pass `@resultView` to customise it.
+- A string `@view` must name a component registered with a class or a co-located template.
+- `<AutocompleteInput>` no longer yields `Button` (it could not be clicked in 1.x).
+- A custom `selectedItemComponent` on the views' select trigger receives ember-power-select 9's `@selected`.
 
 ## Development
 
@@ -97,7 +99,7 @@ pnpm lint
 
 Each package's tests run with Vite + testem in its own directory (`pnpm test` in `packages/*`).
 
-`examples/query-builder` shows the new driver end to end: one filter tree sent to a fake Prysmex server as the legacy `filters` list and as the documented groups spec (see its README).
+`examples/query-builder` shows the new driver end to end: one filter tree sent to a fake server as a legacy `filters` list and as the groups spec, plus a legacy list template running unchanged on the new driver (see its README). Moving from a search-ui driver: `packages/ember-search-ui-driver/docs/migrating-from-search-ui.md`.
 
 `examples/sandbox` is a classic Ember 4.4 app and is not part of the pnpm workspace yet.
 
@@ -107,7 +109,7 @@ Each package's tests run with Vite + testem in its own directory (`pnpm test` in
 import Controller from '@ember/controller';
 
 export default class SomeController extends Controller {
- properties = [
+  properties = [
     {
       name: 'Name',
       relation: 'contact',
@@ -129,25 +131,24 @@ export default class SomeController extends Controller {
   ];
   //check @elastic/search-ui for config documentation
   config = {
-   onSearch: () => {
+    onSearch: () => {
       return [
         {
           cityName: 'Monterrey',
           contact: {
-            company: 'Prysmex'
-          }
+            company: 'Acme',
+          },
         },
         {
           cityName: 'Madrid',
           contact: {
-            company: 'Prysmex'
-          }
-        }
-      ]
-   }
-  } 
+            company: 'Acme',
+          },
+        },
+      ];
+    },
+  };
 }
-
 ```
 
 ```hbs
@@ -156,34 +157,35 @@ export default class SomeController extends Controller {
 <SearchProvider @config={{this.config}} as |driver|>
   <Table @driver={{driver}} @properties={{this.properties}} />
 </SearchProvider>
-
 ```
 
-
 ```hbs
-//here's the <Table /> Component
-<div class="flex flex-col overflow-x-auto rounded">
+//here's the
+<Table />
+Component
+<div class='flex flex-col overflow-x-auto rounded'>
   <div>
-    <div class="inline-block min-w-full align-middle">
-      <div class="overflow-hidden border-b border-gray-200 shadow">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class='inline-block min-w-full align-middle'>
+      <div class='overflow-hidden border-b border-gray-200 shadow'>
+        <table class='min-w-full divide-y divide-gray-200'>
           <WithSearch
             @driver={{@driver}}
             @mapContextToProps={{map-context-to-props
-              "setSort"
-              "sortDirection"
-              "sortField"
-            }} as |state|
+              'setSort'
+              'sortDirection'
+              'sortField'
+            }}
+            as |state|
           >
             <thead>
               <tr>
                 {{#each @properties as |column|}}
                   <th
-                    scope="col"
-                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-gray-50"
-                    role="button"
+                    scope='col'
+                    class='px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-gray-50'
+                    role='button'
                     {{on
-                      "click"
+                      'click'
                       (if
                         (not-eq column.mayBeSorted false)
                         (fn
@@ -194,15 +196,15 @@ export default class SomeController extends Controller {
                               (eq column.sortedBy state.sortField)
                               (eq column.valuePath state.sortField)
                             )
-                            (if (eq state.sortDirection "asc") "desc" "asc")
-                            "asc"
+                            (if (eq state.sortDirection 'asc') 'desc' 'asc')
+                            'asc'
                           )
                         )
                         (noop)
                       )
                     }}
                   >
-                    <div class="flex items-center content-center">
+                    <div class='flex items-center content-center'>
                       <div>
                         {{column.name}}
                       </div>
@@ -215,15 +217,15 @@ export default class SomeController extends Controller {
                           )
                         )
                       }}
-                        {{#if (eq state.sortDirection "asc")}}
+                        {{#if (eq state.sortDirection 'asc')}}
                           <Svg
-                            @name="svg/arrow-narrow-up"
-                            class="flex-initial w-4 h-4 ml-1"
+                            @name='svg/arrow-narrow-up'
+                            class='flex-initial w-4 h-4 ml-1'
                           />
                         {{else}}
                           <Svg
-                            @name="svg/arrow-narrow-down"
-                            class="flex-initial w-4 h-4 ml-1"
+                            @name='svg/arrow-narrow-down'
+                            class='flex-initial w-4 h-4 ml-1'
                           />
                         {{/if}}
                       {{/if}}
@@ -233,18 +235,19 @@ export default class SomeController extends Controller {
               </tr>
             </thead>
           </WithSearch>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class='bg-white divide-y divide-gray-200'>
             <WithSearch
               @driver={{@driver}}
               @mapContextToProps={{map-context-to-props
-                "results"
-                "rawResponse"
-              }} as |state|
+                'results'
+                'rawResponse'
+              }}
+              as |state|
             >
               {{#each state.results as |result|}}
                 <tr>
                   {{#each @columns as |column|}}
-                    <td class="px-6 py-4 whitespace-nowrap {{column.class}}">
+                    <td class='px-6 py-4 whitespace-nowrap {{column.class}}'>
                       {{#if column.component}}
                         {{component
                           column.component
@@ -253,11 +256,11 @@ export default class SomeController extends Controller {
                           rawResponse=state.rawResponse
                         }}
                       {{else}}
-                        <div class="text-sm text-gray-700">
+                        <div class='text-sm text-gray-700'>
                           {{#if (and column.linkeable column.route)}}
                             <a
                               href={{href-to column.route result.id}}
-                              class="hover:text-purple-500"
+                              class='hover:text-purple-500'
                             >
                               {{get result column.valuePath}}
                             </a>
@@ -281,94 +284,96 @@ export default class SomeController extends Controller {
 </div>
 <WithSearch
   @mapContextToProps={{map-context-to-props
-    "pagingStart"
-    "pagingEnd"
-    "totalResults"
-    "current"
-    "resultsPerPage"
-    "totalPages"
-    "setCurrent"
+    'pagingStart'
+    'pagingEnd'
+    'totalResults'
+    'current'
+    'resultsPerPage'
+    'totalPages'
+    'setCurrent'
   }}
-  @driver={{@driver}} as |state|
+  @driver={{@driver}}
+  as |state|
 >
   <Table::Paging
     @current={{state.current}}
     @setCurrent={{state.setCurrent}}
-    @totalPages={{state.totalPages}} as |paging|
+    @totalPages={{state.totalPages}}
+    as |paging|
   >
     <div
-      class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 rounded-b-lg sm:px-6"
+      class='flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 rounded-b-lg sm:px-6'
     >
-      <div class="flex justify-between flex-1 sm:hidden">
+      <div class='flex justify-between flex-1 sm:hidden'>
         <button
-          type="button"
-          class="relative inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700"
+          type='button'
+          class='relative inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700'
           disabled={{paging.previous.disabled}}
-          {{on "click" paging.previous.action}}
+          {{on 'click' paging.previous.action}}
         >
           Previous
         </button>
         <button
-          type="button"
+          type='button'
           disabled={{paging.next.disabled}}
-          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700"
-          {{on "click" paging.next.action}}
+          class='relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium leading-5 text-gray-700 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700'
+          {{on 'click' paging.next.action}}
         >
           Next
         </button>
       </div>
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div class="flex-1">
-          <p class="text-sm leading-5 text-gray-700">
+      <div class='hidden sm:flex-1 sm:flex sm:items-center sm:justify-between'>
+        <div class='flex-1'>
+          <p class='text-sm leading-5 text-gray-700'>
             Showing
-            <span class="font-medium">
+            <span class='font-medium'>
               {{state.pagingStart}}
             </span>
             to
-            <span class="font-medium">
+            <span class='font-medium'>
               {{state.pagingEnd}}
             </span>
             of
-            <span class="font-medium">
+            <span class='font-medium'>
               {{state.totalResults}}
             </span>
             results
           </p>
         </div>
         <div>
-          <nav class="relative z-0 inline-flex shadow-sm">
+          <nav class='relative z-0 inline-flex shadow-sm'>
             <button
-              type="button"
+              type='button'
               disabled={{paging.previous.disabled}}
-              class="relative inline-flex items-center px-2 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-l-md hover:text-gray-400 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-500"
-              aria-label="Previous"
-              {{on "click" paging.previous.action}}
+              class='relative inline-flex items-center px-2 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-l-md hover:text-gray-400 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-500'
+              aria-label='Previous'
+              {{on 'click' paging.previous.action}}
             >
-              <Svg @name="svg/chevron-left" class="w-5 h-5" />
+              <Svg @name='svg/chevron-left' class='w-5 h-5' />
             </button>
             <span
-              class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300"
+              class='relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300'
             >
               {{state.current}}
             </span>
             <span
-              class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300"
+              class='relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300'
             >
               /
             </span>
             <span
-              class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300"
+              class='relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium leading-5 text-gray-700 bg-white border border-gray-300'
             >
               {{state.totalPages}}
             </span>
             <button
-              type="button"
+              type='button'
               disabled={{paging.next.disabled}}
-              class="relative inline-flex items-center px-2 py-2 -ml-px text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-r-md hover:text-gray-400 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-500"
-              aria-label="Next"
-              {{on "click" paging.next.action}}
+              class='relative inline-flex items-center px-2 py-2 -ml-px text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-r-md hover:text-gray-400 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-500'
+              aria-label='Next'
+              {{on 'click' paging.next.action}}
             >
-              <Svg @name="svg/chevron-right" class="w-5 h-5" />
+              <Svg @name='svg/chevron-right' class='w-5 h-5' />
             </button>
           </nav>
         </div>

@@ -5,8 +5,8 @@ import {
   and,
   materialize,
   matches,
-  prysmexGroupFilters,
-  prysmexListFilters,
+  searchApiGroupFilters,
+  searchApiListFilters,
   sequentialIds,
   type CodecContext,
   type GroupNode,
@@ -27,8 +27,8 @@ const root = (input: NodeInput) =>
 const overTheWire = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 const formats = {
-  list: prysmexListFilters(),
-  groups: prysmexGroupFilters(),
+  list: searchApiListFilters(),
+  groups: searchApiGroupFilters(),
 };
 
 for (const [name, codec] of Object.entries(formats)) {

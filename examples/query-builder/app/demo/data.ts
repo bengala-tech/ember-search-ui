@@ -69,7 +69,7 @@ export const INSPECTIONS: Inspection[] = Array.from({ length: 36 }, (_, i) => {
 const options = (values: readonly string[]) =>
   values.map((value) => ({ value, label: value.replace('_', ' ') }));
 
-/** The filterable properties, as Prysmex describes its fields. */
+/** The filterable properties, as the server describes its fields. */
 export const FIELDS: FieldSchema = {
   title: { path: 'title', type: 'text', label: 'Title' },
   description: { path: 'description', type: 'text', label: 'Description' },

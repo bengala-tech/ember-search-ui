@@ -1,6 +1,6 @@
 import { find } from '@ember/test-helpers';
 import { INSPECTIONS, type Inspection } from 'query-builder/demo/data';
-import { handle } from 'query-builder/demo/fake-prysmex';
+import { handle } from 'query-builder/demo/fake-server';
 
 /** The JSON shown in a panel, parsed. */
 export function panelJson(selector: string): Record<string, unknown> {
@@ -13,7 +13,7 @@ export function panelJson(selector: string): Record<string, unknown> {
 export const truth = (predicate: (d: Inspection) => boolean) =>
   INSPECTIONS.filter(predicate).length;
 
-/** Sends a request body to the fake Prysmex server and returns its total. */
+/** Sends a request body to the fake server and returns its total. */
 export async function totalFor(request: unknown): Promise<number> {
   const response = await handle(
     JSON.stringify(request),

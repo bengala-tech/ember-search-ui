@@ -15,7 +15,7 @@ import {
   type GroupNode,
 } from 'ember-search-ui-driver';
 import { TEST_URL } from 'query-builder/demo/session';
-import { panelJson, totalFor, truth } from '../helpers/prysmex';
+import { panelJson, totalFor, truth } from '../helpers/server';
 
 const sent = () => panelJson('[data-test-sent]');
 
@@ -30,7 +30,7 @@ const row = (parent: string, n: number) =>
 const add = (parent: string, what: string) =>
   `${parent} > .sui-qb-footer [data-test-add="${what}"]`;
 
-module('Acceptance | new Prysmex (groups format)', function (hooks) {
+module('Acceptance | new (groups format)', function (hooks) {
   setupApplicationTest(hooks);
   hooks.beforeEach(() => {
     TEST_URL.value = '';

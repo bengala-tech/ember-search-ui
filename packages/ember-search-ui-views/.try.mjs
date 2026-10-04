@@ -26,7 +26,7 @@ const compatDeps = {
 export default {
   scenarios: [
     {
-      // what Prysmex runs
+      // the oldest LTS, through the compat build
       name: 'ember-lts-4.12',
       npm: {
         devDependencies: {

@@ -13,8 +13,9 @@ import type { Backend, FieldSchema } from '../codec.ts';
 import type { OperatorRegistry } from '../operators.ts';
 import type { ConditionNode, GroupNode, SearchState } from '../types.ts';
 
-// Prysmex's offline lists (LocalSearchDriver + LocalConnector) over the new
-// driver. The search works like the old connector:
+// Offline lists for apps that extended search-ui with a local connector
+// (a LocalSearchDriver with setData / setProperties), over the new driver.
+// The search works like such a connector:
 //
 // - the search term matches, case-insensitively, the text of any filterable
 //   property's `filteredBy` value (booleans and Dates are skipped);
@@ -26,8 +27,8 @@ import type { ConditionNode, GroupNode, SearchState } from '../types.ts';
 // Nodes made outside the search-ui filters (a query builder) are applied
 // too, with the driver's own operators.
 
-/** The parts of a Prysmex `Property` the local search reads. */
-export interface PrysmexLocalProperty {
+/** The parts of a list property (column) the local search reads. */
+export interface LocalSearchProperty {
   filteredBy?: string | undefined;
   /** Truthy when the property can be filtered and searched. */
   useFilter?: unknown;
@@ -38,9 +39,9 @@ export interface PrysmexLocalProperty {
   ) => unknown;
 }
 
-export interface PrysmexLocalOptions<Doc> {
+export interface LocalSearchOptions<Doc> {
   data?: Doc[];
-  properties?: PrysmexLocalProperty[];
+  properties?: LocalSearchProperty[];
   /** Default true. */
   filteringIgnoreCase?: boolean;
   /** Default true. false returns every match on one page. */
@@ -163,12 +164,12 @@ export function emberLikeCompare(v: unknown, w: unknown): number {
 /** What the local search reads; changed by setData / setProperties. */
 interface LocalSource<Doc> {
   data: Doc[];
-  properties: PrysmexLocalProperty[];
+  properties: LocalSearchProperty[];
 }
 
 function localBackend<Doc>(
   source: LocalSource<Doc>,
-  options: PrysmexLocalOptions<Doc>,
+  options: LocalSearchOptions<Doc>,
 ): Backend<LocalRequest, LocalResponse<Doc>, Doc> {
   const ignoreCase = options.filteringIgnoreCase ?? true;
   const usePagination = options.usePagination ?? true;
@@ -283,10 +284,10 @@ function localBackend<Doc>(
 
 /**
  * searchUiCompat plus the old LocalSearchDriver API (setData,
- * setProperties, runSearch). Prysmex's property builders check
- * `instanceof LocalSearchDriver`: export this class under that name.
+ * setProperties, runSearch). If app code checks `instanceof
+ * LocalSearchDriver`, export this class under that name.
  */
-export class PrysmexLocalCompat<Doc = unknown> extends SearchUiCompat<Doc> {
+export class LocalSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   readonly #source: LocalSource<Doc>;
 
   constructor(driver: SearchDriver<Doc>, source: LocalSource<Doc>) {
@@ -298,7 +299,7 @@ export class PrysmexLocalCompat<Doc = unknown> extends SearchUiCompat<Doc> {
     return this.#source.data;
   }
 
-  get properties(): readonly PrysmexLocalProperty[] {
+  get properties(): readonly LocalSearchProperty[] {
     return this.#source.properties;
   }
 
@@ -309,7 +310,7 @@ export class PrysmexLocalCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   };
 
   /** Replaces the properties and searches again, on the current page. */
-  setProperties = (properties: PrysmexLocalProperty[]): void => {
+  setProperties = (properties: LocalSearchProperty[]): void => {
     this.#source.properties = properties;
     this.runSearch();
   };
@@ -321,9 +322,9 @@ export class PrysmexLocalCompat<Doc = unknown> extends SearchUiCompat<Doc> {
 }
 
 /** An in-memory driver with the old LocalSearchDriver API and semantics. */
-export function prysmexLocalSearch<Doc = unknown>(
-  options: PrysmexLocalOptions<Doc> = {},
-): PrysmexLocalCompat<Doc> {
+export function localSearch<Doc = unknown>(
+  options: LocalSearchOptions<Doc> = {},
+): LocalSearchCompat<Doc> {
   const source: LocalSource<Doc> = {
     data: options.data ?? [],
     properties: options.properties ?? [],
@@ -340,5 +341,5 @@ export function prysmexLocalSearch<Doc = unknown>(
     ),
     ...(options.schema ? { schema: options.schema } : {}),
   });
-  return new PrysmexLocalCompat(driver, source);
+  return new LocalSearchCompat(driver, source);
 }

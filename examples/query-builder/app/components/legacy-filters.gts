@@ -11,10 +11,10 @@ import type {
 } from 'ember-search-ui-driver';
 import { FIELDS, type Inspection } from '../demo/data.ts';
 
-// Prysmex's current filter UI, rebuilt on the search-ui compat API: one
+// A legacy filter UI, built on the search-ui compat API: one
 // filter per property, AND only, a condition per property type. It only
 // calls compat.actions.setFilter / removeFilter / clearFilters, the way the
-// Prysmex components do, so what it sends is the legacy list.
+// legacy components do, so what it sends is the legacy list.
 
 type Condition =
   'contains' | 'is' | 'any_of' | 'between' | 'greater' | 'less' | 'exists';
@@ -200,7 +200,7 @@ export default class LegacyFilters extends Component<Signature> {
     if (!this.pending.includes(field)) this.pending = [...this.pending, field];
   }
 
-  /** What Prysmex does: setFilter(field, value, 'any'); blank removes it. */
+  /** setFilter(field, value, 'any'); a blank value removes it. */
   #setFilter(field: string, value: unknown) {
     this.args.compat.actions.setFilter(field, value, 'any');
   }

@@ -1,6 +1,6 @@
 export type NodeId = string;
 
-/** A dotted path into a document: `state`, `document.4-date_input455`. */
+/** A dotted path into a document: `state`, `custom.4-due_date`. */
 export type FieldPath = string;
 
 /** Key of an operator in the operator registry: `eq`, `in`, `range`, ... */
@@ -97,7 +97,7 @@ export interface SearchState {
   readonly filter: GroupNode;
   readonly sort: readonly SortItem[];
   readonly page: PageState;
-  /** Backend-specific options, namespaced: `prysmex.refresh`. */
+  /** Backend-specific options, namespaced: `api.refresh`. */
   readonly extensions: Readonly<Record<string, unknown>>;
 }
 

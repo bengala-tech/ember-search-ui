@@ -6,7 +6,7 @@ import {
   fromSearchUiState,
   memoryBackend,
   or,
-  prysmexCodec,
+  searchApiCodec,
   searchUiCompat,
   sequentialIds,
   type SearchUiState,
@@ -69,7 +69,7 @@ describe('searchUiCompat: the search-ui driver API over the new driver', () => {
     expect(compat.getState()).toBe(compat.getState()); // stable until something changes
   });
 
-  test('actions work as in search-ui (Prysmex uses setFilter with type "any")', async () => {
+  test('actions work as in search-ui (setFilter with type "any")', async () => {
     const { driver, compat } = setup({
       page: { kind: 'offset', page: 1, perPage: 20 },
     });
@@ -99,7 +99,7 @@ describe('searchUiCompat: the search-ui driver API over the new driver', () => {
     await driver.settled();
     expect(compat.state.filters[0]?.values).toEqual(['created', 'pending']);
 
-    actions.setFilter('cost', null); // blank removes (Prysmex's BaseSearchDriver behaviour)
+    actions.setFilter('cost', null); // blank removes (a common search-ui driver override)
     actions.clearFilters(['state']);
     await driver.settled();
     expect(compat.state.filters.map((f) => f.field)).toEqual(['state']);
@@ -207,7 +207,7 @@ describe('searchUiCompat: the search-ui driver API over the new driver', () => {
   });
 });
 
-describe('fromSearchUiState: restore what Prysmex keeps in its `query` param', () => {
+describe('fromSearchUiState: restore a search-ui state kept in a `query` param', () => {
   test('page, size, term, sort and filters', () => {
     const state = fromSearchUiState({
       current: 3,
@@ -242,12 +242,12 @@ describe('fromSearchUiState: restore what Prysmex keeps in its `query` param', (
     ]);
   });
 
-  test('the compat filters and the Prysmex list codec agree', async () => {
+  test('the compat filters and the list codec agree', async () => {
     const { driver, compat } = setup();
     compat.actions.setFilter('state', ['created', 'pending'], 'any');
     compat.actions.setFilter('cost', { gt: 1 }, 'any');
     await driver.settled();
-    const request = prysmexCodec().serialize(driver.state, {
+    const request = searchApiCodec().serialize(driver.state, {
       operators: new OperatorRegistry(),
       idFactory: sequentialIds(),
     });
@@ -280,7 +280,7 @@ test('onRequestStateChange reports request changes only (for URL query params)',
   expect(seen).toHaveLength(1);
 });
 
-test('with a schema, a string on a text field is "contains" (how Prysmex reads it)', async () => {
+test('with a schema, a string on a text field is "contains" (how the search API reads it)', async () => {
   const driver = new SearchDriver<Doc>({
     backend: memoryBackend(DOCS),
     schema: { state: { path: 'state', type: 'text' } },

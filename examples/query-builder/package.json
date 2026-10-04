@@ -2,7 +2,7 @@
   "name": "query-builder",
   "version": "0.0.0",
   "private": true,
-  "description": "ember-search-ui example: one internal filter tree, serialized as legacy (list) and new (groups) Prysmex requests",
+  "description": "ember-search-ui example: one internal filter tree, serialized as legacy (list) and new (groups) requests",
   "repository": "",
   "license": "MIT",
   "author": "",

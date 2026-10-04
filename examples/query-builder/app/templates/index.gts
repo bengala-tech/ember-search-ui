@@ -3,26 +3,41 @@ import { LinkTo } from '@ember/routing';
 <template>
   <section class="intro">
     <p>
-      Both pages use the same driver and keep the same internal state: a filter
-      tree of groups and conditions. Only the serialization differs.
+      Every page uses the same driver and keeps the same internal state: a
+      filter tree of groups and conditions. Only the serialization differs.
     </p>
     <ul>
       <li>
-        <LinkTo @route="legacy">Legacy Prysmex</LinkTo>: today's filter UI (one
+        <LinkTo @route="legacy">Legacy (list)</LinkTo>: a legacy filter UI (one
         filter per property, AND only), driven through the search-ui compat API,
-        sent as the
+        sent as a flat
         <code>filters</code>
-        list Prysmex sends today.
+        list.
       </li>
       <li>
-        <LinkTo @route="groups">New Prysmex</LinkTo>: the query builder (nested
-        any/all groups, NOT, on/off), sent as the documented groups spec.
+        <LinkTo @route="groups">New (groups)</LinkTo>: the query builder (nested
+        any/all groups, NOT, on/off), sent as the groups spec.
+      </li>
+      <li>
+        <LinkTo @route="legacy-template">Template: legacy drop-in</LinkTo>: a
+        list template written for a search-ui driver (WithSearch,
+        mapContextToProps, the containers, direct driver calls, an Excel export,
+        a
+        <code>query</code>
+        param), unchanged, on the new driver through
+        <code>serverSearch</code>.
+      </li>
+      <li>
+        <LinkTo @route="groups-template">Template: new spec</LinkTo>: the same
+        list with
+        <code>&lt;Search&gt;</code>
+        and a QueryBuilder sending the groups spec, next to an unchanged
+        WithSearch view on the same driver.
       </li>
     </ul>
     <p>
-      A fake Prysmex server receives only the JSON request, decodes it, and
-      answers. Each page shows the internal tree, the exact request sent, and
-      the same state in the other format.
+      A fake server receives only the JSON request, decodes it, and answers.
+      Each page shows the exact request sent.
     </p>
   </section>
 </template>

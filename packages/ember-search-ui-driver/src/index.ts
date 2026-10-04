@@ -71,20 +71,20 @@ export {
   type UrlSyncOptions,
 } from './url-sync.ts';
 export {
-  prysmexCodec,
-  prysmexBackend,
-  prysmexListFilters,
-  prysmexGroupFilters,
-  type PrysmexCodec,
-  type PrysmexCodecOptions,
-  type PrysmexBackendOptions,
-  type PrysmexResponse,
-  type PrysmexRequest,
-  type PrysmexFilterList,
-  type PrysmexFilterObject,
-  type PrysmexValueHooks,
-  type PrysmexWireValue,
-} from './codecs/prysmex.ts';
+  searchApiCodec,
+  searchApiBackend,
+  searchApiListFilters,
+  searchApiGroupFilters,
+  type SearchApiCodec,
+  type SearchApiCodecOptions,
+  type SearchApiBackendOptions,
+  type SearchApiResponse,
+  type SearchApiRequest,
+  type SearchApiFilterList,
+  type SearchApiFilterObject,
+  type SearchApiValueHooks,
+  type SearchApiWireValue,
+} from './codecs/search-api.ts';
 export {
   SearchUiCompat,
   searchUiCompat,
@@ -98,18 +98,18 @@ export {
   type SearchUiState,
 } from './compat/search-ui.ts';
 export {
-  PrysmexServerCompat,
-  prysmexServerSearch,
-  type PrysmexApiConnector,
-  type PrysmexSend,
-  type PrysmexSerializedState,
-  type PrysmexServerCompatOptions,
-  type PrysmexServerSearchOptions,
-} from './compat/prysmex-server.ts';
+  ServerSearchCompat,
+  serverSearch,
+  type ApiConnector,
+  type SearchApiSend,
+  type SerializedSearchUiState,
+  type ServerSearchCompatOptions,
+  type ServerSearchOptions,
+} from './compat/server-search.ts';
 export {
-  PrysmexLocalCompat,
-  prysmexLocalSearch,
+  LocalSearchCompat,
+  localSearch,
   emberLikeCompare,
-  type PrysmexLocalOptions,
-  type PrysmexLocalProperty,
-} from './compat/prysmex-local.ts';
+  type LocalSearchOptions,
+  type LocalSearchProperty,
+} from './compat/local-search.ts';

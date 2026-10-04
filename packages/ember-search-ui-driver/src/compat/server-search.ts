@@ -1,13 +1,13 @@
 import { SearchDriver } from '../driver.ts';
 import { createState } from '../state.ts';
 import {
-  prysmexBackend,
-  prysmexCodec,
-  type PrysmexCodec,
-  type PrysmexCodecOptions,
-  type PrysmexRequest,
-  type PrysmexResponse,
-} from '../codecs/prysmex.ts';
+  searchApiBackend,
+  searchApiCodec,
+  type SearchApiCodec,
+  type SearchApiCodecOptions,
+  type SearchApiRequest,
+  type SearchApiResponse,
+} from '../codecs/search-api.ts';
 import {
   SearchUiCompat,
   filterNodeId,
@@ -17,7 +17,7 @@ import {
 import type { FieldSchema } from '../codec.ts';
 import type { SearchState } from '../types.ts';
 
-// The extras Prysmex's ServerSearchDriver adds to search-ui's driver, over
+// The extras a typical server driver built on search-ui adds, over
 // the new driver: `apiConnector` (endpoint, serializeState, prepareRequest,
 // makeSearch), `getSerializedState()` and `makeSearch()`. Exports, widgets
 // and bulk actions use them to repeat the current search elsewhere: another
@@ -28,63 +28,63 @@ import type { SearchState } from '../types.ts';
 //   prepareRequest(serialized)   the request: { search, sort, page, per, filters }
 //   makeSearch(endpoint, serialized, extra)   prepares and sends it
 
-/** Sends a request: Prysmex's client.request (endpoint, query, options). */
-export type PrysmexSend = (
+/** Sends a request: the app's client (endpoint, request, options). */
+export type SearchApiSend = (
   endpoint: string,
-  request: PrysmexRequest,
+  request: SearchApiRequest,
   extra: Record<string, unknown>,
 ) => Promise<unknown>;
 
 /** search-ui request state with the filters as they are sent. */
-export interface PrysmexSerializedState {
+export interface SerializedSearchUiState {
   [key: string]: unknown;
   current?: number;
   resultsPerPage?: number;
   searchTerm?: string;
   sortField?: string;
   sortDirection?: string;
-  filters: PrysmexRequest['filters'];
+  filters: SearchApiRequest['filters'];
 }
 
-export interface PrysmexApiConnector {
+export interface ApiConnector {
   readonly endpoint: string;
   readonly include: string | undefined;
-  serializeState(state: SearchUiRequestState): PrysmexSerializedState;
+  serializeState(state: SearchUiRequestState): SerializedSearchUiState;
   prepareRequest(
-    state: PrysmexSerializedState,
+    state: SerializedSearchUiState,
     extra?: Record<string, unknown>,
-  ): PrysmexRequest;
+  ): SearchApiRequest;
   makeSearch(
     endpoint: string | undefined,
-    state: PrysmexSerializedState,
+    state: SerializedSearchUiState,
     extra?: Record<string, unknown>,
   ): Promise<unknown>;
 }
 
-export interface PrysmexServerCompatOptions {
+export interface ServerSearchCompatOptions {
   endpoint: string;
-  send: PrysmexSend;
+  send: SearchApiSend;
   /** The codec the driver's backend uses (same filter format and hooks). */
-  codec: PrysmexCodec;
+  codec: SearchApiCodec;
   /** JSON:API include, added by makeSearch like the old connector. */
   include?: string;
 }
 
-/** searchUiCompat plus Prysmex's ServerSearchDriver API. */
-export class PrysmexServerCompat<Doc = unknown> extends SearchUiCompat<Doc> {
-  readonly apiConnector: PrysmexApiConnector;
-  readonly #codec: PrysmexCodec;
+/** searchUiCompat plus the server driver API (apiConnector, makeSearch...). */
+export class ServerSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
+  readonly apiConnector: ApiConnector;
+  readonly #codec: SearchApiCodec;
 
-  constructor(driver: SearchDriver<Doc>, options: PrysmexServerCompatOptions) {
+  constructor(driver: SearchDriver<Doc>, options: ServerSearchCompatOptions) {
     super(driver);
     this.#codec = options.codec;
     const { endpoint, include, send } = options;
 
     const prepareRequest = (
-      state: PrysmexSerializedState,
+      state: SerializedSearchUiState,
       extra: Record<string, unknown> = {},
-    ): PrysmexRequest => {
-      const request: PrysmexRequest = { ...extra, filters: state.filters };
+    ): SearchApiRequest => {
+      const request: SearchApiRequest = { ...extra, filters: state.filters };
       if (state.searchTerm) request.search = state.searchTerm;
       if (state.sortField) {
         request.sort = state.sortField;
@@ -115,7 +115,7 @@ export class PrysmexServerCompat<Doc = unknown> extends SearchUiCompat<Doc> {
    * is serialized from the driver itself, so nodes made outside the
    * search-ui filters (a query builder) are included.
    */
-  serializeState = (state: SearchUiRequestState): PrysmexSerializedState => {
+  serializeState = (state: SearchUiRequestState): SerializedSearchUiState => {
     const searchState =
       state === this.getState()
         ? this.driver.state
@@ -130,20 +130,20 @@ export class PrysmexServerCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   /**
    * Calls `listener` with the serialized request state whenever the request
    * changes, what the old beforeSearchCall handed to onSearchStateChange
-   * (and Prysmex keeps in the `query` param). Returns the unsubscribe function.
+   * (and apps keep in a `query` param). Returns the unsubscribe function.
    */
   onSerializedStateChange = (
-    listener: (state: PrysmexSerializedState) => void,
+    listener: (state: SerializedSearchUiState) => void,
   ): (() => void) =>
     this.onRequestStateChange((request) =>
       listener(this.serializeState(request)),
     );
 
-  getSerializedState = (): PrysmexSerializedState =>
+  getSerializedState = (): SerializedSearchUiState =>
     this.serializeState(this.getState());
 
   makeSearch = (
-    state: PrysmexSerializedState,
+    state: SerializedSearchUiState,
     extra?: Record<string, unknown>,
   ): Promise<unknown> =>
     this.apiConnector.makeSearch(this.apiConnector.endpoint, state, extra);
@@ -162,25 +162,25 @@ export class PrysmexServerCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   }
 }
 
-export interface PrysmexServerSearchOptions extends PrysmexCodecOptions {
+export interface ServerSearchOptions extends SearchApiCodecOptions {
   endpoint: string;
   /**
    * Sends every request, searches and makeSearch alike. Searches pass
    * `{ signal }` in `extra`; honour it to cancel superseded searches.
    */
-  send: PrysmexSend;
+  send: SearchApiSend;
   /**
    * Runs on search responses only (not makeSearch), like the old
    * afterSearchCall: push the payload into the store, cap total_pages...
    */
   afterSearch?: (
-    response: PrysmexResponse,
-  ) => PrysmexResponse | Promise<PrysmexResponse>;
+    response: SearchApiResponse,
+  ) => SearchApiResponse | Promise<SearchApiResponse>;
   include?: string;
   /**
    * The search-ui state to start from, e.g. the controller's `query` param.
    * Its filters are serialized (as onSerializedStateChange reports them);
-   * `parseValue` reads each value back, like deserializeFilters.
+   * `parseValue` reads each value back.
    */
   initialState?: SearchUiRequestState;
   /** Defaults under `initialState`. Default: page 1, 10 per page. */
@@ -192,12 +192,12 @@ export interface PrysmexServerSearchOptions extends PrysmexCodecOptions {
 }
 
 /**
- * A driver for a Prysmex endpoint wrapped in the ServerSearchDriver API:
- * what SearchDriverServerHelper builds, as one call.
+ * A driver for a search API endpoint wrapped in the server driver API:
+ * the usual server-driver setup, as one call.
  */
-export function prysmexServerSearch<Doc = unknown>(
-  options: PrysmexServerSearchOptions,
-): PrysmexServerCompat<Doc> {
+export function serverSearch<Doc = unknown>(
+  options: ServerSearchOptions,
+): ServerSearchCompat<Doc> {
   const { endpoint, send, afterSearch, include } = options;
   const defaults =
     options.defaults ??
@@ -221,16 +221,16 @@ export function prysmexServerSearch<Doc = unknown>(
       ? defaults
       : {
           ...defaults,
-          extensions: { ...defaults.extensions, 'prysmex.include': include },
+          extensions: { ...defaults.extensions, 'api.include': include },
         },
     options.schema,
   );
-  const backend = prysmexBackend<Doc>({
+  const backend = searchApiBackend<Doc>({
     ...options,
     request: async (request, signal) => {
       const response = (await send(endpoint, request, {
         signal,
-      })) as PrysmexResponse;
+      })) as SearchApiResponse;
       return afterSearch ? afterSearch(response) : response;
     },
   });
@@ -243,10 +243,10 @@ export function prysmexServerSearch<Doc = unknown>(
       ? {}
       : { searchOnInit: options.searchOnInit }),
   });
-  return new PrysmexServerCompat(driver, {
+  return new ServerSearchCompat(driver, {
     endpoint,
     send,
-    codec: prysmexCodec(options),
+    codec: searchApiCodec(options),
     ...(include === undefined ? {} : { include }),
   });
 }

@@ -3,12 +3,12 @@ import {
   emberLikeCompare,
   eq,
   or,
-  prysmexLocalSearch,
-  PrysmexLocalCompat,
-  type PrysmexLocalOptions,
+  localSearch,
+  LocalSearchCompat,
+  type LocalSearchOptions,
 } from '../src/index.ts';
 
-// Mirrors Prysmex's offline lists: its Property class (getters for
+// Mirrors an app's offline lists: a Property class (getters for
 // useFilter / filteredBy), defaultFilter, and the filtering functions the
 // property builders install for a LocalSearchDriver.
 
@@ -26,7 +26,7 @@ const getPath = (row: unknown, path: string): unknown =>
       row,
     );
 
-// Prysmex: '' + filterValue === get(row, valueKey)
+// the usual default: '' + filterValue === get(row, valueKey)
 const defaultFilter: Fn = (row, values, { valueKey }) =>
   values.some((f) => String(f) === getPath(row, valueKey!));
 
@@ -92,7 +92,7 @@ const ROWS: Row[] = [
   },
 ];
 
-// build-boolean-property's function
+// a boolean property's function
 const booleanFilter: Fn = (row, values, { valueKey }) =>
   values.some((fv) =>
     fv === true || fv === 'true'
@@ -100,7 +100,7 @@ const booleanFilter: Fn = (row, values, { valueKey }) =>
       : !getPath(row, valueKey!),
   );
 
-// build-date-property's function, in spirit: a range over the row's date
+// a date property's function: a range over the row's date
 const dateFilter: Fn = (row, values, { valueKey }) => {
   const time = (getPath(row, valueKey!) as Date).getTime();
   return values.every((v) => {
@@ -124,8 +124,8 @@ const properties = () => [
 const teardowns: (() => void)[] = [];
 afterEach(() => teardowns.splice(0).forEach((t) => t()));
 
-function local(options: Partial<PrysmexLocalOptions<Row>> = {}) {
-  const driver = prysmexLocalSearch<Row>({
+function local(options: Partial<LocalSearchOptions<Row>> = {}) {
+  const driver = localSearch<Row>({
     data: ROWS,
     properties: properties(),
     ...options,
@@ -134,15 +134,15 @@ function local(options: Partial<PrysmexLocalOptions<Row>> = {}) {
   return driver;
 }
 
-const ids = (driver: PrysmexLocalCompat<Row>) =>
+const ids = (driver: LocalSearchCompat<Row>) =>
   (driver.state.results as Row[]).map((r) => r.id);
 
-async function settle(driver: PrysmexLocalCompat<Row>) {
+async function settle(driver: LocalSearchCompat<Row>) {
   await driver.driver.settled();
   return ids(driver);
 }
 
-describe('prysmexLocalSearch: the old LocalConnector semantics', () => {
+describe('localSearch: the semantics of a search-ui local connector', () => {
   test('no filters and no term: every row, in data order, 10 per page', async () => {
     const driver = local();
     expect(await settle(driver)).toEqual([1, 2, 3, 4]);
@@ -256,7 +256,7 @@ describe('prysmexLocalSearch: the old LocalConnector semantics', () => {
     const rows = ROWS.slice(0, 1);
     driver.setData(rows);
     await driver.driver.settled();
-    rows.push(ROWS[1]!); // mutated in place, as Prysmex sometimes does
+    rows.push(ROWS[1]!); // mutated in place, as apps sometimes do
     driver.runSearch();
     expect(await settle(driver)).toEqual([1, 2]);
   });
@@ -283,8 +283,8 @@ describe('prysmexLocalSearch: the old LocalConnector semantics', () => {
     expect(await settle(driver)).toEqual([1, 3]);
   });
 
-  test('it is a class Prysmex can export as LocalSearchDriver (instanceof checks)', () => {
-    expect(local()).toBeInstanceOf(PrysmexLocalCompat);
+  test('it is a class apps can export as LocalSearchDriver (instanceof checks)', () => {
+    expect(local()).toBeInstanceOf(LocalSearchCompat);
   });
 });
 

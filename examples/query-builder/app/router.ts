@@ -9,4 +9,6 @@ export default class Router extends EmberRouter {
 Router.map(function () {
   this.route('legacy');
   this.route('groups');
+  this.route('legacy-template', { path: '/templates/legacy' });
+  this.route('groups-template', { path: '/templates/groups' });
 });

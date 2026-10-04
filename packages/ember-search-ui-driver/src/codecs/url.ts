@@ -20,7 +20,7 @@ import type {
 //   per     page size (offset paging)       ?per=50
 //   cursor  cursor (cursor paging)          ?cursor=abc
 //   size    page size (cursor paging)       ?size=50
-//   x       extensions, JSON (opt-in)       ?x={"prysmex.refresh":true}
+//   x       extensions, JSON (opt-in)       ?x={"api.refresh":true}
 //
 // Compact filter nodes keep ids, negation and disabled flags, so the tree
 // round-trips exactly:

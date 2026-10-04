@@ -19,12 +19,13 @@ import type {
   SearchState,
 } from '../types.ts';
 
-// Prysmex search requests. Two filter formats:
+// Requests for a JSON search API (page/per, sort/sort_direction, filters).
+// Two filter formats:
 //
-// - `list`: what the search-ui based Prysmex frontend sends today, an AND
+// - `list`: the legacy format a search-ui based frontend sends, an AND
 //   of per-field entries: [{ field, values: [...] }]. A list of values means
 //   "any of"; a single value is a scalar, { gt, gte, lt, lte } or { exists }.
-// - `groups`: the documented Prysmex filter spec. Keys of one object are
+// - `groups`: the newer filter spec. Keys of one object are
 //   ANDed; { type: 'any' | 'all', filters: [...] } groups nest; __negate and
 //   __disable apply to objects and groups. Nested (per-item) queries are not
 //   mapped yet.
@@ -32,27 +33,27 @@ import type {
 // The request envelope is the same for both:
 //   { search?, sort?, sort_direction?, page, per, filters, ...extensions }
 
-export type PrysmexFilterList = {
+export type SearchApiFilterList = {
   field: string;
   values: unknown[];
   type?: string;
 }[];
-export type PrysmexFilterObject = Record<string, unknown>;
+export type SearchApiFilterObject = Record<string, unknown>;
 
-export interface PrysmexRequest {
+export interface SearchApiRequest {
   search?: string;
   sort?: string;
   sort_direction?: 'asc' | 'desc';
   page?: number;
   per?: number;
-  filters: PrysmexFilterList | PrysmexFilterObject;
+  filters: SearchApiFilterList | SearchApiFilterObject;
   [extension: string]: unknown;
 }
 
-export interface PrysmexValueHooks {
+export interface SearchApiValueHooks {
   /**
-   * Converts a value just before it is sent, e.g. Prysmex's
-   * DocumentAdapterForQueryParams for `document.*` fields. In the list
+   * Converts a value just before it is sent, e.g. an app's own value
+   * adapter for some fields. In the list
    * format it gets each entry of `values`; in the groups format, the whole
    * value of the field.
    */
@@ -61,12 +62,12 @@ export interface PrysmexValueHooks {
   parseValue?: (field: string, value: unknown) => unknown;
 }
 
-export interface PrysmexCodecOptions extends PrysmexValueHooks {
-  /** Filter format to send. Default `list` (what Prysmex sends today). */
+export interface SearchApiCodecOptions extends SearchApiValueHooks {
+  /** Filter format to send. Default `list` (the legacy format). */
   filters?: 'list' | 'groups';
   /**
    * Extensions starting with this prefix are added to the request without
-   * it: `prysmex.include` -> `include`. Default `prysmex.`.
+   * it: `api.include` -> `include`. Default `api.`.
    */
   extensionsPrefix?: string;
   /** Keep disabled nodes as `__disable` (groups format), e.g. to save filters. */
@@ -162,10 +163,10 @@ function decodeValue(
 
 function checkCondition(node: ConditionNode, ctx: CodecContext): Support {
   if (!SUPPORTED_OPERATORS.includes(node.operator)) {
-    return refuse(node, `Prysmex filters have no "${node.operator}" operator`);
+    return refuse(node, `The search API has no "${node.operator}" operator`);
   }
   const type = ctx.schema?.[node.field]?.type;
-  // Prysmex reads a bare string as "contains" on text fields and "equals"
+  // The API reads a bare string as "contains" on text fields and "equals"
   // elsewhere, so each operator only fits one kind of field.
   if (node.operator === 'eq' && type === 'text') {
     return refuse(node, `"is" on a text field is sent as "contains"`);
@@ -181,10 +182,10 @@ function checkCondition(node: ConditionNode, ctx: CodecContext): Support {
 
 // --- list format --------------------------------------------------------------
 
-/** The search-ui style list Prysmex sends today: an AND of per-field entries. */
-export function prysmexListFilters(
-  hooks: PrysmexValueHooks = {},
-): FilterCodec<PrysmexFilterList> {
+/** The legacy search-ui style list: an AND of per-field entries. */
+export function searchApiListFilters(
+  hooks: SearchApiValueHooks = {},
+): FilterCodec<SearchApiFilterList> {
   const supports = (node: FilterNode, ctx: CodecContext): Support => {
     if (node.disabled) return ok; // dropped
     if (node.negate) return refuse(node, 'The list format cannot negate');
@@ -214,7 +215,7 @@ export function prysmexListFilters(
       const support = supports(filter, ctx);
       if (!support.ok)
         throw new UnsupportedNodeError(support.nodeId, support.reason);
-      const list: PrysmexFilterList = [];
+      const list: SearchApiFilterList = [];
       const visit = (node: FilterNode) => {
         if (node.kind === 'group') node.children.forEach(visit);
         else if (node.kind === 'condition') {
@@ -261,15 +262,18 @@ export function prysmexListFilters(
 
 const FLAG_KEYS = ['__negate', '__disable'];
 
-/** The documented Prysmex filter spec (objects, groups, __negate, __disable). */
-export function prysmexGroupFilters(
-  hooks: PrysmexValueHooks & { keepDisabled?: boolean } = {},
-): FilterCodec<PrysmexFilterObject> {
+/** The groups filter spec (objects, groups, __negate, __disable). */
+export function searchApiGroupFilters(
+  hooks: SearchApiValueHooks & { keepDisabled?: boolean } = {},
+): FilterCodec<SearchApiFilterObject> {
   const supports = (node: FilterNode, ctx: CodecContext): Support => {
     if (node.disabled && !hooks.keepDisabled) return ok;
     switch (node.kind) {
       case 'nested':
-        return refuse(node, 'Nested queries are not mapped to Prysmex yet');
+        return refuse(
+          node,
+          'Nested queries are not mapped to the search API yet',
+        );
       case 'group':
         for (const child of node.children) {
           const support = supports(child, ctx);
@@ -286,7 +290,7 @@ export function prysmexGroupFilters(
     ...(node.disabled ? { __disable: true } : {}),
   });
 
-  const encode = (node: FilterNode): PrysmexFilterObject => {
+  const encode = (node: FilterNode): SearchApiFilterObject => {
     if (node.kind === 'condition') {
       const wire = encodeCondition(node, 'null');
       return {
@@ -299,7 +303,7 @@ export function prysmexGroupFilters(
     if (node.kind === 'nested') {
       throw new UnsupportedNodeError(
         node.id,
-        'Nested queries are not mapped to Prysmex yet',
+        'Nested queries are not mapped to the search API yet',
       );
     }
     // A group of one, without flags of its own, is just its child.
@@ -317,7 +321,7 @@ export function prysmexGroupFilters(
       return Object.assign(
         { ...flags(node) },
         ...node.children.map(encode),
-      ) as PrysmexFilterObject;
+      ) as SearchApiFilterObject;
     }
     return {
       ...flags(node),
@@ -342,7 +346,7 @@ export function prysmexGroupFilters(
       const id = () => `p${++next}`;
       const decode = (raw: unknown): FilterNode => {
         if (!isPlainObject(raw))
-          throw new TypeError('A Prysmex filter must be an object');
+          throw new TypeError('A groups filter must be an object');
         const flagged = {
           ...(raw['__negate'] === true ? { negate: true } : {}),
           ...(raw['__disable'] === true ? { disabled: true } : {}),
@@ -388,18 +392,20 @@ export function prysmexGroupFilters(
 
 // --- whole request ------------------------------------------------------------------
 
-export interface PrysmexCodec extends StateCodec<PrysmexRequest> {
+export interface SearchApiCodec extends StateCodec<SearchApiRequest> {
   readonly filterCodec:
-    FilterCodec<PrysmexFilterList> | FilterCodec<PrysmexFilterObject>;
+    FilterCodec<SearchApiFilterList> | FilterCodec<SearchApiFilterObject>;
   /** Can the active filter format express this node? For UIs. */
   supports(node: FilterNode, ctx: CodecContext): Support;
-  parse(request: PrysmexRequest, ctx: CodecContext): SearchState;
+  parse(request: SearchApiRequest, ctx: CodecContext): SearchState;
 }
 
-export function prysmexCodec(options: PrysmexCodecOptions = {}): PrysmexCodec {
-  const prefix = options.extensionsPrefix ?? 'prysmex.';
-  const list = prysmexListFilters(options);
-  const groups = prysmexGroupFilters(options);
+export function searchApiCodec(
+  options: SearchApiCodecOptions = {},
+): SearchApiCodec {
+  const prefix = options.extensionsPrefix ?? 'api.';
+  const list = searchApiListFilters(options);
+  const groups = searchApiGroupFilters(options);
   const filterCodec = options.filters === 'groups' ? groups : list;
 
   return {
@@ -408,9 +414,9 @@ export function prysmexCodec(options: PrysmexCodecOptions = {}): PrysmexCodec {
 
     serialize(state, ctx) {
       if (state.page.kind !== 'offset') {
-        throw new TypeError('Prysmex searches use page/per, not cursors');
+        throw new TypeError('The search API uses page/per, not cursors');
       }
-      const request: PrysmexRequest = {
+      const request: SearchApiRequest = {
         filters: filterCodec.serialize(state.filter, ctx),
         page: state.page.page,
         per: state.page.perPage,
@@ -465,12 +471,12 @@ export function prysmexCodec(options: PrysmexCodecOptions = {}): PrysmexCodec {
 }
 
 /** Values on the wire, for typing hooks. */
-export type PrysmexWireValue =
+export type SearchApiWireValue =
   Scalar | Scalar[] | RangeValue | { exists: boolean } | null;
 
 // --- backend ------------------------------------------------------------------
 
-export interface PrysmexResponse {
+export interface SearchApiResponse {
   /** Records, already pushed/converted by the client (e.g. the store). */
   results?: unknown[];
   /** JSON:API data, used when `results` is absent. */
@@ -478,23 +484,23 @@ export interface PrysmexResponse {
   meta?: { total_count?: number; total_pages?: number; [key: string]: unknown };
 }
 
-export interface PrysmexBackendOptions extends PrysmexCodecOptions {
+export interface SearchApiBackendOptions extends SearchApiCodecOptions {
   /**
    * Sends the request: your fetch service, the endpoint, auth, pushing the
    * payload into the store... Honour `signal` to cancel superseded searches.
    */
   request: (
-    request: PrysmexRequest,
+    request: SearchApiRequest,
     signal: AbortSignal,
-  ) => Promise<PrysmexResponse>;
+  ) => Promise<SearchApiResponse>;
 }
 
-/** A driver backend for Prysmex search endpoints. */
-export function prysmexBackend<Doc = unknown>(
-  options: PrysmexBackendOptions,
-): Backend<PrysmexRequest, PrysmexResponse, Doc> {
+/** A driver backend for search API endpoints. */
+export function searchApiBackend<Doc = unknown>(
+  options: SearchApiBackendOptions,
+): Backend<SearchApiRequest, SearchApiResponse, Doc> {
   return {
-    codec: prysmexCodec(options),
+    codec: searchApiCodec(options),
     search: (request, signal) => options.request(request, signal),
     normalize: (response) => {
       const { total_count, total_pages, ...rest } = response.meta ?? {};
@@ -504,7 +510,7 @@ export function prysmexBackend<Doc = unknown>(
         results,
         total: total_count ?? results.length,
         ...(total_pages !== undefined ? { pageCount: total_pages } : {}),
-        aggregations: rest, // e.g. project_counts
+        aggregations: rest, // e.g. status_counts
       };
     },
   };

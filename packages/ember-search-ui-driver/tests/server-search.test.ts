@@ -2,16 +2,16 @@ import { afterEach, describe, expect, test } from 'vitest';
 import {
   SearchDriver,
   memoryBackend,
-  prysmexCodec,
-  prysmexServerSearch,
+  searchApiCodec,
+  serverSearch,
   searchUiCompat,
   sequentialIds,
-  type PrysmexRequest,
-  type PrysmexServerSearchOptions,
+  type SearchApiRequest,
+  type ServerSearchOptions,
 } from '../src/index.ts';
 
-// Each test repeats what a Prysmex call site does with its search driver
-// today (read from the Prysmex frontend), against the new driver.
+// Each test repeats what typical code on a search-ui server driver does
+// (calendars, exports, bulk actions, a `query` param), against the new driver.
 
 interface Doc {
   id: number;
@@ -42,7 +42,7 @@ function memory() {
 
 const ids = (results: unknown[]) => (results as Doc[]).map((d) => d.id);
 const listOf = (driver: SearchDriver<Doc>) =>
-  driver.export(prysmexCodec()).filters;
+  driver.export(searchApiCodec()).filters;
 
 describe('actions on the driver itself (search-ui copies them there)', () => {
   test('driver.setFilter / setCurrent / clearFilters, as calendar and multi-search call them', async () => {
@@ -125,9 +125,9 @@ describe('values no operator covers are sent as they are', () => {
   });
 
   test('parsing an unknown shape keeps it instead of throwing', () => {
-    const codec = prysmexCodec();
+    const codec = searchApiCodec();
     const ctx = memory().driver.codecContext;
-    const request: PrysmexRequest = {
+    const request: SearchApiRequest = {
       filters: [{ field: 'location', values: [{ near: 'x' }] }],
     };
     const state = codec.parse(request, ctx);
@@ -139,22 +139,22 @@ describe('values no operator covers are sent as they are', () => {
   });
 });
 
-describe('prysmexServerSearch: the ServerSearchDriver API', () => {
+describe('serverSearch: the server driver API', () => {
   interface Sent {
     endpoint: string;
-    request: PrysmexRequest;
+    request: SearchApiRequest;
     extra: Record<string, unknown>;
   }
 
-  function server(options: Partial<PrysmexServerSearchOptions> = {}) {
+  function server(options: Partial<ServerSearchOptions> = {}) {
     const sent: Sent[] = [];
-    const compat = prysmexServerSearch<{ id: number }>({
+    const compat = serverSearch<{ id: number }>({
       endpoint: 'inspections',
       include: 'location',
-      // like Prysmex's document adapter: dates as YYYY-MM-DD. It gets one
+      // like an app's value adapter: dates as YYYY-MM-DD. It gets one
       // entry of `values` at a time: a string or a whole range object.
       serializeValue: (field, value) => {
-        if (field !== 'document.due') return value;
+        if (field !== 'custom.due') return value;
         const day = (v: unknown) =>
           typeof v === 'string' ? v.slice(0, 10) : v;
         return typeof value === 'object' && value !== null
@@ -206,9 +206,9 @@ describe('prysmexServerSearch: the ServerSearchDriver API', () => {
     expect(calls).toBe(1);
   });
 
-  test('helpers/get-serialized-state: prepareRequest(serializeState(getState()))', async () => {
+  test('a serialized-state helper: prepareRequest(serializeState(getState()))', async () => {
     const { compat } = server();
-    compat.setFilter('document.due', { gte: '2026-02-01T08:00:00.000Z' });
+    compat.setFilter('custom.due', { gte: '2026-02-01T08:00:00.000Z' });
     compat.setSearchTerm('tank', { shouldClearFilters: false });
     compat.setSort('created_at', 'asc');
     await compat.driver.settled();
@@ -223,12 +223,12 @@ describe('prysmexServerSearch: the ServerSearchDriver API', () => {
       sort_direction: 'asc',
       page: 1,
       per: 10,
-      // the value hook ran, per value like serializeFilters
-      filters: [{ field: 'document.due', values: [{ gte: '2026-02-01' }] }],
+      // the value hook ran, once per value
+      filters: [{ field: 'custom.due', values: [{ gte: '2026-02-01' }] }],
     });
   });
 
-  test('export-to-excel: serializeState, change the page, makeSearch to another endpoint', async () => {
+  test('an Excel export: serializeState, change the page, makeSearch to another endpoint', async () => {
     const { compat, sent } = server();
     compat.setFilter('state', 'done', 'any');
     await compat.driver.settled();
@@ -253,7 +253,7 @@ describe('prysmexServerSearch: the ServerSearchDriver API', () => {
     });
   });
 
-  test('users controller: driver.getSerializedState() and driver.makeSearch(state, extra)', async () => {
+  test('bulk actions: driver.getSerializedState() and driver.makeSearch(state, extra)', async () => {
     const { compat, sent } = server();
     compat.setFilter('role', 'admin', 'any');
     await compat.driver.settled();
@@ -273,17 +273,17 @@ describe('prysmexServerSearch: the ServerSearchDriver API', () => {
   test('the query param round trip: serialized out, parseValue back in', async () => {
     const seen: unknown[] = [];
     const parseValue = (field: string, value: unknown) =>
-      field === 'document.due' && typeof value === 'string'
+      field === 'custom.due' && typeof value === 'string'
         ? `${value}T00:00:00.000Z`
         : value;
     const { compat } = server({ parseValue });
     compat.onSerializedStateChange((state) => seen.push(state));
-    compat.setFilter('document.due', '2026-02-01T08:00:00.000Z');
+    compat.setFilter('custom.due', '2026-02-01T08:00:00.000Z');
     await compat.driver.settled();
     const query = seen.at(-1) as { filters: unknown };
     expect(query).toMatchObject({
       current: 1,
-      filters: [{ field: 'document.due', values: ['2026-02-01'] }],
+      filters: [{ field: 'custom.due', values: ['2026-02-01'] }],
     });
 
     const { compat: restored } = server({
@@ -292,7 +292,7 @@ describe('prysmexServerSearch: the ServerSearchDriver API', () => {
     });
     expect(restored.getState().filters).toEqual([
       {
-        field: 'document.due',
+        field: 'custom.due',
         values: ['2026-02-01T00:00:00.000Z'],
         type: 'any',
       },

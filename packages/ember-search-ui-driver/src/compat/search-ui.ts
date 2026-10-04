@@ -15,7 +15,7 @@ import type {
 
 // The @elastic/search-ui driver API (getState, getActions, subscribe...)
 // over a SearchDriver, so code written for search-ui keeps working:
-// ember-search-ui's WithSearch and containers, and apps like Prysmex.
+// ember-search-ui's WithSearch and containers, and app code.
 //
 // search-ui filters are one entry per field: { field, values, type }. They
 // map onto field-owned nodes with the id `filter:<field>` under the root.
@@ -101,7 +101,7 @@ const isPrimitive = (value: unknown) =>
 
 /**
  * A search-ui filter (field + values + type) as a condition node. With a
- * schema, a string on a text field means "contains" (as Prysmex reads it).
+ * schema, a string on a text field means "contains" (as the search API reads it).
  */
 export function filterToNode(
   filter: {

@@ -156,7 +156,7 @@ describe('urlCodec', () => {
   });
 
   test('extensions are opt-in', () => {
-    const state = stateWith({ extensions: { 'prysmex.refresh': true } });
+    const state = stateWith({ extensions: { 'api.refresh': true } });
     expect(codec.serialize(state)).toBe('');
     const withExtensions = urlCodec({ extensions: true });
     expect(withExtensions.parse(withExtensions.serialize(state))).toEqual(

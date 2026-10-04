@@ -1,15 +1,15 @@
 import {
   SearchDriver,
   memoryHistory,
-  prysmexBackend,
-  prysmexCodec,
+  searchApiBackend,
+  searchApiCodec,
   searchUiCompat,
   type SearchUiCompat,
   type UrlSyncOptions,
 } from 'ember-search-ui-driver';
 import config from 'query-builder/config/environment';
 import { FIELDS, type Inspection } from './data.ts';
-import { NetworkLog, fakePrysmex } from './fake-prysmex.ts';
+import { NetworkLog, fakeServer } from './fake-server.ts';
 
 export type Format = 'list' | 'groups';
 
@@ -19,7 +19,7 @@ export const FORMAT_LABELS: Record<Format, string> = {
 };
 
 /**
- * One search page: a driver whose backend sends Prysmex requests in one
+ * One search page: a driver whose backend sends search API requests in one
  * filter format to the fake server, plus the search-ui compat API on top.
  * The internal state is the same SearchState either way.
  */
@@ -33,9 +33,9 @@ export class DemoSession {
   constructor(format: Format, prefix: string) {
     this.format = format;
     this.driver = new SearchDriver<Inspection>({
-      backend: prysmexBackend<Inspection>({
+      backend: searchApiBackend<Inspection>({
         filters: format,
-        request: fakePrysmex(this.log, {
+        request: fakeServer(this.log, {
           latencyMs: config.environment === 'test' ? 0 : 150,
         }),
       }),
@@ -61,7 +61,7 @@ export class DemoSession {
     | { format: Format; ok: true; request: unknown }
     | { format: Format; ok: false; reason: string; nodeId: string } {
     const format: Format = this.format === 'list' ? 'groups' : 'list';
-    const codec = prysmexCodec({ filters: format });
+    const codec = searchApiCodec({ filters: format });
     const support = codec.supports(
       this.driver.state.filter,
       this.driver.codecContext,
