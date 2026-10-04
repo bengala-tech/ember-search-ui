@@ -117,6 +117,8 @@ export interface SearchResult<Doc = unknown> {
   readonly error?: unknown;
   /** Nodes skipped because their value was invalid. */
   readonly warnings: readonly ValidationWarning[];
+  /** The backend's raw response of the last successful search. */
+  readonly response?: unknown;
 }
 
 /** What a backend's `normalize` returns; the driver adds the status. */

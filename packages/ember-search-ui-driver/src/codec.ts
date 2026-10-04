@@ -2,6 +2,8 @@ import type { IdFactory } from './ids.ts';
 import type { OperatorRegistry } from './operators.ts';
 import type {
   FieldPath,
+  FilterNode,
+  GroupNode,
   NormalizedResponse,
   OperatorId,
   Scalar,
@@ -39,6 +41,18 @@ export class UnsupportedNodeError extends Error {
   ) {
     super(`Node "${nodeId}": ${reason}`);
   }
+}
+
+export type Support =
+  { ok: true } | { ok: false; nodeId: string; reason: string };
+
+/** Converts a filter tree to and from one external filter format. */
+export interface FilterCodec<External> {
+  /** Throws UnsupportedNodeError for trees the format cannot express. */
+  serialize(filter: GroupNode, ctx: CodecContext): External;
+  parse?(external: External, ctx: CodecContext): GroupNode;
+  /** Can this subtree be expressed? For UIs to refuse it up front. */
+  supports(node: FilterNode, ctx: CodecContext): Support;
 }
 
 /** Converts the whole search state to and from one external format. */

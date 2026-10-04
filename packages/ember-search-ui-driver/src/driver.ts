@@ -383,6 +383,7 @@ export class SearchDriver<Doc = unknown> {
               normalized.pageCount ?? pageCount(state, normalized.total),
             aggregations: normalized.aggregations ?? {},
             warnings,
+            response,
           },
         });
       } catch (error) {

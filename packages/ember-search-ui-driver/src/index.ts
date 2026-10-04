@@ -48,6 +48,8 @@ export { createState, firstPage, DEFAULT_PER_PAGE } from './state.ts';
 export {
   UnsupportedNodeError,
   type Backend,
+  type FilterCodec,
+  type Support,
   type CodecContext,
   type FieldDefinition,
   type FieldSchema,
@@ -67,3 +69,30 @@ export {
   type UrlAdapter,
   type UrlSyncOptions,
 } from './url-sync.ts';
+export {
+  prysmexCodec,
+  prysmexBackend,
+  prysmexListFilters,
+  prysmexGroupFilters,
+  type PrysmexCodec,
+  type PrysmexCodecOptions,
+  type PrysmexBackendOptions,
+  type PrysmexResponse,
+  type PrysmexRequest,
+  type PrysmexFilterList,
+  type PrysmexFilterObject,
+  type PrysmexValueHooks,
+  type PrysmexWireValue,
+} from './codecs/prysmex.ts';
+export {
+  SearchUiCompat,
+  searchUiCompat,
+  fromSearchUiState,
+  filterToNode,
+  nodeToFilter,
+  filterNodeId,
+  type SearchUiFilter,
+  type SearchUiFilterType,
+  type SearchUiRequestState,
+  type SearchUiState,
+} from './compat/search-ui.ts';

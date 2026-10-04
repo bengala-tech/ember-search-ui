@@ -50,9 +50,13 @@ export function memoryBackend<Doc>(
 
       for (const { field, direction } of [...state.sort].reverse()) {
         const sign = direction === 'desc' ? -1 : 1;
-        hits = [...hits].sort(
-          (a, b) => sign * compareAny(first(a, field), first(b, field)),
-        );
+        hits = [...hits].sort((a, b) => {
+          const x = first(a, field);
+          const y = first(b, field);
+          // missing values go last in both directions, as in Elasticsearch
+          if (x === undefined || y === undefined) return compareAny(x, y);
+          return sign * compareAny(x, y);
+        });
       }
 
       const total = hits.length;

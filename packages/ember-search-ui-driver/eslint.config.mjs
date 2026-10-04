@@ -10,6 +10,13 @@ export default defineConfig([
   {
     files: ['**/*.ts'],
     extends: [...ts.configs.recommendedTypeChecked],
+    rules: {
+      // stubs that mirror another API keep its parameter names, prefixed with _
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
