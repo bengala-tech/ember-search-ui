@@ -73,7 +73,7 @@ export interface PrysmexCodecOptions extends PrysmexValueHooks {
   keepDisabled?: boolean;
 }
 
-const SUPPORTED_OPERATORS = ['eq', 'in', 'range', 'exists', 'contains'];
+const SUPPORTED_OPERATORS = ['eq', 'in', 'range', 'exists', 'contains', 'raw'];
 const RANGE_KEYS = ['gt', 'gte', 'lt', 'lte'];
 
 const ok: Support = { ok: true };
@@ -108,7 +108,7 @@ function encodeCondition(
       if (value === true) return { exists: true };
       return missingAs === 'null' ? null : { exists: false };
     default:
-      // eq, contains
+      // eq, contains, raw
       return encodeDate(value);
   }
 }
@@ -134,6 +134,11 @@ function decodeValue(
 
   if (wire === null) return { operator: 'exists', value: false };
   if (Array.isArray(wire)) {
+    const primitive = wire.every((v) =>
+      ['string', 'number', 'boolean'].includes(typeof v),
+    );
+    // e.g. a list of objects: kept as is
+    if (!primitive) return { operator: 'raw', value: wire as Scalar[] };
     return { operator: 'in', value: wire.map(scalar) };
   }
   if (isPlainObject(wire)) {
@@ -146,9 +151,8 @@ function decodeValue(
       for (const key of keys) range[key] = scalar(wire[key]);
       return { operator: 'range', value: range };
     }
-    throw new TypeError(
-      `Unrecognised filter value for "${field}": ${JSON.stringify(wire)}`,
-    );
+    // a shape the driver has no operator for: kept as is
+    return { operator: 'raw', value: wire };
   }
   return {
     operator: type === 'text' && typeof wire === 'string' ? 'contains' : 'eq',

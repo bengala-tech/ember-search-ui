@@ -85,6 +85,22 @@ export const isRangeValue = (value: unknown): value is RangeValue =>
 const isNonEmptyScalarList = (value: unknown): value is readonly unknown[] =>
   Array.isArray(value) && value.length > 0 && value.every(isPrimitive);
 
+/**
+ * A date-like object: a Date or anything with toISOString (moment, dayjs).
+ * Returns its ISO string, or undefined when it is not one (or is invalid).
+ */
+export function dateLikeToISO(value: unknown): string | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const toISOString = (value as { toISOString?: unknown }).toISOString;
+  if (typeof toISOString !== 'function') return undefined;
+  try {
+    const iso: unknown = toISOString.call(value);
+    return typeof iso === 'string' ? iso : undefined;
+  } catch {
+    return undefined; // an invalid Date throws
+  }
+}
+
 // --- dates ----------------------------------------------------------------
 
 const UNITS = 'yMwdhms';
@@ -285,7 +301,23 @@ export const prefixOperator: OperatorDefinition = {
     values.some((v) => typeof v === 'string' && v.startsWith(value as string)),
 };
 
+/** Deep equality of plain data (JSON-like values). */
+const sameData = (a: unknown, b: unknown): boolean =>
+  JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * A value passed through verbatim to the backend, for wire shapes the
+ * driver has no operator for (search-ui apps can set any filter value).
+ * In memory it matches documents holding an equal value.
+ */
+export const rawOperator: OperatorDefinition = {
+  id: 'raw',
+  validate: (value) => value !== undefined,
+  evaluate: (values, value) => values.some((v) => sameData(v, value)),
+};
+
 export const BUILT_IN_OPERATORS: readonly OperatorDefinition[] = [
+  rawOperator,
   eqOperator,
   inOperator,
   allOperator,

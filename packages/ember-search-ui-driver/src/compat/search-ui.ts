@@ -1,4 +1,4 @@
-import { isDateValue } from '../operators.ts';
+import { dateLikeToISO, isDateValue } from '../operators.ts';
 import { createState, DEFAULT_PER_PAGE } from '../state.ts';
 import { ROOT_ID } from '../tree.ts';
 import type { FieldSchema } from '../codec.ts';
@@ -79,6 +79,26 @@ const RANGE_KEYS = ['gt', 'gte', 'lt', 'lte'];
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** Date-like objects (Date, moment...) as date values, also in range bounds. */
+function normalizeValue(value: unknown): unknown {
+  const iso = dateLikeToISO(value);
+  if (iso !== undefined) return { date: iso };
+  if (isPlainObject(value) && !isDateValue(value)) {
+    const out: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value)) {
+      const entryIso = dateLikeToISO(entry);
+      out[key] = entryIso === undefined ? entry : { date: entryIso };
+    }
+    return out;
+  }
+  return value;
+}
+
+const isPrimitive = (value: unknown) =>
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  typeof value === 'boolean';
+
 /**
  * A search-ui filter (field + values + type) as a condition node. With a
  * schema, a string on a text field means "contains" (as Prysmex reads it).
@@ -91,9 +111,9 @@ export function filterToNode(
   },
   schema?: FieldSchema,
 ): ConditionNode | undefined {
-  const values = filter.values.flatMap((v) =>
-    Array.isArray(v) ? (v as unknown[]) : [v],
-  );
+  const values = filter.values
+    .flatMap((v) => (Array.isArray(v) ? (v as unknown[]) : [v]))
+    .map(normalizeValue);
   if (values.length === 0) return undefined;
   const base = {
     kind: 'condition' as const,
@@ -135,6 +155,13 @@ export function filterToNode(
           meta: { name: value['name'] },
         };
       }
+      // a shape no operator covers: sent as is
+      return {
+        ...base,
+        ...negate,
+        operator: 'raw',
+        value: value as unknown as Scalar,
+      };
     }
     const textual =
       schema?.[filter.field]?.type === 'text' && typeof value === 'string';
@@ -145,11 +172,15 @@ export function filterToNode(
       value: value as FilterValue,
     };
   }
+  const list = values.map(toWire);
+  if (!list.every(isPrimitive)) {
+    return { ...base, ...negate, operator: 'raw', value: list as Scalar[] };
+  }
   return {
     ...base,
     ...negate,
     operator: filter.type === 'all' ? 'all' : 'in',
-    value: values as Scalar[],
+    value: list as Scalar[],
   };
 }
 
@@ -178,6 +209,11 @@ export function nodeToFilter(node: ConditionNode): SearchUiFilter {
     }
     case 'exists':
       values = [{ exists: node.value }];
+      break;
+    case 'raw':
+      values = Array.isArray(node.value)
+        ? [...(node.value as unknown[])]
+        : [node.value];
       break;
     default:
       values = [toWire(node.value)];
@@ -403,6 +439,23 @@ export class SearchUiCompat<Doc = unknown> {
     trackAutocompleteSuggestionClickThrough: () => {},
     a11yNotify: (_name?: string, _args?: unknown) => {},
   };
+
+  // search-ui also puts every action on the driver itself: driver.setFilter(...)
+  readonly setCurrent = this.actions.setCurrent;
+  readonly setResultsPerPage = this.actions.setResultsPerPage;
+  readonly setSearchTerm = this.actions.setSearchTerm;
+  readonly setSort = this.actions.setSort;
+  readonly setFilter = this.actions.setFilter;
+  readonly addFilter = this.actions.addFilter;
+  readonly removeFilter = this.actions.removeFilter;
+  readonly clearFilters = this.actions.clearFilters;
+  readonly reset = this.actions.reset;
+  readonly trackClickThrough = this.actions.trackClickThrough;
+  readonly trackAutocompleteClickThrough =
+    this.actions.trackAutocompleteClickThrough;
+  readonly trackAutocompleteSuggestionClickThrough =
+    this.actions.trackAutocompleteSuggestionClickThrough;
+  readonly a11yNotify = this.actions.a11yNotify;
 
   getActions = () => this.actions;
 

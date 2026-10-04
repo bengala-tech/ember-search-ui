@@ -80,6 +80,10 @@ export const contains = (field: FieldPath, text: string) =>
 export const prefix = (field: FieldPath, text: string) =>
   where(field, 'prefix', text);
 
+/** A value sent to the backend as is, for shapes no operator covers. */
+export const raw = (field: FieldPath, value: unknown) =>
+  where(field, 'raw', value as FilterValue);
+
 /**
  * "Items of the list at `path` match `filter`". Fields inside are relative
  * to `path`: nested('requirements', and(eq('status', 'ok'), ...)).

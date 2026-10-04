@@ -1,78 +1,57 @@
 # Using the driver in Prysmex
 
-Prysmex's search lists all create their driver in one place:
+Prysmex's server search lists all create their driver in one place:
 `ServerSearchDriverResource` → `SearchDriverServerHelper` → a search-ui
-`ServerSearchDriver` with a `ServerConnector`. Swapping the driver there is
-enough; components keep the search-ui API through `searchUiCompat`.
+`ServerSearchDriver` with a `ServerConnector`. `prysmexServerSearch` builds
+the new driver behind the same API (search-ui's plus `apiConnector`,
+`getSerializedState` and `makeSearch`), so replacing the driver there is the
+only change for those lists. Offline lists (`LocalSearchDriverResource`) are
+not covered yet; they keep the old local driver.
 
 ## What maps to what
 
 | Prysmex today                                                                          | New driver                                                                      |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `ServerSearchDriver` + `ServerConnector`                                               | `new SearchDriver({ backend: prysmexBackend(...) })`                            |
+| `new ServerSearchDriver({ apiConnector: new ServerConnector(...) })`                   | `prysmexServerSearch({ endpoint, send, ... })`                                  |
 | `adaptRequest` (search, sort, sort_direction, page, per, filters, include)             | `prysmexCodec` (same request shape)                                             |
 | `serializeFilters` / `deserializeFilters` (document adapters, query-param serializers) | `serializeValue` / `parseValue` hooks, called per value like today              |
-| `client.request` + `afterSearchCall` (store `pushPayload`)                             | `prysmexBackend({ request })`                                                   |
+| `client.request(endpoint, query, opts)`                                                | `send(endpoint, request, extra)`; searches pass `{ signal }` in `extra`         |
+| `afterSearchCall` (store `pushPayload`, page cap)                                      | `afterSearch(response)`, searches only                                          |
+| `beforeSearchCall` → `onSearchStateChange(serializedState)` → `query` param            | `driver.onSerializedStateChange(...)`, on request changes only                  |
+| `setupInitialSearchState(query)`                                                       | `initialState: query` (`parseValue` reads the values back)                      |
 | `meta.total_count` / `meta.total_pages`                                                | `result.total` / `result.pageCount`; other `meta` keys in `result.aggregations` |
-| `include`                                                                              | the `prysmex.include` extension                                                 |
-| `driver.getState()`, `actions.*`, `subscribeToStateChanges`, `tearDown`                | `searchUiCompat(driver)` (same API)                                             |
-| `onSearchStateChange(state)` → controller `query` param                                | `compat.onRequestStateChange(...)`, same shape, request changes only            |
-| `setupInitialSearchState(query)`                                                       | `fromSearchUiState(query, defaults)`                                            |
-| `getSerializedState()`                                                                 | `driver.export(codec)`                                                          |
-| `makeSearch(state)` (exports)                                                          | `request(driver.export(codec))` with your client                                |
+| `driver.getState()`, `actions.*`, `driver.setFilter(...)`, `subscribeToStateChanges`   | the same, on the returned object                                                |
+| `apiConnector.serializeState` / `prepareRequest` / `makeSearch` / `endpoint`           | the same                                                                        |
+| `driver.getSerializedState()` / `driver.makeSearch(state, extra)`                      | the same                                                                        |
+| `setFilter(field, { gte: Date, lte: Date })` (calendar), moment values                 | accepted: sent as ISO strings, like `JSON.stringify` sent them                  |
+| filter values of any other shape                                                       | kept and sent as they are (the `raw` operator)                                  |
 
 ## Sketch of `SearchDriverServerHelper` on the new driver
 
 ```ts
-import {
-  SearchDriver,
-  createState,
-  fromSearchUiState,
-  prysmexBackend,
-  prysmexCodec,
-  searchUiCompat,
-} from 'ember-search-ui-driver';
+import { prysmexServerSearch } from 'ember-search-ui-driver';
 
-const valueHooks = {
-  // the existing per-value logic of serializeFilters / deserializeFilters
-  serializeValue: (field: string, value: unknown) => serializeOne(field, value),
-  parseValue: (field: string, value: unknown) => deserializeOne(field, value),
-};
-
-const driver = new SearchDriver({
-  backend: prysmexBackend({
+createSearchDriver(query: RequestState = {}) {
+  const driver = prysmexServerSearch({
+    endpoint: this.endpoint,
+    include: this.include,
     filters: 'list', // what the backend receives today
-    ...valueHooks,
-    request: async (request, signal) => {
-      const response = await this.fetchRequest.request(this.endpoint, {
-        method: this.requestMethod,
-        body: request,
-        signal,
-      });
-      if (this.useEmberData)
-        response.results = this.store.pushPayload(response);
+    // the existing per-value logic of serializeFilters / deserializeFilters
+    serializeValue: (field, value) => serializeOne(field, value),
+    parseValue: (field, value) => deserializeOne(field, value),
+    schema, // field types: a string on a text field means "contains"
+    initialState: this.setupInitialSearchState(query), // minus deserializeFilters
+    send: (endpoint, request, extra) => this.onSearch(endpoint, request, extra),
+    afterSearch: (response) => {
+      if (this.useEmberData) response.results = this.store.pushPayload(response);
+      // ...cap total_pages for limited clients, as today
       return response;
     },
-  }),
-  initialState: fromSearchUiState(
-    this.initialSearchState ?? {},
-    createState({
-      page: { kind: 'offset', page: 1, perPage: 10 },
-      extensions: { 'prysmex.include': this.include },
-    }),
-    schema, // field types: a string on a text field means "contains"
-  ),
-  schema,
-  debounceMs: 0,
-});
-
-// what the components get, unchanged API
-this.driver = searchUiCompat(driver);
-
-// keep the controller's `query` param in sync, as onSearchStateChange did:
-// called with { current, resultsPerPage, searchTerm, sortField, sortDirection, filters }
-// on request changes only (not when results arrive)
-this.driver.onRequestStateChange((state) => this.onSearchStateChange?.(state));
+  });
+  // keeps the controller's `query` param in sync, as beforeSearchCall did
+  driver.onSerializedStateChange((state) => this.onSearchStateChange?.(state));
+  return driver;
+}
 ```
 
 Notes:
@@ -90,5 +69,12 @@ Notes:
   `contains` and the codec refuses an `equals` it could not express.
 - Old URLs keep working: `fromSearchUiState` reads the existing `query` param
   shape, and the codec's `parse` reads both filter formats.
-- Offline lists (`LocalSearchDriverResource`) can use `memoryBackend(records)`
-  with the same compat wrapper.
+- Types: Prysmex code is typed against `ServerSearchDriver`. The returned
+  object has the same members, but TypeScript sees a different class, so the
+  helper's `driver` type and a few casts change.
+- `onSerializedStateChange` fires when the request changes. The old hook
+  fired before every search, including repeats of the same request.
+- Offline lists (`LocalSearchDriverResource`, with per-property filter
+  functions) are not covered yet. `memoryBackend(records)` with
+  `searchUiCompat` is the starting point, but the property filters need a
+  port.

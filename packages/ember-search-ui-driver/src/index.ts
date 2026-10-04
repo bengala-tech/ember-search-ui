@@ -26,6 +26,7 @@ export {
   resolveDate,
   isDateValue,
   isRangeValue,
+  dateLikeToISO,
   type OperatorDefinition,
   type EvaluationContext,
 } from './operators.ts';
@@ -96,3 +97,12 @@ export {
   type SearchUiRequestState,
   type SearchUiState,
 } from './compat/search-ui.ts';
+export {
+  PrysmexServerCompat,
+  prysmexServerSearch,
+  type PrysmexApiConnector,
+  type PrysmexSend,
+  type PrysmexSerializedState,
+  type PrysmexServerCompatOptions,
+  type PrysmexServerSearchOptions,
+} from './compat/prysmex-server.ts';
