@@ -43,42 +43,46 @@ interface Signature {
 }
 
 const ResultsTable: TOC<Signature> = <template>
-  <table class="results {{if @loading 'is-loading'}}" ...attributes>
-    <thead>
-      <tr>
-        {{#each COLUMNS as |column|}}
-          <th scope="col" aria-sort={{ariaSort @sort column.field}}>
-            <button
-              type="button"
-              data-test-sort={{column.field}}
-              {{on "click" (fn @onSort column.field)}}
-            >
-              {{column.label}}
-              <span class="sort-mark">{{sortMark @sort column.field}}</span>
-            </button>
-          </th>
-        {{/each}}
-      </tr>
-    </thead>
-    <tbody>
-      {{#each @results as |row|}}
-        <tr data-test-row={{row.id}}>
-          <td>{{row.id}}</td>
-          <td>{{row.title}}</td>
-          <td><span class="badge state-{{row.state}}">{{row.state}}</span></td>
-          <td>{{row.priority}}</td>
-          <td>{{row.project}}</td>
-          <td>{{userName row.created_by_id}}</td>
-          <td>{{join row.tags}}</td>
-          <td class="num">{{money row.cost}}</td>
-          <td>{{day row.created_at}}</td>
-          <td>{{day row.due_at}}</td>
+  <div class="table-scroll">
+    <table class="results {{if @loading 'is-loading'}}" ...attributes>
+      <thead>
+        <tr>
+          {{#each COLUMNS as |column|}}
+            <th scope="col" aria-sort={{ariaSort @sort column.field}}>
+              <button
+                type="button"
+                data-test-sort={{column.field}}
+                {{on "click" (fn @onSort column.field)}}
+              >
+                {{column.label}}
+                <span class="sort-mark">{{sortMark @sort column.field}}</span>
+              </button>
+            </th>
+          {{/each}}
         </tr>
-      {{else}}
-        <tr><td colspan="10" class="empty">No inspections match.</td></tr>
-      {{/each}}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {{#each @results as |row|}}
+          <tr data-test-row={{row.id}}>
+            <td>{{row.id}}</td>
+            <td>{{row.title}}</td>
+            <td><span
+                class="badge state-{{row.state}}"
+              >{{row.state}}</span></td>
+            <td>{{row.priority}}</td>
+            <td>{{row.project}}</td>
+            <td>{{userName row.created_by_id}}</td>
+            <td>{{join row.tags}}</td>
+            <td class="num">{{money row.cost}}</td>
+            <td>{{day row.created_at}}</td>
+            <td>{{day row.due_at}}</td>
+          </tr>
+        {{else}}
+          <tr><td colspan="10" class="empty">No inspections match.</td></tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
 </template>;
 
 export default ResultsTable;

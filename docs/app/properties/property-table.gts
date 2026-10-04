@@ -42,43 +42,45 @@ export default class PropertyTable extends Component<Signature> {
   };
 
   <template>
-    <table class="results property-table" data-test-property-table>
-      <thead>
-        <tr>
-          {{#each this.columns as |column|}}
-            <th scope="col">
-              {{#if (isSortable column)}}
-                <button
-                  type="button"
-                  data-test-sort={{column.key}}
-                  {{on "click" (fn this.sortBy column)}}
-                >{{column.label}} {{this.arrow column}}</button>
-              {{else}}
-                {{column.label}}
-              {{/if}}
-            </th>
-          {{/each}}
-        </tr>
-      </thead>
-      <tbody>
-        {{#each @search.results as |row|}}
-          <tr data-test-row>
+    <div class="table-scroll">
+      <table class="results property-table" data-test-property-table>
+        <thead>
+          <tr>
             {{#each this.columns as |column|}}
-              <td class={{if column.views.table.numeric "num"}}>
-                {{#let (urlOf column row) as |link|}}
-                  {{#if link}}
-                    <a href={{link.url}}>{{display column row}}</a>
-                  {{else}}
-                    {{display column row}}
-                  {{/if}}
-                {{/let}}
-              </td>
+              <th scope="col">
+                {{#if (isSortable column)}}
+                  <button
+                    type="button"
+                    data-test-sort={{column.key}}
+                    {{on "click" (fn this.sortBy column)}}
+                  >{{column.label}} {{this.arrow column}}</button>
+                {{else}}
+                  {{column.label}}
+                {{/if}}
+              </th>
             {{/each}}
           </tr>
-        {{else}}
-          <tr><td class="empty" colspan="99">No inspections match.</td></tr>
-        {{/each}}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {{#each @search.results as |row|}}
+            <tr data-test-row>
+              {{#each this.columns as |column|}}
+                <td class={{if column.views.table.numeric "num"}}>
+                  {{#let (urlOf column row) as |link|}}
+                    {{#if link}}
+                      <a href={{link.url}}>{{display column row}}</a>
+                    {{else}}
+                      {{display column row}}
+                    {{/if}}
+                  {{/let}}
+                </td>
+              {{/each}}
+            </tr>
+          {{else}}
+            <tr><td class="empty" colspan="99">No inspections match.</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
   </template>
 }
