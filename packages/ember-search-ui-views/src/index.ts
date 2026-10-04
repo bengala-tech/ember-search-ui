@@ -17,7 +17,15 @@ export { default as SingleSelectFacet } from './components/single-select-facet.g
 export { default as Sorting } from './components/sorting.gts';
 export { default as Trigger } from './components/trigger.gts';
 export { default as QueryBuilder } from './components/query-builder.gts';
-export type { QueryBuilderSignature } from './components/query-builder.gts';
+export {
+  ConditionEditor,
+  type QueryBuilderSignature,
+  type ConditionEditorSignature,
+} from './components/query-builder.gts';
+export { default as FilterBar } from './components/filter-bar.gts';
+export type { FilterBarSignature } from './components/filter-bar.gts';
+export { default as FilterChips } from './components/filter-chips.gts';
+export type { FilterChipsSignature } from './components/filter-chips.gts';
 export { describeFilter } from './query-builder/describe.ts';
 export {
   CONDITIONS,

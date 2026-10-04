@@ -1,0 +1,62 @@
+/* Filter bar and chips. Themed through the query builder's custom properties. */
+.sui-fb-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sui-fb-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--sui-qb-border, #d3dae6);
+  border-radius: var(--sui-qb-radius, 6px);
+}
+
+.sui-fb-name {
+  font-weight: 600;
+  min-width: 8em;
+}
+
+.sui-fb-remove {
+  margin-left: auto;
+}
+
+.sui-fb-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sui-fb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sui-fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
+  border: 1px solid var(--sui-qb-border, #d3dae6);
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.sui-fb-chip-remove {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--sui-qb-muted, #69707d);
+}

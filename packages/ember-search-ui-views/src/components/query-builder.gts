@@ -1,17 +1,29 @@
 import type { TOC } from '@ember/component/template-only';
 import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
-import type {
-  ConditionNode,
-  FieldDefinition,
-  FieldSchema,
-  FilterNode,
-  GroupNode,
-  NestedNode,
-  RangeValue,
-  Scalar,
+import {
+  legacyOf,
+  schemaFrom,
+  toProperty,
+  type AnyProperty,
+  type ConditionNode,
+  type ConditionPatch,
+  type FieldDefinition,
+  type FieldSchema,
+  type FilterNode,
+  type GroupNode,
+  type NestedNode,
+  type Property,
+  type RangeValue,
+  type Scalar,
+  type SearchDriver,
 } from 'ember-search-ui-driver';
-import type { TrackedSearch } from 'ember-search-ui';
+import {
+  LegacyFilterEditor,
+  type FilterEditorSignature,
+  type TrackedSearch,
+} from 'ember-search-ui';
+import type { ComponentLike } from '@glint/template';
 import {
   DATE_PRESETS,
   conditionOf,
@@ -58,6 +70,49 @@ const subFields = (fields: FieldSchema, path: string): FieldSchema =>
   fields[path]?.fields ?? {};
 const hasNested = (fields: FieldSchema) => nestedFields(fields).length > 0;
 const isOr = (group: GroupNode) => group.op === 'or';
+
+type Properties = readonly AnyProperty<never, unknown>[];
+
+/** The fields to offer: `@fields`, else the schema of `@properties`. */
+const fieldsFrom = (
+  fields: FieldSchema | undefined,
+  properties: Properties | undefined,
+): FieldSchema => fields ?? (properties ? schemaFrom(properties) : {});
+
+interface RowEditor {
+  property: Property;
+  /** A Property's own editor; undefined for a legacy filter component. */
+  component?: ComponentLike<FilterEditorSignature>;
+}
+
+/** The editor a property brings for this field, if any. */
+function editorFor(
+  properties: Properties | undefined,
+  path: string,
+): RowEditor | undefined {
+  for (const input of properties ?? []) {
+    const property = toProperty(input) as Property;
+    if (property.field.path !== path) continue;
+    const { filter } = property;
+    if (filter && filter.editor)
+      return {
+        property,
+        component: filter.editor as ComponentLike<FilterEditorSignature>,
+      };
+    if (legacyOf(input)?.componentsForFiltering?.filter?.component)
+      return { property };
+  }
+  return undefined;
+}
+
+const updateRow =
+  (driver: SearchDriver<unknown>, node: ConditionNode) =>
+  (patch: ConditionPatch) =>
+    driver.update(node.id, patch);
+
+// clearing an editor leaves the row (it has its own delete button) empty
+const clearRow = (driver: SearchDriver<unknown>, node: ConditionNode) => () =>
+  driver.update(node.id, { value: undefined, meta: undefined });
 const bound = (value: unknown, side: Bound) =>
   (value as RangeValue | undefined)?.[side];
 const listOf = (value: unknown) =>
@@ -296,8 +351,39 @@ const NodeControls: TOC<NodeControlsSignature> = <template>
 
 // --- rows -----------------------------------------------------------------------
 
+export interface ConditionEditorSignature {
+  Args: {
+    search: Search;
+    node: ConditionNode;
+    field: FieldDefinition | undefined;
+  };
+}
+
+/** The built-in editor: a condition picker and a value input for the field. */
+export const ConditionEditor: TOC<ConditionEditorSignature> = <template>
+  <select
+    class="sui-qb-select sui-qb-operator"
+    aria-label="Condition"
+    {{on "change" (fn setCondition @search.driver @node @field)}}
+  >
+    {{#each (conditionsFor @field) as |kind|}}
+      <option value={{kind.id}} selected={{eq kind.id (conditionId @node)}}>
+        {{kind.label}}
+      </option>
+    {{/each}}
+  </select>
+  <span class="sui-qb-value">
+    <ValueInput @search={{@search}} @node={{@node}} @field={{@field}} />
+  </span>
+</template>;
+
 interface ConditionRowSignature {
-  Args: { search: Search; node: ConditionNode; fields: FieldSchema };
+  Args: {
+    search: Search;
+    node: ConditionNode;
+    fields: FieldSchema;
+    properties?: Properties;
+  };
 }
 
 const ConditionRow: TOC<ConditionRowSignature> = <template>
@@ -319,20 +405,35 @@ const ConditionRow: TOC<ConditionRowSignature> = <template>
           </option>
         {{/each}}
       </select>
-      <select
-        class="sui-qb-select sui-qb-operator"
-        aria-label="Condition"
-        {{on "change" (fn setCondition @search.driver @node field)}}
-      >
-        {{#each (conditionsFor field) as |kind|}}
-          <option value={{kind.id}} selected={{eq kind.id (conditionId @node)}}>
-            {{kind.label}}
-          </option>
-        {{/each}}
-      </select>
-      <span class="sui-qb-value">
-        <ValueInput @search={{@search}} @node={{@node}} @field={{field}} />
-      </span>
+      {{#let (editorFor @properties @node.field) as |rowEditor|}}
+        {{#if rowEditor.component}}
+          {{#let rowEditor.component as |Editor|}}
+            <span class="sui-qb-value sui-qb-editor">
+              <Editor
+                @property={{rowEditor.property}}
+                @node={{@node}}
+                @update={{updateRow @search.driver @node}}
+                @remove={{clearRow @search.driver @node}}
+              />
+            </span>
+          {{/let}}
+        {{else if rowEditor}}
+          <span class="sui-qb-value sui-qb-editor">
+            <LegacyFilterEditor
+              @property={{rowEditor.property}}
+              @node={{@node}}
+              @update={{updateRow @search.driver @node}}
+              @remove={{clearRow @search.driver @node}}
+            />
+          </span>
+        {{else}}
+          <ConditionEditor
+            @search={{@search}}
+            @node={{@node}}
+            @field={{field}}
+          />
+        {{/if}}
+      {{/let}}
       <NodeControls @search={{@search}} @node={{@node}} @removable={{true}} />
     </div>
   {{/let}}
@@ -401,6 +502,8 @@ interface GroupSignature {
     search: Search;
     group: GroupNode;
     fields: FieldSchema;
+    /** Properties with editors (top-level scope only). */
+    properties?: Properties;
     depth: number;
     /** Root groups (and a nested scope's group) cannot be removed or negated. */
     isRoot?: boolean;
@@ -456,12 +559,14 @@ const Group: TOC<GroupSignature> = <template>
                 @search={{@search}}
                 @node={{condition}}
                 @fields={{@fields}}
+                @properties={{@properties}}
               />
             {{else if group}}
               <Group
                 @search={{@search}}
                 @group={{group}}
                 @fields={{@fields}}
+                @properties={{@properties}}
                 @depth={{inc @depth}}
               />
             {{else if nestedNode}}
@@ -512,7 +617,12 @@ export interface QueryBuilderSignature {
     /** A TrackedSearch, e.g. yielded by <Search>. */
     search: Search;
     /** Fields people can filter on (labels, types, options, nested lists). */
-    fields: FieldSchema;
+    fields?: FieldSchema;
+    /**
+     * Or properties, in either shape: their filterable fields are offered,
+     * and a property's editor (or legacy filter component) edits its rows.
+     */
+    properties?: Properties;
   };
 }
 
@@ -527,7 +637,8 @@ const QueryBuilder: TOC<QueryBuilderSignature> = <template>
     <Group
       @search={{@search}}
       @group={{@search.filter}}
-      @fields={{@fields}}
+      @fields={{fieldsFrom @fields @properties}}
+      @properties={{@properties}}
       @depth={{0}}
       @isRoot={{true}}
     />
