@@ -10,6 +10,9 @@ importers:
 
   packages/ember-search-ui:
     dependencies:
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.10.3
@@ -19,6 +22,9 @@ importers:
       deep-equal:
         specifier: ^2.2.3
         version: 2.2.3
+      ember-search-ui-driver:
+        specifier: workspace:^
+        version: link:../ember-search-ui-driver
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -44,9 +50,6 @@ importers:
       '@ember/test-helpers':
         specifier: ^5.7.0
         version: 5.7.0(@babel/core@7.29.7)
-      '@ember/test-waiters':
-        specifier: ^4.1.2
-        version: 4.1.2
       '@embroider/addon-dev':
         specifier: ^8.4.0
         version: 8.4.0(@glint/template@1.9.0)(rollup@4.64.0)

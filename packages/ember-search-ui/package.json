@@ -48,9 +48,11 @@
     "test": "vite build --mode=development --out-dir dist-tests && testem --file testem.cjs ci --port 0"
   },
   "dependencies": {
+    "@ember/test-waiters": "^4.1.2",
     "@embroider/addon-shim": "^1.10.3",
     "decorator-transforms": "^2.4.0",
-    "deep-equal": "^2.2.3"
+    "deep-equal": "^2.2.3",
+    "ember-search-ui-driver": "workspace:^"
   },
   "peerDependencies": {
     "@elastic/search-ui": "^1.5.0",
@@ -65,7 +67,6 @@
     "@ember/app-tsconfig": "^2.1.0",
     "@ember/library-tsconfig": "^3.0.0",
     "@ember/test-helpers": "^5.7.0",
-    "@ember/test-waiters": "^4.1.2",
     "@embroider/addon-dev": "^8.4.0",
     "@embroider/compat": "^4.1.25",
     "@embroider/core": "^4.6.7",
@@ -124,6 +125,7 @@
       "./components/containers/search-box.js": "./dist/_app_/components/containers/search-box.js",
       "./components/containers/sorting.js": "./dist/_app_/components/containers/sorting.js",
       "./components/search-provider.js": "./dist/_app_/components/search-provider.js",
+      "./components/search.js": "./dist/_app_/components/search.js",
       "./components/with-search.js": "./dist/_app_/components/with-search.js",
       "./helpers/arg-or-default.js": "./dist/_app_/helpers/arg-or-default.js",
       "./helpers/bool.js": "./dist/_app_/helpers/bool.js",

@@ -129,9 +129,9 @@ export class SearchDriver<Doc = unknown> {
     };
   }
 
-  findNode(id: NodeId): FilterNode | undefined {
+  findNode = (id: NodeId): FilterNode | undefined => {
     return findNode(this.state.filter, id);
-  }
+  };
 
   /**
    * The integration point for frameworks and plugins. `listener` is called
@@ -140,65 +140,65 @@ export class SearchDriver<Doc = unknown> {
    * field, a React external store, a signal). `immediate` also calls it once
    * now with the current snapshot. Returns the unsubscribe function.
    */
-  subscribe(
+  subscribe = (
     listener: Listener<Doc>,
     options: { immediate?: boolean } = {},
-  ): () => void {
+  ): (() => void) => {
     this.#listeners.add(listener);
     if (options.immediate) listener(this.#snapshot);
     return () => {
       this.#listeners.delete(listener);
     };
-  }
+  };
 
   // --- filter tree commands -------------------------------------------------
 
   /** Adds a node (builder input) under a group; returns the new node's id. */
-  add(parentId: NodeId, input: NodeInput, index?: number): NodeId {
+  add = (parentId: NodeId, input: NodeInput, index?: number): NodeId => {
     const taken = collectIds(this.state.filter);
     const node = materialize(input, this.idFactory, taken);
     this.#setFilter(insertNode(this.state.filter, parentId, node, index));
     return node.id;
-  }
+  };
 
-  update(id: NodeId, patch: NodePatch): void {
+  update = (id: NodeId, patch: NodePatch): void => {
     this.#setFilter(updateNode(this.state.filter, id, patch));
-  }
+  };
 
-  remove(id: NodeId): void {
+  remove = (id: NodeId): void => {
     this.#setFilter(removeNode(this.state.filter, id));
-  }
+  };
 
-  move(id: NodeId, parentId: NodeId, index?: number): void {
+  move = (id: NodeId, parentId: NodeId, index?: number): void => {
     this.#setFilter(moveNode(this.state.filter, id, parentId, index));
-  }
+  };
 
-  toggleNegate(id: NodeId): void {
+  toggleNegate = (id: NodeId): void => {
     const node = this.#require(id);
     this.update(id, { negate: node.negate ? undefined : true });
-  }
+  };
 
-  toggleDisabled(id: NodeId): void {
+  toggleDisabled = (id: NodeId): void => {
     const node = this.#require(id);
     this.update(id, { disabled: node.disabled ? undefined : true });
-  }
+  };
 
   /** Replaces the whole filter tree; the root keeps the id `root`. */
-  replaceFilter(input: GroupInput): void {
+  replaceFilter = (input: GroupInput): void => {
     const root = materialize(
       { ...input, id: ROOT_ID },
       this.idFactory,
     ) as GroupNode;
     this.#setFilter(root);
-  }
+  };
 
-  clearFilter(): void {
+  clearFilter = (): void => {
     this.#setFilter({ ...this.state.filter, children: [] });
-  }
+  };
 
   // --- the rest of the request ----------------------------------------------
 
-  setQuery(term: string, options: { debounceMs?: number } = {}): void {
+  setQuery = (term: string, options: { debounceMs?: number } = {}): void => {
     this.#commit(
       {
         ...this.state,
@@ -207,13 +207,13 @@ export class SearchDriver<Doc = unknown> {
       },
       options.debounceMs,
     );
-  }
+  };
 
-  setSort(sort: readonly SortItem[]): void {
+  setSort = (sort: readonly SortItem[]): void => {
     this.#commit({ ...this.state, sort, page: firstPage(this.state.page) });
-  }
+  };
 
-  setPage(page: number): void {
+  setPage = (page: number): void => {
     const current = this.state.page;
     if (current.kind !== 'offset') {
       throw new TypeError('setPage needs offset pagination; use setCursor');
@@ -222,43 +222,43 @@ export class SearchDriver<Doc = unknown> {
       ...this.state,
       page: { ...current, page: Math.max(1, page) },
     });
-  }
+  };
 
-  setCursor(cursor: string | null): void {
+  setCursor = (cursor: string | null): void => {
     const current = this.state.page;
     if (current.kind !== 'cursor') {
       throw new TypeError('setCursor needs cursor pagination; use setPage');
     }
     this.#commit({ ...this.state, page: { ...current, cursor } });
-  }
+  };
 
-  setPerPage(perPage: number): void {
+  setPerPage = (perPage: number): void => {
     const current = this.state.page;
     const page =
       current.kind === 'offset'
         ? { ...current, page: 1, perPage }
         : { ...current, cursor: null, size: perPage };
     this.#commit({ ...this.state, page });
-  }
+  };
 
-  setExtension(key: string, value: unknown): void {
+  setExtension = (key: string, value: unknown): void => {
     const extensions = { ...this.state.extensions };
     if (value === undefined) delete extensions[key];
     else extensions[key] = value;
     this.#commit({ ...this.state, extensions });
-  }
+  };
 
   /** Replaces the whole state (e.g. restored from a URL). */
-  setState(state: SearchState): void {
+  setState = (state: SearchState): void => {
     if (state.filter.id !== ROOT_ID) {
       throw new TreeError(`The root group's id must be "${ROOT_ID}"`);
     }
     collectIds(state.filter);
     this.#commit(state);
-  }
+  };
 
   /** Runs many commands; searches once at the end. */
-  transaction(fn: (driver: this) => void): void {
+  transaction = (fn: (driver: this) => void): void => {
     this.#transactionDepth++;
     try {
       fn(this);
@@ -270,42 +270,45 @@ export class SearchDriver<Doc = unknown> {
         this.#schedule(delay);
       }
     }
-  }
+  };
 
-  import<External>(codec: StateCodec<External>, external: External): void {
+  import = <External>(
+    codec: StateCodec<External>,
+    external: External,
+  ): void => {
     if (!codec.parse) throw new TypeError('This codec cannot parse');
     this.setState(codec.parse(external, this.codecContext));
-  }
+  };
 
-  export<External>(codec: StateCodec<External>): External {
+  export = <External>(codec: StateCodec<External>): External => {
     return codec.serialize(this.state, this.codecContext);
-  }
+  };
 
   // --- searching ---------------------------------------------------------------
 
   /** Searches now, skipping any pending debounce. */
-  refresh(): Promise<void> {
+  refresh = (): Promise<void> => {
     this.#clearTimer();
     return this.#run();
-  }
+  };
 
   /** Resolves once no search is scheduled or running. */
-  settled(): Promise<void> {
+  settled = (): Promise<void> => {
     if (this.#isSettled()) return Promise.resolve();
     return new Promise((resolve) => this.#settledWaiters.push(resolve));
-  }
+  };
 
   get isSettled(): boolean {
     return this.#isSettled();
   }
 
-  destroy(): void {
+  destroy = (): void => {
     this.#destroyed = true;
     this.#clearTimer();
     this.#controller?.abort();
     this.#listeners.clear();
     this.#flushSettled();
-  }
+  };
 
   // --- internals ---------------------------------------------------------------
 

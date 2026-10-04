@@ -96,3 +96,15 @@ describe('subscribe: the hook for any framework', () => {
     expect(calls).toEqual(['early']);
   });
 });
+
+test('commands work detached from the driver (for template helpers)', async () => {
+  const driver = create();
+  const { add, toggleNegate, remove, setQuery, settled } = driver;
+  const id = add('root', eq('x', 'b'));
+  toggleNegate(id);
+  expect(driver.findNode(id)?.negate).toBe(true);
+  setQuery('z');
+  remove(id);
+  await settled();
+  expect(driver.state.filter.children).toHaveLength(0);
+});

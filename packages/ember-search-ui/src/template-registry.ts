@@ -5,6 +5,7 @@
 //   declare module '@glint/environment-ember-loose/registry' {
 //     export default interface Registry extends EmberSearchUiRegistry {}
 //   }
+import type Search from './components/search.gts';
 import type SearchProvider from './components/search-provider.gts';
 import type WithSearch from './components/with-search.gts';
 import type ErrorBoundaryContainer from './components/containers/error-boundary.gts';
@@ -27,6 +28,7 @@ import type mapContextToProps from './helpers/map-context-to-props.ts';
 import type markSelectedFacetValuesFromFilters from './helpers/mark-selected-facet-values-from-filters.ts';
 
 export default interface Registry {
+  Search: typeof Search;
   SearchProvider: typeof SearchProvider;
   WithSearch: typeof WithSearch;
   'Containers::ErrorBoundary': typeof ErrorBoundaryContainer;
