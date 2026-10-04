@@ -17,6 +17,7 @@ const Results: TOC<{
     | 'titleField'
     | 'urlField'
     | 'shouldTrackClickThrough'
+    | 'clickThroughTags'
     | 'resultView'
   >;
 }> = <template>
@@ -27,6 +28,7 @@ const Results: TOC<{
       @titleField={{@titleField}}
       @urlField={{@urlField}}
       @shouldTrackClickThrough={{@shouldTrackClickThrough}}
+      @clickThroughTags={{@clickThroughTags}}
       @resultView={{argOrDefault @resultView Result}}
     />
   </ul>

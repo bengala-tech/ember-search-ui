@@ -36,6 +36,19 @@ export type AutocompleteSelection = Record<string, unknown> & {
   suggestion?: string;
 };
 
+/** Second argument to `@onSelectAutocomplete`, as in @elastic/react-search-ui. */
+export interface OnSelectAutocompleteHelpers {
+  setSearchTerm: SetSearchTerm;
+  autocompleteResults: boolean | Partial<AutocompleteResult> | undefined;
+  autocompleteSuggestions: boolean | AutocompleteSuggestion | undefined;
+}
+
+export type OnSelectAutocomplete = (
+  selection: AutocompleteSelection,
+  helpers: OnSelectAutocompleteHelpers,
+  defaultOnSelectAutocomplete: (selection: AutocompleteSelection) => void,
+) => void;
+
 export interface SearchBoxState {
   allAutocompletedItemsCount: number;
   autocompleteView: unknown;
@@ -70,6 +83,16 @@ export interface SearchBoxContainerSignature {
     autocompleteSuggestions?: boolean | AutocompleteSuggestion;
     autocompleteView?: unknown;
     debounceLength?: number;
+    /**
+     * Called when an autocomplete item is selected, instead of the default
+     * handler (open the result's url / complete the suggestion), which is
+     * passed as the third argument.
+     */
+    onSelectAutocomplete?: OnSelectAutocomplete;
+    /**
+     * @deprecated Use `@onSelectAutocomplete`. Replaces the default handler
+     * and only receives the selection.
+     */
     handleOnSelectAutocomplete?: (selection: AutocompleteSelection) => void;
     inputProps?: Partial<InputProps>;
     inputView?: unknown;
@@ -138,14 +161,29 @@ export default class SearchBoxContainer extends Component<SearchBoxContainerSign
   allItemsCount = (state: SearchBoxContext) =>
     this.suggestionsCount(state) + state.autocompletedResults.length;
 
-  onSelectAutocomplete = (state: SearchBoxContext) =>
-    this.args.handleOnSelectAutocomplete
-      ? this.args.handleOnSelectAutocomplete
-      : (selection: AutocompleteSelection) =>
-          this.defaultOnSelectAutocomplete(
-            state.trackAutocompleteClickThrough,
-            selection,
-          );
+  onSelectAutocomplete = (state: SearchBoxContext) => {
+    const defaultOnSelectAutocomplete = (selection: AutocompleteSelection) =>
+      this.defaultOnSelectAutocomplete(
+        state.trackAutocompleteClickThrough,
+        state.setSearchTerm,
+        selection,
+      );
+    const { onSelectAutocomplete, handleOnSelectAutocomplete } = this.args;
+
+    if (onSelectAutocomplete) {
+      return (selection: AutocompleteSelection) =>
+        onSelectAutocomplete(
+          selection,
+          {
+            setSearchTerm: state.setSearchTerm,
+            autocompleteResults: this.args.autocompleteResults,
+            autocompleteSuggestions: this.args.autocompleteSuggestions,
+          },
+          defaultOnSelectAutocomplete,
+        );
+    }
+    return handleOnSelectAutocomplete ?? defaultOnSelectAutocomplete;
+  };
 
   handleChange = (setSearchTerm: SetSearchTerm, e: string | Event) => {
     let value = '';
@@ -183,13 +221,14 @@ export default class SearchBoxContainer extends Component<SearchBoxContainerSign
 
   defaultOnSelectAutocomplete = (
     trackAutocompleteClickThrough: TrackAutocompleteClickThrough,
+    setSearchTerm: SetSearchTerm,
     selection: AutocompleteSelection,
   ) => {
     if (!selection) return;
 
-    const autocompleteResults = asAutocompleteResult(
-      this.args.autocompleteResults,
-    )!;
+    // `@autocompleteResults` may be `true` (no config) or omitted.
+    const autocompleteResults =
+      asAutocompleteResult(this.args.autocompleteResults) ?? {};
 
     this.handleNotifyAutocompleteSelected(
       trackAutocompleteClickThrough,
@@ -204,11 +243,7 @@ export default class SearchBoxContainer extends Component<SearchBoxContainerSign
         window.open(url, target);
       }
     } else {
-      // Pre-existing bug, kept as-is: completeSuggestion expects the curried
-      // setSearchTerm first, so this throws.
-      (this.completeSuggestion as unknown as (term: string) => void)(
-        selection.suggestion,
-      );
+      this.completeSuggestion(setSearchTerm, selection.suggestion);
     }
   };
 

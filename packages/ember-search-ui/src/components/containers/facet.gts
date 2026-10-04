@@ -50,7 +50,6 @@ export interface FacetContainerSignature {
     isFilterable?: boolean;
     /** How many options to show before "more" is clicked. Defaults to 5. */
     show?: number;
-    options?: SelectableFacetValue[];
     view?: ViewArg<FacetViewSignature>;
   };
   Blocks: { default: [FacetState] };
@@ -227,7 +226,7 @@ export default class FacetContainer extends Component<FacetContainerSignature> {
                 onSelect=(fn
                   this.addFilter state.addFilter @field model.filterType
                 )
-                options=(this.visibleOptions @options)
+                options=(this.visibleOptions model.filteredFacetValues)
                 showMore=(if model.filteredFacetValues.length true false)
                 values=model.selectedValues
                 showSearch=@isFilterable

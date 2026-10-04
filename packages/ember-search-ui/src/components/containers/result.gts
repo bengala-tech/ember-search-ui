@@ -40,9 +40,8 @@ export default class ResultContainer extends Component<ResultContainerSignature>
     return resolveComponent(this, this.args.view);
   }
 
-  // Mirrors the original `(if @clickThroughTags (array))`.
-  get clickThroughTags(): string[] | undefined {
-    return this.args.clickThroughTags ? [] : undefined;
+  get clickThroughTags(): string[] {
+    return this.args.clickThroughTags ?? [];
   }
 
   onClickLink = (

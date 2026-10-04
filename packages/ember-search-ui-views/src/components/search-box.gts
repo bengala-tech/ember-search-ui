@@ -16,9 +16,7 @@ type ContainerArgs = SearchBoxContainerSignature['Args'];
 
 export interface SearchBoxSignature {
   Element: Element;
-  Args: Omit<ContainerArgs, 'handleOnSelectAutocomplete'> & {
-    onSelectAutocomplete?: ContainerArgs['handleOnSelectAutocomplete'];
-  };
+  Args: ContainerArgs;
 }
 
 export default class SearchBox extends Component<SearchBoxSignature> {
@@ -36,8 +34,6 @@ export default class SearchBox extends Component<SearchBoxSignature> {
       : fnWith(state.onSelectAutocomplete, option as Record<string, unknown>);
 
   <template>
-    {{! @onSelectAutocomplete is not forwarded: the container reads
-        @handleOnSelectAutocomplete. Kept as-is from the classic version. }}
     <SearchBoxContainer
       @driver={{@driver}}
       @view={{@view}}
@@ -49,6 +45,8 @@ export default class SearchBox extends Component<SearchBoxSignature> {
       @debounceLength={{@debounceLength}}
       @inputProps={{@inputProps}}
       @inputView={{@inputView}}
+      @onSelectAutocomplete={{@onSelectAutocomplete}}
+      @handleOnSelectAutocomplete={{@handleOnSelectAutocomplete}}
       @onSubmit={{@onSubmit}}
       @searchAsYouType={{@searchAsYouType}}
       ...attributes

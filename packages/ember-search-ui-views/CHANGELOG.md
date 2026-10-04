@@ -13,5 +13,7 @@
 - SearchBox: no longer throws on submit / Enter / ArrowUp (removed `Ember` global).
 - SearchBox: the autocomplete menu no longer leaks a window keydown listener.
 - `Result` no longer crashes with a url but no `@onClickLink`.
+- `<SearchBox @onSelectAutocomplete>` is now used (it was never forwarded).
+- `<Results @clickThroughTags>` is now forwarded.
 
 See the repository README, "Upgrading from 1.x".

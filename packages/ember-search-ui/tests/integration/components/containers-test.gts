@@ -29,6 +29,7 @@ import ResultsContainer, {
 import ResultsPerPageContainer from '#src/components/containers/results-per-page.gts';
 import SearchBoxContainer, {
   type AutocompleteSelection,
+  type OnSelectAutocompleteHelpers,
 } from '#src/components/containers/search-box.gts';
 import SortingContainer from '#src/components/containers/sorting.gts';
 import type { SortingOption } from '#src/types.ts';
@@ -40,6 +41,7 @@ const join = (separator: string, values: unknown[] | undefined) =>
 const rawOf = (result: SearchResult, field: string | undefined) =>
   String((result[field!] as { raw?: string } | undefined)?.raw ?? '');
 const display = (value: unknown) => String(value);
+const optional = (action: (() => void) | undefined) => () => action?.();
 
 module('Integration | Component | containers', function (hooks) {
   setupRenderingTest(hooks);
@@ -420,6 +422,35 @@ module('Integration | Component | containers', function (hooks) {
       ]);
     });
 
+    test('in block form it yields the visible, filtered options', async function (assert) {
+      const d = (driver = createDriver());
+      await render(
+        <template>
+          <FacetContainer @driver={{d}} @field="states" @show={{2}} as |facet|>
+            <input data-test-search {{on "input" facet.onSearch}} />
+            {{#each facet.options as |option|}}
+              <span data-test-option>{{display option.value}}</span>
+            {{/each}}
+          </FacetContainer>
+        </template>,
+      );
+      await searchSettled(d);
+      assert.deepEqual(
+        [...document.querySelectorAll('[data-test-option]')].map(
+          (e) => e.textContent,
+        ),
+        ['California', 'Wyoming'],
+      );
+
+      await fillIn('[data-test-search]', 'ut');
+      assert.deepEqual(
+        [...document.querySelectorAll('[data-test-option]')].map(
+          (e) => e.textContent,
+        ),
+        ['Utah'],
+      );
+    });
+
     test('@isFilterable enables accent-insensitive searching of options', async function (assert) {
       const d = (driver = createDriver());
       await render(
@@ -609,9 +640,7 @@ module('Integration | Component | containers', function (hooks) {
       assert.dom('[data-test-suggestions]').hasText('2');
     });
 
-    // BUG (pre-existing): defaultOnSelectAutocomplete calls completeSuggestion(suggestion)
-    // without the curried setSearchTerm, so this throws. Unskip once fixed.
-    test.skip('selecting an autocomplete suggestion completes the search term', async function (assert) {
+    test('selecting an autocomplete suggestion completes the search term', async function (assert) {
       const d = (driver = createDriver());
       const selection: AutocompleteSelection = { suggestion: 'zion' };
       await render(
@@ -631,6 +660,78 @@ module('Integration | Component | containers', function (hooks) {
       await click('button');
       assert.strictEqual(d.getState().searchTerm, 'zion');
       await searchSettled(d, (s) => s.resultSearchTerm === 'zion');
+    });
+
+    test('@onSelectAutocomplete gets the selection, helpers and the default handler', async function (assert) {
+      const d = (driver = createDriver());
+      const seen: unknown[] = [];
+      const onSelectAutocomplete = (
+        selection: AutocompleteSelection,
+        helpers: OnSelectAutocompleteHelpers,
+        defaultOnSelectAutocomplete: (selection: AutocompleteSelection) => void,
+      ) => {
+        seen.push([
+          selection,
+          typeof helpers.setSearchTerm,
+          helpers.autocompleteResults,
+          helpers.autocompleteSuggestions,
+        ]);
+        defaultOnSelectAutocomplete(selection);
+      };
+      const selection: AutocompleteSelection = { suggestion: 'zion' };
+      await render(
+        <template>
+          <SearchBoxContainer
+            @driver={{d}}
+            @autocompleteSuggestions={{true}}
+            @onSelectAutocomplete={{onSelectAutocomplete}}
+            as |box|
+          >
+            <button
+              type="button"
+              {{on "click" (fn box.onSelectAutocomplete selection)}}
+            >pick</button>
+          </SearchBoxContainer>
+        </template>,
+      );
+      await click('button');
+      assert.deepEqual(seen, [
+        [{ suggestion: 'zion' }, 'function', undefined, true],
+      ]);
+      assert.strictEqual(
+        d.getState().searchTerm,
+        'zion',
+        'default handler ran',
+      );
+      await searchSettled(d, (s) => s.resultSearchTerm === 'zion');
+    });
+
+    test('@handleOnSelectAutocomplete (deprecated) replaces the default handler', async function (assert) {
+      const d = (driver = createDriver());
+      const handle = (selection: AutocompleteSelection) =>
+        assert.step(`handle:${selection.suggestion}`);
+      const selection: AutocompleteSelection = { suggestion: 'zion' };
+      await render(
+        <template>
+          <SearchBoxContainer
+            @driver={{d}}
+            @handleOnSelectAutocomplete={{handle}}
+            as |box|
+          >
+            <button
+              type="button"
+              {{on "click" (fn box.onSelectAutocomplete selection)}}
+            >pick</button>
+          </SearchBoxContainer>
+        </template>,
+      );
+      await click('button');
+      assert.verifySteps(['handle:zion']);
+      assert.strictEqual(
+        d.getState().searchTerm,
+        '',
+        'default handler did not run',
+      );
     });
 
     test('selecting an autocomplete result opens its url and tracks the click', async function (assert) {
@@ -800,7 +901,7 @@ module('Integration | Component | containers', function (hooks) {
     });
 
     test('@shouldTrackClickThrough tracks clicks on results', async function (assert) {
-      const clicks: { documentId: string }[] = [];
+      const clicks: { documentId: string; tags: string[] }[] = [];
       const d = (driver = createDriver({
         onResultClick: (args: (typeof clicks)[number]) => {
           clicks.push(args);
@@ -820,6 +921,66 @@ module('Integration | Component | containers', function (hooks) {
       await click('[data-test-result="2"] button');
       assert.strictEqual(clicks.length, 1);
       assert.strictEqual(clicks[0]?.documentId, '2');
+      assert.deepEqual(clicks[0]?.tags, [], 'no tags by default');
+    });
+
+    test('@clickThroughTags are sent with tracked clicks', async function (assert) {
+      const clicks: { documentId: string; tags: string[] }[] = [];
+      const d = (driver = createDriver({
+        onResultClick: (args: (typeof clicks)[number]) => {
+          clicks.push(args);
+        },
+      }));
+      const tags = ['promo', 'home'];
+      await render(
+        <template>
+          <ResultsContainer
+            @driver={{d}}
+            @resultView={{ResultView}}
+            @titleField="title"
+            @shouldTrackClickThrough={{true}}
+            @clickThroughTags={{tags}}
+          />
+        </template>,
+      );
+      await searchSettled(d);
+      await click('[data-test-result="3"] button');
+      assert.deepEqual(
+        clicks.map((c) => [c.documentId, c.tags]),
+        [['3', ['promo', 'home']]],
+      );
+    });
+
+    test('Result yields an onClickLink that tracks with @clickThroughTags', async function (assert) {
+      const clicks: { documentId: string; tags: string[] }[] = [];
+      const d = (driver = createDriver({
+        onResultClick: (args: (typeof clicks)[number]) => {
+          clicks.push(args);
+        },
+      }));
+      const result = { id: { raw: '9' }, title: { raw: 'Denali' } };
+      const tags = ['ad'];
+      await render(
+        <template>
+          <ResultContainer
+            @driver={{d}}
+            @result={{result}}
+            @shouldTrackClickThrough={{true}}
+            @clickThroughTags={{tags}}
+            as |r|
+          >
+            <button
+              type="button"
+              {{on "click" (optional r.onClickLink)}}
+            >go</button>
+          </ResultContainer>
+        </template>,
+      );
+      await click('button');
+      assert.deepEqual(
+        clicks.map((c) => [c.documentId, c.tags]),
+        [['9', ['ad']]],
+      );
     });
 
     test('Result yields its state when no @view is given', async function (assert) {

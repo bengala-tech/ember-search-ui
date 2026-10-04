@@ -73,6 +73,33 @@ module('Integration | Views | wired to a driver', function (hooks) {
     assert.deepEqual(clicks, ['1']);
   });
 
+  test('Results forwards @clickThroughTags', async function (assert) {
+    const clicks: [string, string[]][] = [];
+    const d = (driver = createDriver({
+      onResultClick: (a: { documentId: string; tags: string[] }) => {
+        clicks.push([a.documentId, a.tags]);
+      },
+    }));
+    const tags = ['promo'];
+    await render(
+      <template>
+        <Results
+          @driver={{d}}
+          @titleField="title"
+          @urlField="nps_link"
+          @shouldTrackClickThrough={{true}}
+          @clickThroughTags={{tags}}
+        />
+      </template>,
+    );
+    await searchSettled(d);
+    document
+      .querySelector('li.sui-result a')!
+      .addEventListener('click', (e) => e.preventDefault());
+    await click('li.sui-result a');
+    assert.deepEqual(clicks, [['1', ['promo']]]);
+  });
+
   test('Facet defaults to MultiCheckboxFacet and filters results', async function (assert) {
     const d = (driver = createDriver());
     await render(
@@ -305,6 +332,37 @@ module('Integration | Views | wired to a driver', function (hooks) {
         .dom('.sui-search-box__autocomplete-container')
         .doesNotExist('menu closes after selecting');
       await searchSettled(d, (s) => s.resultSearchTerm === 'yellowstone');
+    });
+
+    test('@onSelectAutocomplete handles clicks on autocomplete results', async function (assert) {
+      const d = (driver = createDriver());
+      const picked: unknown[] = [];
+      const onSelectAutocomplete = (selection: Record<string, unknown>) => {
+        picked.push((selection['title'] as { raw: string }).raw);
+      };
+      await render(
+        <template>
+          <SearchBox
+            @driver={{d}}
+            @autocompleteResults={{hash titleField="title" urlField="nps_link"}}
+            @onSelectAutocomplete={{onSelectAutocomplete}}
+          />
+        </template>,
+      );
+      await searchSettled(d);
+      await fillIn('input[type="search"]', 'y');
+      await waitUntil(() => d.getState().autocompletedResults.length === 2, {
+        timeout: 2000,
+      });
+      await settled();
+
+      await click(
+        '.sui-search-box__result-list [role="menuitem"]:nth-child(2)',
+      );
+      assert.deepEqual(picked, ['Yellowstone']);
+      assert
+        .dom('.sui-search-box__autocomplete-container')
+        .doesNotExist('menu closes after selecting');
     });
 
     test('arrow keys move through autocomplete items', async function (assert) {

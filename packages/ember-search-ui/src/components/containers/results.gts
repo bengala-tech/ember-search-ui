@@ -32,9 +32,8 @@ export default class ResultsContainer extends Component<ResultsContainerSignatur
     return resolveComponent(this, this.args.view);
   }
 
-  // Mirrors the original `(if @clickThroughTags (array))`.
-  get clickThroughTags(): string[] | undefined {
-    return this.args.clickThroughTags ? [] : undefined;
+  get clickThroughTags(): string[] {
+    return this.args.clickThroughTags ?? [];
   }
 
   get shouldTrackClickThrough(): true | undefined {
