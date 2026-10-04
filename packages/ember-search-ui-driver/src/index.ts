@@ -106,3 +106,10 @@ export {
   type PrysmexServerCompatOptions,
   type PrysmexServerSearchOptions,
 } from './compat/prysmex-server.ts';
+export {
+  PrysmexLocalCompat,
+  prysmexLocalSearch,
+  emberLikeCompare,
+  type PrysmexLocalOptions,
+  type PrysmexLocalProperty,
+} from './compat/prysmex-local.ts';

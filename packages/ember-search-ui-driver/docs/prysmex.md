@@ -5,8 +5,8 @@ Prysmex's server search lists all create their driver in one place:
 `ServerSearchDriver` with a `ServerConnector`. `prysmexServerSearch` builds
 the new driver behind the same API (search-ui's plus `apiConnector`,
 `getSerializedState` and `makeSearch`), so replacing the driver there is the
-only change for those lists. Offline lists (`LocalSearchDriverResource`) are
-not covered yet; they keep the old local driver.
+only change for those lists. Offline lists (`LocalSearchDriverResource`) get
+the same treatment from `prysmexLocalSearch`; see below.
 
 ## What maps to what
 
@@ -74,7 +74,53 @@ Notes:
   helper's `driver` type and a few casts change.
 - `onSerializedStateChange` fires when the request changes. The old hook
   fired before every search, including repeats of the same request.
-- Offline lists (`LocalSearchDriverResource`, with per-property filter
-  functions) are not covered yet. `memoryBackend(records)` with
-  `searchUiCompat` is the starting point, but the property filters need a
-  port.
+
+## Offline lists: `prysmexLocalSearch`
+
+`SearchDriverLocalHelper` builds a `LocalSearchDriver` with a
+`LocalConnector`. `prysmexLocalSearch` is the same thing on the new driver,
+with the connector's search ported as is:
+
+| `LocalConnector` today                                                         | `prysmexLocalSearch`                                    |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| `new LocalConnector({ data, properties, usePagination, filteringIgnoreCase })` | the same options                                        |
+| `driver.setData(data)`, `setProperties(properties)`, `runSearch()`             | the same; they search again on the current page         |
+| search term over `filteredBy` of properties with `useFilter`                   | the same (case-insensitive, booleans and Dates skipped) |
+| `property.localFilteringFunction(row, values, { valueKey })` per filter        | the same; filters without a property are ignored        |
+| `betterCompare` / Ember `compare` on one sort field                            | `emberLikeCompare` by default, or pass `compare`        |
+| Ember `get(row, path)`                                                         | plain access by default; pass `get` for proxies         |
+| `resultsPerPage` (20 when unset), `usePagination: false`                       | the same                                                |
+
+```ts
+import { get } from '@ember/object';
+import { prysmexLocalSearch } from 'ember-search-ui-driver';
+
+createSearchDriver(query: RequestState = {}) {
+  return prysmexLocalSearch({
+    data: this.data,
+    properties: this.properties,
+    usePagination: this.usePagination,
+    initialState: this.setupInitialSearchState(query),
+    get, // belongsTo proxies and computed properties
+  });
+}
+```
+
+The property builders check `searchDriver instanceof LocalSearchDriver` to
+pick local paths and filtering functions. Export the new class under the old
+name and those checks keep working without edits:
+
+```ts
+// @addons/search-ui/addon/connectors/local/index.ts
+export { PrysmexLocalCompat as LocalSearchDriver } from 'ember-search-ui-driver';
+```
+
+Differences from the old connector:
+
+- A filter of type `none` negates; the old connector ignored the type. The
+  Prysmex UI only sends `any`.
+- Date and moment filter values reach `localFilteringFunction` as ISO
+  strings, not as the objects that were set. `moment(value)` reads both.
+- Query-builder nodes next to the search-ui filters are applied too.
+- Kept on purpose: the search term matches a missing value as the text
+  "null" or "undefined", like `'' + value` did.
