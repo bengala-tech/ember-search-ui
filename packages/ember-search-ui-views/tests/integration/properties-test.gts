@@ -241,3 +241,32 @@ module(
     });
   },
 );
+
+module('Integration | QueryBuilder and view conditions', function (hooks) {
+  setupRenderingTest(hooks);
+
+  test('conditions owned by a view (view:*) are not shown', async function (assert) {
+    const driver = new SearchDriver<Doc>({
+      backend: memoryBackend(DOCS),
+      idFactory: sequentialIds(),
+    });
+    driver.add('root', {
+      kind: 'condition',
+      id: 'view:calendar',
+      field: 'score',
+      operator: 'range',
+      value: { gte: 50 },
+    });
+    await render(
+      <template>
+        <Search @driver={{driver}} as |search|>
+          <QueryBuilder @search={{search}} @properties={{PROPERTIES}} />
+          <p data-test-ids>{{idsOf search.results}}</p>
+        </Search>
+      </template>,
+    );
+    assert.dom(`${ROOT} > .sui-qb-children > li`).doesNotExist();
+    assert.dom('[data-test-ids]').hasText('2,3', 'still applied');
+    driver.destroy();
+  });
+});

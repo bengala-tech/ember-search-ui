@@ -83,7 +83,9 @@ export interface LegacyProperty {
   /** Picker options. Property: `filter.options`. */
   collection?: LegacyCollection;
   /** Per-view config; `iconType` is the icon. Property: `views` and `icon`. */
-  viewConfig?: { iconType?: string };
+  // a union: an app's own views interface (no index signature) fits the
+  // first member, a plain object literal with any view keys the second
+  viewConfig?: { iconType?: string } | Record<string, unknown>;
   /** Route name read from the record. Property: `link`. */
   propertyRoute?: string;
   /** Route query read from the record. Property: `link`. */
