@@ -10,6 +10,7 @@ import LegacyFilters from './legacy-filters.gts';
 import Pager from './pager.gts';
 import ResultsTable from './results-table.gts';
 import WirePanel from './wire-panel.gts';
+import FilterPresets from './filter-presets.gts';
 
 interface Signature {
   Args: { format: Format };
@@ -86,6 +87,7 @@ export default class DemoPage extends Component<Signature> {
           {{#if this.isLegacy}}
             <LegacyFilters @compat={{this.session.compat}} @search={{search}} />
           {{else}}
+            <FilterPresets @search={{search}} />
             <QueryBuilder @search={{search}} @fields={{FIELDS}} />
           {{/if}}
 

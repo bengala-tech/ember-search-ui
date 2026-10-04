@@ -930,3 +930,55 @@ body {
 .prose code {
   overflow-wrap: anywhere;
 }
+
+/* filter presets */
+.presets {
+  margin-bottom: 12px;
+}
+
+.presets-title {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.presets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.preset.is-active {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+
+.preset-badge {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.preset-badge.is-groups {
+  color: var(--groups);
+}
+
+.presets-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}

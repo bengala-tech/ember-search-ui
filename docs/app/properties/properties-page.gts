@@ -23,6 +23,7 @@ import PropertyTable from './property-table.gts';
 import PropertyList from './property-list.gts';
 import PropertyCalendar from './property-calendar.gts';
 import QueryInspector from '../components/query-inspector.gts';
+import FilterPresets from '../components/filter-presets.gts';
 
 type View = 'table' | 'list' | 'calendar';
 const VIEWS: { id: View; name: string }[] = [
@@ -102,6 +103,7 @@ export default class PropertiesPage extends Component {
               @properties={{PROPERTIES}}
               data-test-chips
             />
+            <FilterPresets @search={{search}} />
             <details class="advanced">
               <summary>Advanced: groups, OR, NOT</summary>
               <QueryBuilder @search={{search}} @properties={{PROPERTIES}} />
