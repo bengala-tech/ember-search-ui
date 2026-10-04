@@ -1,3 +1,9 @@
+---
+order: 7
+imports:
+  - import FilterBarDemo from 'docs/demos/filter-bar';
+---
+
 # Legacy properties
 
 Many apps already describe their fields with a mutable property class:
@@ -34,7 +40,9 @@ searchApiBackend({ request, ...legacyValueHooks(legacyProperties) });
 The State filter in this demo is a legacy class with a legacy picker and a
 legacy chip:
 
-<!-- demo:filter-bar -->
+<div class="demo" data-test-demo="filter-bar">
+  <FilterBarDemo />
+</div>
 
 ## Field by field
 

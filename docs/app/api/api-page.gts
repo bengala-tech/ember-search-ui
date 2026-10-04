@@ -1,7 +1,8 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { on } from '@ember/modifier';
-import { LinkTo } from '@ember/routing';
+import { concat } from '@ember/helper';
+import { DocfyLink } from '@docfy/ember';
 import { API, type ApiPackage, type ApiSection } from './reference.ts';
 
 const anchor = (name: string) => name.replace(/[^a-z0-9]+/gi, '-');
@@ -65,10 +66,9 @@ export default class ApiPage extends Component {
                   <dd>
                     {{entry.summary}}
                     {{#if entry.guide}}
-                      <LinkTo
-                        @route="guide"
-                        @model={{entry.guide}}
-                      >Guide</LinkTo>
+                      <DocfyLink
+                        @to={{concat "/guides/" entry.guide}}
+                      >Guide</DocfyLink>
                     {{/if}}
                   </dd>
                 </div>

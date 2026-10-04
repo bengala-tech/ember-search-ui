@@ -10,7 +10,7 @@ import { LinkTo } from '@ember/routing';
       backend.
     </p>
     <p class="cta">
-      <LinkTo @route="guide" @model="getting-started" class="button">Get started</LinkTo>
+      <LinkTo @route="guides.getting-started" class="button">Get started</LinkTo>
       <LinkTo @route="examples" class="button secondary">See the examples</LinkTo>
     </p>
     <div class="cards">

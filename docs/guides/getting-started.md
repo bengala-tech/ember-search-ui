@@ -1,3 +1,9 @@
+---
+order: 1
+imports:
+  - import QuickStart from 'docs/demos/quick-start';
+---
+
 # Getting started
 
 ember-search-ui has three packages. Use the ones you need:
@@ -55,7 +61,9 @@ yourself (`new SearchDriver({ backend })`) and pass `@driver` instead;
 Type below: each keystroke calls `driver.setQuery`, the driver searches, and
 the template follows.
 
-<!-- demo:quick-start -->
+<div class="demo" data-test-demo="quick-start">
+  <QuickStart />
+</div>
 
 ## What to read next
 
@@ -65,5 +73,5 @@ the template follows.
   view use them.
 - [Filtering UIs](/guides/filtering): the filter bar, chips and the query
   builder.
-- [Migrating from search-ui](/guides/migrating): keep your templates and swap
+- [Migrating from search-ui](/guides/migrating-from-search-ui): keep your templates and swap
   the driver.

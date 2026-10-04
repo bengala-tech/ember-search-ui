@@ -364,32 +364,32 @@ export const API: ApiPackage[] = [
           cls(
             'SearchUiCompat',
             "search-ui's driver API over a SearchDriver.",
-            'migrating',
+            'migrating-from-search-ui',
           ),
           fn(
             'searchUiCompat',
             'Wraps a driver in the search-ui API.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           cls(
             'ServerSearchCompat',
             'searchUiCompat plus the server driver API.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           fn(
             'serverSearch',
             'A server-backed driver with the search-ui API.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           cls(
             'LocalSearchCompat',
             'searchUiCompat plus setData / setProperties / runSearch.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           fn(
             'localSearch',
             'An in-memory driver with the legacy local semantics.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           fn('emberLikeCompare', "Ember's compare, without Ember."),
           fn(
@@ -468,12 +468,12 @@ export const API: ApiPackage[] = [
           cmp(
             'WithSearch',
             'Yields search-ui state picked by mapContextToProps.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           fn(
             'mapContextToProps',
             'Picks search-ui state and actions for WithSearch.',
-            'migrating',
+            'migrating-from-search-ui',
           ),
           cmp('ErrorBoundaryContainer', 'Search errors.'),
           cmp('FacetContainer', 'One facet: values, selection, more/less.'),

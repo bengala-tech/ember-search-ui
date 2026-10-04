@@ -1,3 +1,7 @@
+---
+order: 6
+---
+
 # Backends and codecs
 
 A backend turns the search state into results: a **codec** writes the

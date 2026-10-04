@@ -660,6 +660,7 @@ body {
 }
 
 .demo {
+  overflow-x: auto;
   margin: 16px 0;
   padding: 16px;
   border: 1px solid var(--line);
@@ -771,3 +772,47 @@ body {
 .api-kind-type {
   color: var(--accent);
 }
+
+/* code blocks (Docfy + Shiki) */
+/* stylelint-disable selector-class-pattern -- Docfy's class names */
+.docfy-code-block {
+  position: relative;
+  margin: 12px 0;
+}
+
+.docfy-code-block__copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.docfy-code-block:hover .docfy-code-block__copy,
+.docfy-code-block__copy:focus-visible {
+  opacity: 1;
+}
+
+.docfy-code-block__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.prose pre.shiki {
+  margin: 0;
+  background-color: var(--shiki-light-bg, var(--soft));
+}
+
+.shiki span {
+  color: var(--shiki-light);
+}
+/* stylelint-enable selector-class-pattern */

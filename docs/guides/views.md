@@ -1,3 +1,9 @@
+---
+order: 5
+imports:
+  - import KanbanDemo from 'docs/demos/kanban';
+---
+
 # Building views
 
 A view is a component over the search and the properties. Three rules keep
@@ -55,7 +61,9 @@ The lanes are the options of a grouping property and the card titles come
 from the property marked as the title. Filter it with the bar: the lanes
 follow.
 
-<!-- demo:kanban -->
+<div class="demo" data-test-demo="kanban">
+  <KanbanDemo />
+</div>
 
 ## Conditions a view owns
 

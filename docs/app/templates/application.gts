@@ -7,8 +7,7 @@ import { LinkTo } from '@ember/routing';
     <LinkTo @route="index" class="brand">ember-search-ui</LinkTo>
     <nav aria-label="Site">
       <LinkTo
-        @route="guide"
-        @model="getting-started"
+        @route="guides.getting-started"
         data-test-nav="guides"
       >Guides</LinkTo>
       <LinkTo @route="examples" data-test-nav="examples">Examples</LinkTo>

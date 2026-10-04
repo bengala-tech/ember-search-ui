@@ -1,3 +1,9 @@
+---
+order: 2
+imports:
+  - import DriverTree from 'docs/demos/driver-tree';
+---
+
 # The driver
 
 `SearchDriver` owns one search state, changes it only through commands, and
@@ -54,7 +60,9 @@ driver.add(
 
 Try it: add the group, then negate it or switch it off.
 
-<!-- demo:driver-tree -->
+<div class="demo" data-test-demo="driver-tree">
+  <DriverTree />
+</div>
 
 **What a node means when it has no effect.** A disabled node, a condition
 with an incomplete value, and a group with no active children are skipped

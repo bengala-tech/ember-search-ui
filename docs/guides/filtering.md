@@ -1,3 +1,10 @@
+---
+order: 4
+imports:
+  - import FilterBarDemo from 'docs/demos/filter-bar';
+  - import QueryBuilderDemo from 'docs/demos/query-builder';
+---
+
 # Filtering UIs
 
 Three ready components cover most filter UIs. They all edit the same filter
@@ -20,7 +27,9 @@ Each property is edited by its own editor, its legacy filter component, or a
 built-in editor chosen from the field type. Chips show each set filter with
 the property's chip component, or in words.
 
-<!-- demo:filter-bar -->
+<div class="demo" data-test-demo="filter-bar">
+  <FilterBarDemo />
+</div>
 
 A filter bar keeps its conditions directly under the root with the id
 `filter:<key>`. That is the same node `setFilter(field, value)` edits in the
@@ -38,7 +47,9 @@ on/off on every row and group, and conditions on items of nested lists.
 With `@properties`, it offers the filterable fields, and a property's editor
 edits its rows. Conditions owned by a view (`view:calendar`) are not shown.
 
-<!-- demo:query-builder -->
+<div class="demo" data-test-demo="query-builder">
+  <QueryBuilderDemo />
+</div>
 
 ## One property's filter
 

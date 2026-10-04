@@ -1,3 +1,9 @@
+---
+order: 3
+imports:
+  - import FilterBarDemo from 'docs/demos/filter-bar';
+---
+
 # Properties
 
 A Property describes one field of your records once: how to read it, filter
@@ -91,7 +97,9 @@ These example properties drive the filter bar, the chips and the table
 below. State is written in the [legacy shape](/guides/legacy-properties),
 with its own legacy picker; it runs unchanged next to the others.
 
-<!-- demo:filter-bar -->
+<div class="demo" data-test-demo="filter-bar">
+  <FilterBarDemo />
+</div>
 
 The helpers views use:
 

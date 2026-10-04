@@ -8,8 +8,23 @@ import {
   visit,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'docs/tests/helpers';
-import { GUIDES } from 'docs/guides/index';
 import { truth } from '../helpers/server';
+
+// the guides, in reading order, and how many live demos each one has
+const GUIDES = [
+  { slug: 'getting-started', title: 'Getting started', demos: 1 },
+  { slug: 'driver', title: 'The driver', demos: 1 },
+  { slug: 'properties', title: 'Properties', demos: 1 },
+  { slug: 'filtering', title: 'Filtering UIs', demos: 2 },
+  { slug: 'views', title: 'Building views', demos: 1 },
+  { slug: 'backends', title: 'Backends and codecs', demos: 0 },
+  { slug: 'legacy-properties', title: 'Legacy properties', demos: 1 },
+  {
+    slug: 'migrating-from-search-ui',
+    title: 'Migrating from a search-ui driver',
+    demos: 0,
+  },
+];
 
 const texts = (selector: string) =>
   findAll(selector).map((el) => el.textContent?.trim() ?? '');
@@ -30,33 +45,26 @@ module('Acceptance | docs site', function (hooks) {
     assert.strictEqual(currentURL(), '/guides/getting-started');
     assert.deepEqual(
       texts('.docs-nav a'),
-      GUIDES.map((g) => g.doc.title),
+      GUIDES.map((g) => g.title),
     );
     await click('[data-test-nav="examples"]');
     assert.strictEqual(currentURL(), '/examples');
     assert.dom('.intro a').exists({ count: 5 });
   });
 
-  test('every guide renders, with its demos where its markers are', async function (assert) {
+  test('every guide renders, with its live demos', async function (assert) {
     for (const guide of GUIDES) {
       await visit(`/guides/${guide.slug}`);
-      assert.dom('.docs-article h1').hasText(guide.doc.title, guide.slug);
-      const markers = [
-        ...guide.doc.html.matchAll(/<!--\s*demo:([\w-]+)\s*-->/g),
-      ].map((m) => m[1]);
-      assert.deepEqual(
-        texts('[data-test-demo]').length,
-        markers.length,
-        `${guide.slug}: one demo per marker`,
-      );
-      for (const name of markers)
-        assert.ok(guide.demos?.[name!], `${guide.slug}: demo ${name} exists`);
+      assert.dom('.docs-article h1').hasText(guide.title, guide.slug);
+      assert
+        .dom('[data-test-demo]')
+        .exists({ count: guide.demos }, `${guide.slug}: its demos render`);
     }
   });
 
   test('links inside guides navigate in the app', async function (assert) {
     await visit('/guides/getting-started');
-    await click('.prose a[href="/guides/driver"]');
+    await click('.docs-article a[href="/guides/driver"]');
     assert.strictEqual(currentURL(), '/guides/driver');
     assert.dom('.docs-nav a.active').hasText('The driver');
     assert.dom('.docs-toc a[href="#the-filter-tree"]').exists();
@@ -135,13 +143,6 @@ module('Acceptance | docs site', function (hooks) {
       ),
       ['Title', 'State', 'Priority'],
     );
-  });
-
-  test('an unknown guide shows the first one', async function (assert) {
-    await visit('/guides/nope');
-    assert
-      .dom('[data-test-guide]')
-      .hasAttribute('data-test-guide', 'getting-started');
   });
 });
 
