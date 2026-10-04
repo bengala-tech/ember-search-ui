@@ -1,1 +1,0 @@
-export { default, getFieldType } from 'ember-search-ui-views/helpers/get-field-type';

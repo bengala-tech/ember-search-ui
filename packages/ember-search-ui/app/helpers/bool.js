@@ -1,1 +1,0 @@
-export { default, bool } from 'ember-search-ui/helpers/bool';

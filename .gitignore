@@ -31,3 +31,9 @@ packages/docs/tmp/
 packages/.DS_Store
 
 .DS_Store
+
+# v2 addon build output
+/packages/**/declarations/
+/packages/**/dist-tests/
+.eslintcache
+.prettiercache

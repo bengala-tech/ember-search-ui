@@ -1,37 +1,103 @@
 # ember-search-ui
 Ember implementation for [@elastic/search-ui](https://github.com/elastic/search-ui)
 
+This repo holds two [v2 addons](https://rfcs.emberjs.com/id/0507-embroider-v2-package-format/), written in TypeScript with `<template>` tag components (`.gts`) and typed for [Glint](https://typed-ember.gitbook.io/glint/):
+
+| package | what it is |
+| --- | --- |
+| [`ember-search-ui`](packages/ember-search-ui) | `SearchProvider`, `WithSearch` and the headless `Containers::*` components that connect a search-ui `SearchDriver` to your UI |
+| [`ember-search-ui-views`](packages/ember-search-ui-views) | Default views (`SearchBox`, `Facet`, `Results`, `Paging`, `Sorting`, ...) and styles, matching search-ui's React views |
+
+## Compatibility
+
+* Ember.js v5.8 or above (tested against 5.8, 5.12, 6.4, latest, beta)
+* Embroider, or ember-auto-import v2
+* Node.js v20 or above
+
 ## Installation
 
-This addon has @elastic/search-ui as peer dependencies. Install your desired version.
+`@elastic/search-ui` is a peer dependency, install the version you want next to the addon:
 
-```
-yarn add @elastic/search-ui
-```
-
-Once you've installed it, you can now install the addon itself:
-
-```
-ember install ember-search-ui
+```sh
+pnpm add @elastic/search-ui ember-search-ui
 ```
 
-## Still needs documentation, but here's a quick example.
+For the default views, also install the views and their peers:
 
-### This repo comes with a handy example, look at examples/sandbox. 
+```sh
+pnpm add ember-search-ui-views ember-power-select ember-basic-dropdown ember-concurrency
+```
 
-Running the example locally, clone the repo,
-`cd ember-search-ui`,
-`yarn install`, 
-`cd examples/sandbox`, 
-`ember s` 
+The views import their own CSS (and ember-power-select's), so there is nothing else to set up.
 
-### [Live Demo](https://ember-search-ui.netlify.app/)
+## Usage
 
+### With `<template>` tag components
 
+```gts
+import { SearchProvider, WithSearch, mapContextToProps } from 'ember-search-ui';
+import { Layout, SearchBox, Facet, Results, PagingInfo, Paging } from 'ember-search-ui-views';
 
-You can basically refer to @elastic/search-ui for the documentation and use the example/sandbox's code to get a grip of what's going on for ember specifics.
+const config = {
+  apiConnector, // any @elastic/search-ui connector
+  alwaysSearchOnInitialLoad: true,
+};
 
+<template>
+  <SearchProvider @config={{config}} as |driver|>
+    <Layout>
+      <:header><SearchBox @driver={{driver}} @searchAsYouType={{true}} /></:header>
+      <:sideContent>
+        <Facet @driver={{driver}} @field="states" @label="States" @filterType="any" />
+      </:sideContent>
+      <:bodyHeader><PagingInfo @driver={{driver}} /></:bodyHeader>
+      <:bodyContent><Results @driver={{driver}} @titleField="title" @urlField="url" /></:bodyContent>
+      <:bodyFooter><Paging @driver={{driver}} /></:bodyFooter>
+    </Layout>
 
+    <WithSearch @driver={{driver}} @mapContextToProps={{mapContextToProps "totalResults"}} as |state|>
+      {{state.totalResults}} results
+    </WithSearch>
+  </SearchProvider>
+</template>
+```
+
+`@view` arguments take a component (`@view={{SingleLinksFacet}}`). Apps using classic `.hbs` templates can keep using the global names (`<SearchBox>`, `<Containers::Facet>`, `{{map-context-to-props}}`) and may still pass a registered component's name (`@view="boolean-facet"`).
+
+### Glint in loose-mode (`.hbs`) apps
+
+```ts
+import type EmberSearchUiRegistry from 'ember-search-ui/template-registry';
+import type EmberSearchUiViewsRegistry from 'ember-search-ui-views/template-registry';
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry extends EmberSearchUiRegistry, EmberSearchUiViewsRegistry {}
+}
+```
+
+You can refer to @elastic/search-ui for the documentation of the driver config, state and actions.
+
+## Upgrading from 1.x
+
+* Requires Ember 5.8+ with Embroider or ember-auto-import v2.
+* `ember-search-ui-views` now declares `ember-search-ui`, `ember-power-select` (^9), `ember-basic-dropdown` (^9) and `ember-concurrency` (^5) as peer dependencies; it no longer uses `ember-headlessui`.
+* Helpers are plain functions. Their named exports are unchanged; default exports are no longer `helper()` classes.
+* `<Results>` renders the addon's `Result` by default instead of looking up the app's `result` component; pass `@resultView` to customise it.
+* A string `@view` must name a component registered with a class or a co-located template.
+* `<AutocompleteInput>` no longer yields `Button` (it could not be clicked in 1.x).
+* A custom `selectedItemComponent` on the views' select trigger receives ember-power-select 9's `@selected`.
+
+## Development
+
+```sh
+pnpm install
+pnpm test      # builds both addons and runs both test suites
+pnpm lint
+```
+
+Each package's tests run with Vite + testem in its own directory (`pnpm test` in `packages/*`).
+
+`examples/sandbox` is a classic Ember 4.4 app and is not part of the pnpm workspace yet.
 
 ## Custom UI example
 

@@ -1,31 +1,30 @@
 # ember-search-ui-views
 
-[Short description of the addon.]
-
+Default views and styles for [`ember-search-ui`](../ember-search-ui): `SearchBox`,
+`Facet` (multi-checkbox, single-select, single-links and boolean), `Results`,
+`Paging`, `PagingInfo`, `ResultsPerPage`, `Sorting`, `ErrorBoundary` and
+`Layout`, matching @elastic/search-ui's React views.
 
 ## Compatibility
 
-* Ember.js v3.24 or above
-* Ember CLI v3.24 or above
-* Node.js v12 or above
-
+* Ember.js v5.8 or above, with Embroider or ember-auto-import v2
 
 ## Installation
 
-```
-ember install ember-search-ui-views
+```sh
+pnpm add ember-search-ui-views ember-search-ui @elastic/search-ui \
+  ember-power-select ember-basic-dropdown ember-concurrency
 ```
 
+Components import their own CSS (and ember-power-select's).
 
 ## Usage
 
-[Longer description of how to use the addon in apps.]
-
+See the [repository README](../../README.md).
 
 ## Contributing
 
 See the [Contributing](CONTRIBUTING.md) guide for details.
-
 
 ## License
 

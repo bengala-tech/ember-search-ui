@@ -1,1 +1,0 @@
-export { default, findSortOption } from 'ember-search-ui/helpers/find-sort-option';

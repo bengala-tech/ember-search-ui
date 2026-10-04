@@ -1,0 +1,30 @@
+export {
+  default as SearchProvider,
+  setupDriver,
+} from './components/search-provider.gts';
+export { default as WithSearch } from './components/with-search.gts';
+export { default as ErrorBoundaryContainer } from './components/containers/error-boundary.gts';
+export { default as FacetContainer } from './components/containers/facet.gts';
+export { default as PagingContainer } from './components/containers/paging.gts';
+export { default as PagingInfoContainer } from './components/containers/paging-info.gts';
+export { default as ResultContainer } from './components/containers/result.gts';
+export { default as ResultsContainer } from './components/containers/results.gts';
+export { default as ResultsPerPageContainer } from './components/containers/results-per-page.gts';
+export { default as SearchBoxContainer } from './components/containers/search-box.gts';
+export { default as SortingContainer } from './components/containers/sorting.gts';
+
+export { default as mapContextToProps } from './helpers/map-context-to-props.ts';
+export { resolveComponent, type ViewArg } from './utils/resolve-component.ts';
+
+export type * from './types.ts';
+export type { SearchProviderSignature } from './components/search-provider.gts';
+export type { WithSearchSignature } from './components/with-search.gts';
+export type * from './components/containers/error-boundary.gts';
+export type * from './components/containers/facet.gts';
+export type * from './components/containers/paging.gts';
+export type * from './components/containers/paging-info.gts';
+export type * from './components/containers/result.gts';
+export type * from './components/containers/results.gts';
+export type * from './components/containers/results-per-page.gts';
+export type * from './components/containers/search-box.gts';
+export type * from './components/containers/sorting.gts';

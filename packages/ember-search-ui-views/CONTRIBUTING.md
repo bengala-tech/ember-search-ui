@@ -2,24 +2,28 @@
 
 ## Installation
 
-* `git clone <repository-url>`
-* `cd ember-search-ui-views`
-* `yarn install`
+- `git clone <repository-url>`
+- `cd ember-search-ui` (the repository root)
+- `pnpm install`
+- `pnpm build` (the views type-check and test against the built `ember-search-ui`)
 
 ## Linting
 
-* `yarn lint`
-* `yarn lint:fix`
+- `pnpm lint`
+- `pnpm lint:fix`
+
+## Building the addon
+
+- `pnpm build`
 
 ## Running tests
 
-* `ember test` – Runs the test suite on the current Ember version
-* `ember test --server` – Runs the test suite in "watch mode"
-* `ember try:each` – Runs the test suite against multiple Ember versions
+Run these from `packages/ember-search-ui-views`:
 
-## Running the dummy application
+- `pnpm test` – Builds the tests with Vite and runs them in headless Chrome
+- `pnpm start` – Starts the Vite dev server; open `/tests/index.html` to run the tests in the browser with live reload
 
-* `ember serve`
-* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
+To run against other Ember versions, apply a scenario from `.try.mjs`:
 
-For more information on using ember-cli, visit [https://cli.emberjs.com/release/](https://cli.emberjs.com/release/).
+- `pnpm dlx @embroider/try apply ember-lts-5.8 && pnpm install --no-lockfile`
+- `ENABLE_COMPAT_BUILD=true pnpm test` (the 5.x scenarios use the classic build)

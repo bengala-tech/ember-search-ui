@@ -1,1 +1,0 @@
-export { default, getFilterValueDisplay } from 'ember-search-ui-views/helpers/get-filter-value-display';
