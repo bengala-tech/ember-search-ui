@@ -34,3 +34,17 @@ export type * from './components/containers/results.gts';
 export type * from './components/containers/results-per-page.gts';
 export type * from './components/containers/search-box.gts';
 export type * from './components/containers/sorting.gts';
+
+// Properties: filter editors and chips, legacy components included
+export { default as PropertyFilter } from './components/properties/property-filter.gts';
+export { default as PropertyChip } from './components/properties/property-chip.gts';
+export { default as LegacyFilterEditor } from './components/properties/legacy-filter-editor.gts';
+export { default as LegacyFilterChip } from './components/properties/legacy-filter-chip.gts';
+export type * from './properties.ts';
+export type { PropertyFilterSignature } from './components/properties/property-filter.gts';
+export type { PropertyChipSignature } from './components/properties/property-chip.gts';
+export type {
+  LegacyFilterEditorSignature,
+  LegacyFilterComponentArgs,
+} from './components/properties/legacy-filter-editor.gts';
+export type { LegacyListValuesArgs } from './components/properties/legacy-filter-chip.gts';
