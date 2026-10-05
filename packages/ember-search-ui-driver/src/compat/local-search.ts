@@ -244,15 +244,17 @@ function localBackend<Doc>(
         )
       : data;
 
-    // each filter through its property's filtering function
-    const byField = new Map(request.filters.map((f) => [f.field, f]));
-    const active = filterable.filter((p) => {
-      const filter = p.filteredBy ? byField.get(p.filteredBy) : undefined;
-      return filter !== undefined && filter.values.length > 0;
-    });
+    // each filter through its property's filtering function, even two on
+    // one field (a query builder's `due >= Feb` and `due <= Mar`)
+    const active = request.filters
+      .filter((filter) => filter.values.length > 0)
+      .flatMap((filter) =>
+        filterable
+          .filter((p) => p.filteredBy === filter.field)
+          .map((p) => ({ p, filter })),
+      );
     rows = rows.filter((row) =>
-      active.every((p) => {
-        const filter = byField.get(p.filteredBy!)!;
+      active.every(({ p, filter }) => {
         const values = filter.values.flatMap((v): unknown[] =>
           Array.isArray(v) ? (v as unknown[]) : [v],
         );

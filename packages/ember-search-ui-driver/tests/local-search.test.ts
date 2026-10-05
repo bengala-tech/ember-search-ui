@@ -2,8 +2,10 @@ import { afterEach, describe, expect, test } from 'vitest';
 import {
   defineProperty,
   emberLikeCompare,
+  date,
   eq,
   or,
+  range,
   localSearch,
   LocalSearchCompat,
   type LocalSearchOptions,
@@ -282,6 +284,16 @@ describe('localSearch: the semantics of a search-ui local connector', () => {
     driver.setFilter('state', 'open', 'any');
     driver.driver.add('root', or(eq('id', 1), eq('id', 2), eq('id', 3)));
     expect(await settle(driver)).toEqual([1, 3]);
+  });
+
+  test('two conditions on one field both run their property function', async () => {
+    const driver = local();
+    driver.driver.add('root', range('due', { gte: date('2026-02-01') }));
+    driver.driver.add('root', range('due', { lte: date('2026-03-31') }));
+    expect(await settle(driver)).toEqual([2, 3]);
+    driver.driver.add('root', eq('state', 'open'));
+    driver.driver.add('root', eq('state', 'closed'));
+    expect(await settle(driver)).toEqual([]);
   });
 
   test('it is a class apps can export as LocalSearchDriver (instanceof checks)', () => {

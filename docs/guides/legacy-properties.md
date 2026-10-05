@@ -61,6 +61,40 @@ legacy chip:
 | routing fields, `getUrl`, `target` | `link`                                     |
 | `exportValuePath`, `skipExport`    | `export`                                   |
 
+## Searching a list in memory
+
+`localSearch` searches an array, like the old local connector. Say we have a
+box of toys:
+
+```ts
+const toys = [
+  { name: 'Teddy bear', color: 'brown', age: 3 },
+  { name: 'Red car', color: 'red', age: 5 },
+  { name: 'Robot', color: 'gray', age: 8 },
+];
+
+const search = localSearch({ data: toys, properties: toyProperties });
+```
+
+Each filter asks a toy's property "do you match?" with its
+`localFilteringFunction`:
+
+```ts
+search.setFilter('color', 'red'); // the red car
+```
+
+A QueryBuilder can ask the same property twice. Both questions count,
+so only toys that pass both stay:
+
+```ts
+search.driver.add('root', range('age', { gte: 4 })); // 4 or older
+search.driver.add('root', range('age', { lte: 6 })); // and 6 or younger
+// the red car (5)
+```
+
+A filter on a field no property knows (`setFilter('smell', 'nice')`) is
+ignored, like before.
+
 ## Older search-ui versions
 
 search-ui 1.20 and older store `setFilter(field, ['a', 'b'])` as one array
