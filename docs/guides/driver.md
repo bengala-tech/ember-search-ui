@@ -87,6 +87,43 @@ be passed around as a callback:
 | `transaction(fn)`                                                 | Several commands, one search.                                        |
 | `import(codec, external)` / `export(codec)`                       | Reads or writes the state in another format.                         |
 
+## Scopes
+
+Sometimes the app narrows the search, not the user. Think of a toy shop
+with tabs:
+
+- **All toys**
+- **For babies**: age 2 or younger
+- **On sale**: sale price is set
+
+The tab is a scope. Every search is ANDed with it:
+
+```ts
+const TABS = {
+  all: undefined,
+  babies: range('age', { lte: 2 }),
+  sale: exists('salePrice'),
+};
+
+function changeTab(tab: keyof typeof TABS) {
+  driver.setScope('tab', TABS[tab]); // undefined removes it
+}
+```
+
+The user can still filter (`color is red`) on any tab. A scope is kept out
+of the filter tree on purpose:
+
+- **The user can't break it.** It isn't a row in the QueryBuilder or a chip
+  in the filter bar, so nobody deletes "age 2 or younger" by mistake, and
+  `clearFilter()` keeps it.
+- **It doesn't mix with the user's filters.** The user can filter `age`
+  too; the tab and the user each have their own condition, and both apply.
+- **It stays out of the URL and `export`.** The tab already lives in the
+  app's own route or query param; a link holds just what the user chose.
+
+A view that narrows the search, like a calendar's month, uses a scope the
+same way (see [Views](/guides/views)).
+
 ## Results
 
 `driver.result` holds `status` (`idle`, `loading`, `success` or `error`),
