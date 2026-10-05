@@ -368,3 +368,44 @@ describe('paging, sorting and state', () => {
     expect(driver.state.extensions).toEqual({});
   });
 });
+
+describe('scopes', () => {
+  test('a scope narrows every search but stays out of the state', async () => {
+    const { driver } = setup(XUT_DOCS);
+    driver.add('root', eq('u', 'k'));
+    driver.setScope('calendar', eq('x', 'b'));
+    await driver.settled();
+    expect(resultIds(driver)).toEqual([1, 5]);
+    expect(driver.state.filter.children).toHaveLength(1);
+
+    driver.clearFilter(); // the user's filter goes, the scope stays
+    await driver.settled();
+    expect(resultIds(driver)).toEqual([1, 3, 5]);
+
+    driver.setScope('calendar', undefined);
+    await driver.settled();
+    expect(resultIds(driver)).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  test('under an OR root, the scope still narrows the whole filter', async () => {
+    const { driver } = setup(XUT_DOCS);
+    driver.replaceFilter(or(eq('x', 'a'), eq('x', 'c')));
+    driver.setScope('lane', eq('u', 'k'));
+    await driver.settled();
+    expect(resultIds(driver)).toEqual([4, 6]);
+  });
+
+  test('setting a scope returns to page 1; removing a missing one does nothing', async () => {
+    const { driver, search } = setup(XUT_DOCS);
+    driver.setPerPage(2);
+    driver.setPage(2);
+    await driver.settled();
+    driver.setScope('calendar', eq('u', 'k'));
+    expect(driver.state.page).toMatchObject({ page: 1 });
+    await driver.settled();
+    const calls = search.mock.calls.length;
+    driver.setScope('missing', undefined);
+    await driver.settled();
+    expect(search.mock.calls.length).toBe(calls);
+  });
+});

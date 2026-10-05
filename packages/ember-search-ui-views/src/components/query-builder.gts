@@ -73,12 +73,6 @@ const isOr = (group: GroupNode) => group.op === 'or';
 
 type Properties = readonly AnyProperty<never, unknown>[];
 
-/**
- * Conditions a view owns (`view:<name>`, e.g. a calendar's visible range)
- * are managed by that view, so the builder does not show them.
- */
-const isViewNode = (node: FilterNode) => node.id.startsWith('view:');
-
 /** The fields to offer: `@fields`, else the schema of `@properties`. */
 const fieldsFrom = (
   fields: FieldSchema | undefined,
@@ -555,36 +549,36 @@ const Group: TOC<GroupSignature> = <template>
 
     <ol class="sui-qb-children">
       {{#each @group.children key="id" as |child|}}
-        {{#unless (isViewNode child)}}<li class="sui-qb-child">
-            {{#let
-              (asCondition child) (asGroup child) (asNested child)
-              as |condition group nestedNode|
-            }}
-              {{#if condition}}
-                <ConditionRow
-                  @search={{@search}}
-                  @node={{condition}}
-                  @fields={{@fields}}
-                  @properties={{@properties}}
-                />
-              {{else if group}}
-                <Group
-                  @search={{@search}}
-                  @group={{group}}
-                  @fields={{@fields}}
-                  @properties={{@properties}}
-                  @depth={{inc @depth}}
-                />
-              {{else if nestedNode}}
-                <NestedRow
-                  @search={{@search}}
-                  @node={{nestedNode}}
-                  @fields={{@fields}}
-                  @depth={{@depth}}
-                />
-              {{/if}}
-            {{/let}}
-          </li>{{/unless}}
+        <li class="sui-qb-child">
+          {{#let
+            (asCondition child) (asGroup child) (asNested child)
+            as |condition group nestedNode|
+          }}
+            {{#if condition}}
+              <ConditionRow
+                @search={{@search}}
+                @node={{condition}}
+                @fields={{@fields}}
+                @properties={{@properties}}
+              />
+            {{else if group}}
+              <Group
+                @search={{@search}}
+                @group={{group}}
+                @fields={{@fields}}
+                @properties={{@properties}}
+                @depth={{inc @depth}}
+              />
+            {{else if nestedNode}}
+              <NestedRow
+                @search={{@search}}
+                @node={{nestedNode}}
+                @fields={{@fields}}
+                @depth={{@depth}}
+              />
+            {{/if}}
+          {{/let}}
+        </li>
       {{else}}
         <li class="sui-qb-empty">No conditions: everything matches.</li>
       {{/each}}

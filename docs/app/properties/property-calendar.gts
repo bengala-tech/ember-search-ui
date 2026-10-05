@@ -4,6 +4,8 @@ import { on } from '@ember/modifier';
 import { modifier } from 'ember-modifier';
 import type Owner from '@ember/owner';
 import {
+  date,
+  range,
   readPath,
   toProperties,
   type AnyProperty,
@@ -21,7 +23,6 @@ interface Signature {
   };
 }
 
-const VIEW_ID = 'view:calendar';
 const MONTHS = [
   'January',
   'February',
@@ -57,8 +58,8 @@ interface Day {
 
 /**
  * A month grid on the property marked `views.calendar.date`. It narrows the
- * search to the visible month with its own condition (`view:calendar`),
- * which leaves the user's filters alone and goes away with the calendar.
+ * search to the visible month with a scope, which leaves the user's
+ * filters alone and goes away with the calendar.
  */
 export default class PropertyCalendar extends Component<Signature> {
   @tracked year: number;
@@ -83,10 +84,10 @@ export default class PropertyCalendar extends Component<Signature> {
     });
   };
 
-  /** Gives the search back: no month condition, the old page size. */
+  /** Gives the search back: no month scope, the old page size. */
   detach = () => {
     const { driver } = this.args.search;
-    if (driver.findNode(VIEW_ID)) driver.remove(VIEW_ID);
+    driver.setScope('calendar', undefined);
     if (this.#perPage) driver.setPerPage(this.#perPage);
   };
 
@@ -151,23 +152,16 @@ export default class PropertyCalendar extends Component<Signature> {
   #narrow() {
     const property = this.dateProperty;
     if (!property) return;
-    const { driver } = this.args.search;
     const from = `${this.year}-${pad(this.month)}-01`;
     const nextMonth = this.month === 12 ? 1 : this.month + 1;
     const nextYear = this.month === 12 ? this.year + 1 : this.year;
-    const value = {
-      gte: { date: from },
-      lt: { date: `${nextYear}-${pad(nextMonth)}-01` },
-    };
-    if (driver.findNode(VIEW_ID)) driver.update(VIEW_ID, { value });
-    else
-      driver.add('root', {
-        kind: 'condition',
-        id: VIEW_ID,
-        field: property.field.path,
-        operator: 'range',
-        value,
-      });
+    this.args.search.driver.setScope(
+      'calendar',
+      range(property.field.path, {
+        gte: date(from),
+        lt: date(`${nextYear}-${pad(nextMonth)}-01`),
+      }),
+    );
   }
 
   <template>

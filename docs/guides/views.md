@@ -13,10 +13,10 @@ views interchangeable:
    dates and kanban lanes all come from properties.
 2. **Change the search only through driver commands.** Sorting is
    `setSort`, paging is `setPage`; a view never fetches.
-3. **Own your conditions.** A view that narrows the search (a calendar's
-   month, a map's bounds) adds its own condition with an id like
-   `view:calendar`. It leaves the user's filters alone and goes away with the
-   view. The QueryBuilder and the filter bar ignore it.
+3. **Narrow with a scope.** A view that narrows the search (a calendar's
+   month, a map's bounds) sets a scope: `driver.setScope('calendar', node)`.
+   Every search is ANDed with it, but it is not in the filter tree, so the
+   QueryBuilder, the filter bar and the URL never see it.
 
 ## A table
 
@@ -65,15 +65,20 @@ follow.
   <KanbanDemo />
 </div>
 
-## Conditions a view owns
+## Scopes
 
-A calendar shows one month. It adds a range condition on its date property,
-from a modifier so the change happens after rendering, and removes it when
-it leaves:
+A calendar shows one month. It scopes the search to a range on its date
+property, from a modifier so the change happens after rendering, and removes
+the scope when it leaves:
+
+```ts
+driver.setScope('calendar', range('due_at', { gte: date(from), lt: date(to) }));
+driver.setScope('calendar', undefined); // gone
+```
 
 ```ts
 const ownsMonth = modifier((element, [calendar]) => {
-  calendar.attach(); // add or update `view:calendar`, page size 100
+  calendar.attach(); // set the month's scope, page size 100
   return () => calendar.detach(); // remove it, restore the page size
 });
 ```

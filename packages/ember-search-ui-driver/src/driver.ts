@@ -85,6 +85,7 @@ export class SearchDriver<Doc = unknown> {
   #pendingDelay: number | undefined;
   #destroyed = false;
   #settledWaiters: (() => void)[] = [];
+  #scopes = new Map<string, FilterNode>();
 
   constructor(options: DriverOptions<Doc>) {
     this.#backend = options.backend;
@@ -194,6 +195,21 @@ export class SearchDriver<Doc = unknown> {
 
   clearFilter = (): void => {
     this.#setFilter({ ...this.state.filter, children: [] });
+  };
+
+  /**
+   * Narrows every search with `filter`, kept under `name`, without touching
+   * the filter tree users edit: a calendar's month, a map's bounds.
+   * `undefined` removes it. Scopes are not part of the state, so URLs,
+   * `export` and filter UIs never see them.
+   */
+  setScope = (name: string, filter: NodeInput | undefined): void => {
+    if (filter === undefined) {
+      if (!this.#scopes.delete(name)) return;
+    } else {
+      this.#scopes.set(name, materialize(filter, this.idFactory));
+    }
+    this.#commit({ ...this.state, page: firstPage(this.state.page) });
   };
 
   // --- the rest of the request ----------------------------------------------
@@ -364,7 +380,7 @@ export class SearchDriver<Doc = unknown> {
     const run = (async () => {
       try {
         const request: unknown = this.#backend.codec.serialize(
-          withInvalidDisabled(state, warnings),
+          this.#withScopes(withInvalidDisabled(state, warnings)),
           this.codecContext,
         );
         const response: unknown = await this.#backend.search(
@@ -409,6 +425,21 @@ export class SearchDriver<Doc = unknown> {
       this.#flushSettled();
     });
     return run;
+  }
+
+  /** The state a backend sees: the user's filter AND every scope. */
+  #withScopes(state: SearchState): SearchState {
+    if (this.#scopes.size === 0) return state;
+    const scopes = [...this.#scopes.values()];
+    const root = state.filter;
+    const children =
+      root.op === 'and' && !root.negate && !root.disabled
+        ? [...root.children, ...scopes]
+        : [{ ...root, id: this.idFactory() }, ...scopes];
+    return {
+      ...state,
+      filter: { kind: 'group', id: ROOT_ID, op: 'and', children },
+    };
   }
 
   #isSettled(): boolean {

@@ -80,6 +80,7 @@ be passed around as a callback:
 | `update(id, patch)` / `remove(id)` / `move(id, parentId, index?)` | Edits a node.                                                        |
 | `toggleNegate(id)` / `toggleDisabled(id)`                         | Flips a flag.                                                        |
 | `replaceFilter(group)` / `clearFilter()`                          | Replaces or empties the tree.                                        |
+| `setScope(name, node)`                                            | Narrows every search, outside the tree (`undefined` removes it).     |
 | `setQuery(term)`                                                  | Sets the search term (optionally debounced).                         |
 | `setSort(list)` / `setPage(n)` / `setPerPage(n)` / `setCursor(c)` | Sort and paging. A filter, query or sort change goes back to page 1. |
 | `setExtension(key, value)`                                        | A backend option.                                                    |

@@ -270,17 +270,16 @@ module(
   },
 );
 
-module('Integration | QueryBuilder and view conditions', function (hooks) {
+module('Integration | QueryBuilder and scopes', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('conditions owned by a view (view:*) are not shown', async function (assert) {
+  test("a view's scope narrows the results but is not a row", async function (assert) {
     const driver = new SearchDriver<Doc>({
       backend: memoryBackend(DOCS),
       idFactory: sequentialIds(),
     });
-    driver.add('root', {
+    driver.setScope('calendar', {
       kind: 'condition',
-      id: 'view:calendar',
       field: 'score',
       operator: 'range',
       value: { gte: 50 },
@@ -293,7 +292,8 @@ module('Integration | QueryBuilder and view conditions', function (hooks) {
         </Search>
       </template>,
     );
-    assert.dom(`${ROOT} > .sui-qb-children > li`).doesNotExist();
+    assert.dom(`${ROOT} > .sui-qb-children > .sui-qb-child`).doesNotExist();
+    assert.dom(`${ROOT} .sui-qb-empty`).exists();
     assert.dom('[data-test-ids]').hasText('2,3', 'still applied');
     driver.destroy();
   });
