@@ -10,7 +10,6 @@ import {
 } from '../codecs/search-api.ts';
 import {
   SearchUiCompat,
-  filterNodeId,
   fromSearchUiState,
   type SearchUiCompatOptions,
   type SearchUiRequestState,
@@ -153,7 +152,7 @@ export class ServerSearchCompat<Doc = unknown> extends SearchUiCompat<Doc> {
   #toSearchState(state: SearchUiRequestState): SearchState {
     const current = this.driver.state;
     const others = current.filter.children.filter(
-      (node) => !node.id.startsWith(filterNodeId('')),
+      (node) => node.kind !== 'condition',
     );
     return fromSearchUiState(
       state,

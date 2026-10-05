@@ -6,7 +6,7 @@ import type { FilterValue, NodeInput, Scalar } from './types.ts';
 //   or(range('cost', { gte: 3000 }), and(eq('state', 'pending'), ...))
 //
 // so a tree built in a UI can be pasted into code. Node meta is UI-only and
-// left out; ids are kept only when they are meaningful (see `keepId`).
+// left out, and so are ids.
 
 export interface FilterToCodeOptions {
   /** Start with the import line for the builders used. Default false. */
@@ -15,24 +15,15 @@ export interface FilterToCodeOptions {
   from?: string;
   /** Break calls longer than this onto several lines. Default 80. */
   width?: number;
-  /**
-   * Which node ids to keep, as `withId(id, ...)`. Default: ids with a ":"
-   * (`filter:state`, `facet:states`), which UIs look nodes up by; generated
-   * ids are left out.
-   */
-  keepId?: (id: string) => boolean;
 }
 
 /** A call (breakable over lines) or a piece of code printed as is. */
 type Doc = string | { call: string; args: Doc[] };
 
-const defaultKeepId = (id: string) => id.includes(':');
-
 export function filterToCode(
   node: NodeInput,
   options: FilterToCodeOptions = {},
 ): string {
-  const keepId = options.keepId ?? defaultKeepId;
   const width = options.width ?? 80;
   const used = new Set<string>();
 
@@ -107,8 +98,7 @@ export function filterToCode(
           inner.op === 'and' &&
           inner.children.length === 1 &&
           !inner.negate &&
-          !inner.disabled &&
-          !(inner.id && keepId(inner.id));
+          !inner.disabled;
         const args = [quote(n.path), print(lone ? inner.children[0]! : inner)];
         if (n.quantifier !== 'some') args.push(quote(n.quantifier));
         doc = call('nested', ...args);
@@ -117,7 +107,6 @@ export function filterToCode(
     }
     if (n.negate) doc = call('not', doc);
     if (n.disabled) doc = call('disabled', doc);
-    if (n.id && keepId(n.id)) doc = call('withId', quote(n.id), doc);
     return doc;
   };
 

@@ -1,5 +1,6 @@
 import { dateLikeToISO, isDateValue } from '../operators.ts';
 import { createState, DEFAULT_PER_PAGE } from '../state.ts';
+import { randomIds } from '../ids.ts';
 import { ROOT_ID } from '../tree.ts';
 import type { FieldSchema } from '../codec.ts';
 import type { SearchDriver } from '../driver.ts';
@@ -7,7 +8,6 @@ import type {
   ConditionNode,
   FilterNode,
   FilterValue,
-  GroupNode,
   RangeValue,
   Scalar,
   SearchState,
@@ -18,9 +18,9 @@ import type {
 // ember-search-ui's WithSearch and containers, and app code.
 //
 // search-ui filters are one entry per field: { field, values, type }. They
-// map onto field-owned nodes with the id `filter:<field>` under the root.
-// Nodes made some other way (a query builder) are left alone by these
-// actions and are not listed in `state.filters`.
+// map onto the conditions directly under the root, one per field. Groups
+// and nested scopes (a query builder's) are left alone by these actions and
+// are not listed in `state.filters`.
 
 export type SearchUiFilterType = 'any' | 'all' | 'none';
 
@@ -70,10 +70,10 @@ export interface SearchUiState extends Required<
 
 type Listener = (state: SearchUiState) => void;
 
-const FILTER_PREFIX = 'filter:';
-export const filterNodeId = (field: string) => `${FILTER_PREFIX}${field}`;
-const isFilterNode = (node: FilterNode): node is ConditionNode =>
-  node.kind === 'condition' && node.id.startsWith(FILTER_PREFIX);
+// search-ui's filters are the conditions directly under the root, one per
+// field. Groups and nested scopes (a query builder's) are left alone.
+const isRootCondition = (node: FilterNode): node is ConditionNode =>
+  node.kind === 'condition';
 
 const RANGE_KEYS = ['gt', 'gte', 'lt', 'lte'];
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -139,7 +139,7 @@ function toNode(
   if (values.length === 0) return undefined;
   const base = {
     kind: 'condition' as const,
-    id: filterNodeId(filter.field),
+    id: randomIds(),
     field: filter.field,
   };
   const negate = filter.type === 'none' ? { negate: true } : {};
@@ -209,7 +209,7 @@ function toNode(
 const toWire = (value: unknown) =>
   isDateValue(value) ? ('date' in value ? value.date : value.dateMath) : value;
 
-/** A field-owned node back as a search-ui filter. */
+/** A condition back as a search-ui filter. */
 export function nodeToFilter(node: ConditionNode): SearchUiFilter {
   const type: SearchUiFilterType = node.negate
     ? 'none'
@@ -337,7 +337,7 @@ export class SearchUiCompat<Doc = unknown> {
       sortField: sort?.field ?? '',
       sortDirection: sort?.direction ?? '',
       sortList: [...state.sort],
-      filters: state.filter.children.filter(isFilterNode).map(nodeToFilter),
+      filters: state.filter.children.filter(isRootCondition).map(nodeToFilter),
       results: [...result.results],
       totalResults: result.total,
       totalPages: result.pageCount,
@@ -459,10 +459,9 @@ export class SearchUiCompat<Doc = unknown> {
 
     /** Removes every field filter except those for `except` fields. */
     clearFilters: (except: string[] = []) => {
-      const keep = new Set(except.map(filterNodeId));
       this.driver.transaction(() => {
         for (const node of this.driver.state.filter.children) {
-          if (isFilterNode(node) && !keep.has(node.id))
+          if (isRootCondition(node) && !except.includes(node.field))
             this.driver.remove(node.id);
         }
       });
@@ -560,19 +559,36 @@ export class SearchUiCompat<Doc = unknown> {
   setSearchQuery = (_query: unknown): void => {};
   setAutocompleteQuery = (_query: unknown): void => {};
 
-  #filter(field: string): ConditionNode | undefined {
-    const node = this.driver.findNode(filterNodeId(field));
-    return node?.kind === 'condition' ? node : undefined;
+  #filters(field: string): ConditionNode[] {
+    return this.driver.state.filter.children.filter(
+      (node): node is ConditionNode =>
+        isRootCondition(node) && node.field === field,
+    );
   }
 
+  #filter(field: string): ConditionNode | undefined {
+    return this.#filters(field)[0];
+  }
+
+  /** The field's filter becomes `node` (in place, keeping its id) or goes. */
   #replace(field: string, node: ConditionNode | undefined): void {
-    const id = filterNodeId(field);
-    const root: GroupNode = this.driver.state.filter;
-    const index = root.children.findIndex((child) => child.id === id);
+    const [current, ...extra] = this.#filters(field);
     this.driver.transaction(() => {
-      if (index !== -1) this.driver.remove(id);
-      if (node)
-        this.driver.add(ROOT_ID, node, index === -1 ? undefined : index);
+      for (const other of extra) this.driver.remove(other.id);
+      if (!node) {
+        if (current) this.driver.remove(current.id);
+      } else if (current) {
+        this.driver.update(current.id, {
+          operator: node.operator,
+          value: node.value,
+          negate: node.negate,
+          disabled: undefined,
+          meta: node.meta,
+        });
+      } else {
+        const { id: _id, ...input } = node;
+        this.driver.add(ROOT_ID, input);
+      }
     });
   }
 }

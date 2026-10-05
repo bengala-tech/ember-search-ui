@@ -254,18 +254,13 @@ export const API: ApiPackage[] = [
         title: 'Filter bars',
         entries: [
           fn(
-            'propertyFilterId',
-            "A property's filter-bar condition id: filter:<key>.",
-            'filtering',
-          ),
-          fn(
             'propertyFilter',
-            "A property's filter-bar condition, if set.",
+            "A property's filter: the root condition on its field, if set.",
             'filtering',
           ),
           fn(
             'setPropertyFilter',
-            "Sets, changes or removes a property's filter-bar condition.",
+            "Sets, changes or removes a property's filter.",
             'filtering',
           ),
         ],
@@ -403,7 +398,6 @@ export const API: ApiPackage[] = [
           ),
           fn('filterToNode', 'A search-ui filter as a condition node.'),
           fn('nodeToFilter', 'A condition node as a search-ui filter.'),
-          fn('filterNodeId', "A search-ui filter's node id: filter:<field>."),
           val(
             'ARRAY_VALUE_META',
             'Node meta flag: the values were one array value.',

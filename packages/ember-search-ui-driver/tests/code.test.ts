@@ -50,7 +50,7 @@ const TREES: Record<string, NodeInput> = {
   ),
   wrappers: and(
     disabled(or(contains('title', 'a\\b\nc'), eq('x', null))),
-    withId('filter:state', anyOf('state', ['done'])),
+    anyOf('state', ['done']),
   ),
   odd: and(
     where('x', 'eq', [1, 2]),
@@ -77,12 +77,14 @@ describe('filterToCode', () => {
     );
   });
 
-  test('ids: generated ones are left out, meaningful ones kept', () => {
-    const tree = materialize(TREES['wrappers']!, sequentialIds('n'));
+  test('ids are left out', () => {
+    const tree = materialize(
+      withId('picked', TREES['wrappers']!),
+      sequentialIds('n'),
+    );
     const code = filterToCode(tree);
     expect(code).not.toContain("'n");
-    expect(code).toContain("withId('filter:state', anyOf('state', ['done']))");
-    expect(filterToCode(tree, { keepId: () => false })).not.toContain('withId');
+    expect(code).not.toContain('withId');
   });
 
   test('short trees stay on one line, long ones break per argument', () => {

@@ -93,7 +93,6 @@ export {
   fromSearchUiState,
   filterToNode,
   nodeToFilter,
-  filterNodeId,
   ARRAY_VALUE_META,
   isArrayValue,
   type SearchUiCompatOptions,
@@ -173,7 +172,6 @@ export {
   type LegacyNotice,
 } from './legacy-property.ts';
 export {
-  propertyFilterId,
   propertyFilter,
   setPropertyFilter,
   legacyEditorValue,

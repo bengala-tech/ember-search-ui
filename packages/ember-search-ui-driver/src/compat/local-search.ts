@@ -4,7 +4,6 @@ import type { Property } from '../property.ts';
 import { createState } from '../state.ts';
 import {
   SearchUiCompat,
-  filterNodeId,
   fromSearchUiState,
   nodeToFilter,
   filterToNode,
@@ -27,8 +26,8 @@ import type { ConditionNode, GroupNode, SearchState } from '../types.ts';
 // - one sort field, compared like Ember's `compare`; pages of
 //   `resultsPerPage` (20 when unset), or everything with usePagination: false.
 //
-// Nodes made outside the search-ui filters (a query builder) are applied
-// too, with the driver's own operators.
+// Groups and nested scopes (a query builder's) are applied too, with the
+// driver's own operators.
 
 const adapted = new WeakMap<object, LocalSearchProperty>();
 
@@ -102,8 +101,9 @@ export interface LocalSearchOptions<Doc> extends SearchUiCompatOptions {
 
 interface LocalRequest {
   searchTerm: string;
+  /** The root's conditions, run by their property's filtering function. */
   filters: SearchUiFilter[];
-  /** Everything that is not a search-ui filter. */
+  /** Groups and nested scopes, run with the driver's operators. */
   rest: GroupNode;
   sort: { field: string; direction: 'asc' | 'desc' } | undefined;
   page: number;
@@ -117,8 +117,9 @@ interface LocalResponse<Doc> {
   pageCount: number;
 }
 
-const isFilterNode = (node: GroupNode['children'][number]) =>
-  node.kind === 'condition' && node.id.startsWith(filterNodeId(''));
+const isRootCondition = (
+  node: GroupNode['children'][number],
+): node is ConditionNode => node.kind === 'condition';
 
 /** Plain property access along a dotted path. */
 function getPath(row: unknown, path: string): unknown {
@@ -277,12 +278,12 @@ function localBackend<Doc>(
         return {
           searchTerm: state.query.term,
           filters: children
-            .filter(isFilterNode)
+            .filter(isRootCondition)
             .filter((node) => !node.disabled)
-            .map((node) => nodeToFilter(node as ConditionNode)),
+            .map(nodeToFilter),
           rest: {
             ...state.filter,
-            children: children.filter((node) => !isFilterNode(node)),
+            children: children.filter((node) => !isRootCondition(node)),
           },
           sort: state.sort[0],
           page: page.page,

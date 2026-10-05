@@ -110,7 +110,7 @@ describe('searchApiCodec (list format: the legacy requests)', () => {
     ]);
   });
 
-  test('parses a request back, with stable ids per field', () => {
+  test('parses a request back', () => {
     const request: SearchApiRequest = {
       search: 'tank',
       sort: 'title',
@@ -134,28 +134,28 @@ describe('searchApiCodec (list format: the legacy requests)', () => {
     expect(parsed.filter.children).toEqual([
       {
         kind: 'condition',
-        id: 'filter:state',
+        id: expect.any(String) as string,
         field: 'state',
         operator: 'in',
         value: ['created', 'pending'],
       },
       {
         kind: 'condition',
-        id: 'filter:created_by_id',
+        id: expect.any(String) as string,
         field: 'created_by_id',
         operator: 'eq',
         value: 50,
       },
       {
         kind: 'condition',
-        id: 'filter:cost',
+        id: expect.any(String) as string,
         field: 'cost',
         operator: 'range',
         value: { gt: 1 },
       },
       {
         kind: 'condition',
-        id: 'filter:due_at',
+        id: expect.any(String) as string,
         field: 'due_at',
         operator: 'exists',
         value: true,

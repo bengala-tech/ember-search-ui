@@ -250,12 +250,9 @@ export function searchApiListFilters(
     },
 
     parse(list, ctx) {
-      const counts = new Map<string, number>();
       const children = list
         .filter((entry) => entry.values.length > 0)
         .map((entry): ConditionNode => {
-          const n = (counts.get(entry.field) ?? 0) + 1;
-          counts.set(entry.field, n);
           const values = entry.values.map((v) =>
             hooks.parseValue ? hooks.parseValue(entry.field, v) : v,
           );
@@ -264,8 +261,7 @@ export function searchApiListFilters(
           const nested = values.length === 1 && Array.isArray(values[0]);
           return {
             kind: 'condition',
-            id:
-              n === 1 ? `filter:${entry.field}` : `filter:${entry.field}:${n}`,
+            id: ctx.idFactory(),
             field: entry.field,
             ...decodeValue(entry.field, wire, ctx),
             ...(nested ? { meta: { [ARRAY_VALUE_META]: true } } : {}),

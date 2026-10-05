@@ -31,9 +31,10 @@ the property's chip component, or in words.
   <FilterBarDemo />
 </div>
 
-A filter bar keeps its conditions directly under the root with the id
-`filter:<key>`. That is the same node `setFilter(field, value)` edits in the
-search-ui compatible API, so legacy code and the bar never disagree.
+A property's filter is simply the condition on its field directly under the
+root. `setFilter(field, value)` in the search-ui compatible API edits the
+same condition, and the QueryBuilder shows it as a row, so the bar, legacy
+code and the builder never disagree.
 
 ## QueryBuilder
 
@@ -45,7 +46,7 @@ on/off on every row and group, and conditions on items of nested lists.
 ```
 
 With `@properties`, it offers the filterable fields, and a property's editor
-edits its rows. Conditions owned by a view (`view:calendar`) are not shown.
+edits its rows.
 
 <div class="demo" data-test-demo="query-builder">
   <QueryBuilderDemo />
@@ -83,8 +84,7 @@ filterToCode(driver.state.filter, { imports: true });
 // and(nested('checks', and(eq('result', 'fail'), eq('item', 'gas lines'))))
 ```
 
-Generated ids and node `meta` are left out; ids with a colon
-(`filter:state`) are kept as `withId(...)`, since UIs find nodes by them.
+Ids and node `meta` are left out.
 Every demo also keeps its search in the URL under its own prefix, so
 **Show query** offers a link to the exact search on screen.
 
@@ -101,8 +101,7 @@ import { PropertyFilter, PropertyChip } from 'ember-search-ui';
 </template>
 ```
 
-`PropertyFilter` renders the property's editor on its `filter:<key>`
-condition; without one it yields `{ property, node, update, remove }` so the
+`PropertyFilter` renders the property's editor on its condition; without one it yields `{ property, node, update, remove }` so the
 block can build one.
 
 ## Writing an editor

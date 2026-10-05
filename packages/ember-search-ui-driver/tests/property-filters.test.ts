@@ -7,7 +7,6 @@ import {
   legacyValuePatch,
   memoryBackend,
   propertyFilter,
-  propertyFilterId,
   searchUiCompat,
   setPropertyFilter,
   type LegacyProperty,
@@ -47,11 +46,10 @@ const ids = (d: SearchDriver<Doc>) => d.result.results.map((r) => r.id);
 describe('the flat filter-bar condition', () => {
   test('set, change and remove a property filter', async () => {
     const d = driver();
-    expect(propertyFilterId(state)).toBe('filter:state');
     setPropertyFilter(d, state, { value: 'open' }); // default operator: eq
     await d.settled();
+    expect(d.state.filter.children).toHaveLength(1);
     expect(propertyFilter(d.state, state)).toMatchObject({
-      id: 'filter:state',
       field: 'state',
       operator: 'eq',
       value: 'open',

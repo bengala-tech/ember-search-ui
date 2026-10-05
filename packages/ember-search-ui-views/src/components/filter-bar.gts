@@ -46,8 +46,8 @@ const hasEditor = (entry: Entry) => {
 /**
  * One filter per property, ANDed: the flat filter bar most lists need. Each
  * property is edited by its own editor, its legacy filter component, or the
- * built-in condition editor. Filters live at `filter:<key>`, the same nodes
- * setFilter edits, next to whatever a QueryBuilder adds. Properties over
+ * built-in condition editor. A property's filter is the condition on its
+ * field directly under the root, the one setFilter edits. Properties over
  * nested lists are left out: one condition cannot scope a list's items
  * (the QueryBuilder can).
  */

@@ -127,10 +127,7 @@ module('Acceptance | legacy (list format)', function (hooks) {
 
   test('restores filters from the URL', async function (assert) {
     const filter = materialize(
-      {
-        ...and({ ...eq('priority', 'high'), id: 'filter:priority' }),
-        id: 'root',
-      },
+      { ...and(eq('priority', 'high')), id: 'root' },
       sequentialIds(),
     ) as GroupNode;
     TEST_URL.value = `?${urlCodec({ prefix: 'legacy.' }).serialize(createState({ filter }))}`;

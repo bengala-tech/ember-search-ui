@@ -48,8 +48,8 @@ export interface PropertyFilterSignature {
 }
 
 /**
- * The filter editor of one property, on the flat filter-bar condition
- * (`filter:<key>`): the property's `filter.editor`, else its legacy filter
+ * The filter editor of one property, on the condition on its field under
+ * the root: the property's `filter.editor`, else its legacy filter
  * component (unchanged, through LegacyFilterEditor), else the block.
  */
 export default class PropertyFilter extends Component<PropertyFilterSignature> {

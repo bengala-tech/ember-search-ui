@@ -6,6 +6,7 @@ import {
   fromSearchUiState,
   memoryBackend,
   nodeToFilter,
+  not,
   or,
   searchApiCodec,
   searchUiCompat,
@@ -228,14 +229,14 @@ describe('fromSearchUiState: restore a search-ui state kept in a `query` param',
     expect(state.filter.children).toEqual([
       {
         kind: 'condition',
-        id: 'filter:state',
+        id: expect.any(String) as string,
         field: 'state',
         operator: 'in',
         value: ['created', 'pending'],
       },
       {
         kind: 'condition',
-        id: 'filter:cost',
+        id: expect.any(String) as string,
         field: 'cost',
         operator: 'range',
         value: { gt: 1, lte: 5000 },
@@ -289,7 +290,7 @@ test('with a schema, a string on a text field is "contains" (how the search API 
   const compat = searchUiCompat(driver);
   compats.push(compat);
   compat.actions.setFilter('state', 'don', 'any');
-  expect(driver.findNode('filter:state')).toMatchObject({
+  expect(driver.state.filter.children[0]).toMatchObject({
     operator: 'contains',
     value: 'don',
   });
@@ -385,4 +386,24 @@ describe('arrays: "keep" (search-ui 1.20 and older)', () => {
       { field: 'state', values: ['created', 'pending'] },
     ]);
   });
+});
+
+test("setFilter edits the field's root condition in place, whoever added it", () => {
+  const driver = new SearchDriver<Doc>({ backend: memoryBackend(DOCS) });
+  const compat = searchUiCompat(driver);
+  compats.push(compat);
+  const id = driver.add('root', not(eq('state', 'done')));
+  driver.add('root', eq('state', 'open')); // a second one on the field
+  driver.add('root', or(eq('state', 'x'))); // a group: not a search-ui filter
+  compat.setFilter('state', ['a', 'b'], 'any');
+  expect(driver.state.filter.children).toMatchObject([
+    { id, operator: 'in', value: ['a', 'b'] },
+    { kind: 'group' },
+  ]);
+  expect(driver.state.filter.children[0]).not.toHaveProperty('negate');
+  expect(compat.state.filters).toEqual([
+    { field: 'state', values: ['a', 'b'], type: 'any' },
+  ]);
+  compat.clearFilters();
+  expect(driver.state.filter.children).toMatchObject([{ kind: 'group' }]);
 });

@@ -3,7 +3,6 @@ import { defaultOperator } from './property.ts';
 import { toProperty, type AnyProperty } from './legacy-property.ts';
 import {
   ARRAY_VALUE_META,
-  filterNodeId,
   filterToNode,
   nodeToFilter,
   type SearchUiCompatOptions,
@@ -11,24 +10,21 @@ import {
 import { ROOT_ID, type ConditionPatch } from './tree.ts';
 import type { ConditionNode, SearchState } from './types.ts';
 
-// The flat filter-bar convention: one condition per property, directly
-// under the root, with the id `filter:<key>`. It is the same node the
-// search-ui compat layer edits with setFilter(field, ...), so a filter bar,
-// legacy code calling setFilter and a QueryBuilder over the rest of the tree
-// all work on one state.
+// A property's filter is the condition on its field directly under the
+// root. The search-ui compat layer's setFilter(field, ...) edits the same
+// condition, and a QueryBuilder sees it as a row, so a filter bar, legacy
+// code and a QueryBuilder all work on one state.
 
-/** The id of a property's filter-bar condition. */
-export const propertyFilterId = (property: AnyProperty<never, unknown>) =>
-  filterNodeId(toProperty(property).key);
-
-/** The property's filter-bar condition, if set. */
+/** The property's filter: the first condition on its field under the root. */
 export function propertyFilter(
   state: SearchState,
   property: AnyProperty<never, unknown>,
 ): ConditionNode | undefined {
-  const id = propertyFilterId(property);
-  const node = state.filter.children.find((child) => child.id === id);
-  return node?.kind === 'condition' ? node : undefined;
+  const { path } = toProperty(property).field;
+  return state.filter.children.find(
+    (child): child is ConditionNode =>
+      child.kind === 'condition' && child.field === path,
+  );
 }
 
 /**
@@ -41,14 +37,13 @@ export function setPropertyFilter<Doc>(
   property: AnyProperty<never, unknown>,
   patch: ConditionPatch | undefined,
 ): void {
-  const id = propertyFilterId(property);
   const current = propertyFilter(driver.state, property);
   if (!patch) {
-    if (current) driver.remove(id);
+    if (current) driver.remove(current.id);
     return;
   }
   if (current) {
-    driver.update(id, patch);
+    driver.update(current.id, patch);
     return;
   }
   const { field } = toProperty(property);
@@ -63,7 +58,6 @@ export function setPropertyFilter<Doc>(
   ) as ConditionPatch;
   driver.add(ROOT_ID, {
     kind: 'condition',
-    id,
     field: field.path,
     ...defined,
     operator,
