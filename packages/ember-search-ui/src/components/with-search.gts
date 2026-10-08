@@ -1,8 +1,8 @@
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
 import { assert } from '@ember/debug';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { scheduleOnce } from '@ember/runloop';
+import { TrackedObject } from 'tracked-built-ins';
 import type Owner from '@ember/owner';
 import type { SearchDriver, SearchState } from '@elastic/search-ui';
 import type { MapContextToProps } from '../types.ts';
@@ -19,7 +19,10 @@ export interface WithSearchSignature<T extends object> {
 
 /**
  * Subscribes to a SearchDriver and yields the slice of its state and actions
- * picked by `@mapContextToProps`. State changes are applied after render.
+ * picked by `@mapContextToProps`. The yielded object is one persistent,
+ * per-key tracked instance: only the picked keys whose value actually
+ * changed are written on each update, so a template reading one key never
+ * re-evaluates because a different, unrelated key changed.
  */
 export default class WithSearch<T extends object> extends Component<
   WithSearchSignature<T>
@@ -27,9 +30,8 @@ export default class WithSearch<T extends object> extends Component<
   /** Subclasses may provide a default instead of `@mapContextToProps`. */
   declare mapContextToProps?: MapContextToProps<T>;
 
-  @tracked private version = 0;
   private subscribedDriver?: SearchDriver;
-  private state?: SearchState;
+  private trackedState?: Record<string, unknown>;
   private pendingState?: SearchState;
 
   constructor(owner: Owner, args: WithSearchSignature<T>['Args']) {
@@ -44,24 +46,28 @@ export default class WithSearch<T extends object> extends Component<
   }
 
   get wantedState(): T {
-    // Re-run whenever the driver pushes new state.
-    void this.version;
-
     const { driver } = this.args;
     if (driver !== this.subscribedDriver) {
       this.subscribe(driver);
     }
+    return this.trackedState as unknown as T;
+  }
 
-    const map = this.args.mapContextToProps || this.mapContextToProps;
-    return (
-      map({ ...this.state!, ...driver.getActions() }, this.args) || ({} as T)
-    );
+  private pickWantedProps(
+    state: SearchState,
+    driver: SearchDriver,
+  ): Record<string, unknown> {
+    const map = this.args.mapContextToProps || this.mapContextToProps!;
+    return (map({ ...state, ...driver.getActions() }, this.args) ||
+      {}) as Record<string, unknown>;
   }
 
   private subscribe(driver: SearchDriver) {
     this.unsubscribe();
     this.subscribedDriver = driver;
-    this.state = driver.getState();
+    this.trackedState = new TrackedObject<Record<string, unknown>>(
+      this.pickWantedProps(driver.getState(), driver),
+    );
     driver.subscribeToStateChanges(this.onStateChange);
   }
 
@@ -78,10 +84,33 @@ export default class WithSearch<T extends object> extends Component<
 
   private applyPendingState = () => {
     if (isDestroying(this) || isDestroyed(this) || !this.pendingState) return;
-    this.state = this.pendingState;
+    const next = this.pickWantedProps(
+      this.pendingState,
+      this.subscribedDriver!,
+    );
     this.pendingState = undefined;
-    this.version++;
+    this.syncWantedProps(next);
   };
+
+  /**
+   * TrackedObject marks a key dirty on every `set`, with no equality
+   * check, so skipping writes for unchanged values here is what gives
+   * each picked key its own independent invalidation - same guarantee
+   * `EmberObject` + `setProperties` gave the previous implementation.
+   */
+  private syncWantedProps(next: Record<string, unknown>) {
+    const target = this.trackedState!;
+    for (const key of Object.keys(next)) {
+      if (target[key] !== next[key]) {
+        target[key] = next[key];
+      }
+    }
+    for (const key of Object.keys(target)) {
+      if (!(key in next)) {
+        delete target[key];
+      }
+    }
+  }
 
   willDestroy() {
     super.willDestroy();
