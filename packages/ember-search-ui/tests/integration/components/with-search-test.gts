@@ -78,6 +78,44 @@ module('Integration | Component | with-search', function (hooks) {
     assert.dom('[data-test-term]').hasText('yel');
   });
 
+  test('a change to one mapped key does not re-evaluate the binding for another, unchanged mapped key', async function (assert) {
+    const d = driver;
+    let resultsPerPageReads = 0;
+    const readResultsPerPage = (value: unknown) => {
+      resultsPerPageReads++;
+      return value;
+    };
+    await render(
+      <template>
+        <WithSearch
+          @driver={{d}}
+          @mapContextToProps={{mapContextToProps
+            "totalResults"
+            "resultsPerPage"
+          }}
+          as |state|
+        >
+          <span data-test-total>{{state.totalResults}}</span>
+          <span data-test-per-page>{{readResultsPerPage
+              state.resultsPerPage
+            }}</span>
+        </WithSearch>
+      </template>,
+    );
+    await searchSettled(driver);
+    const readsAfterInitialRender = resultsPerPageReads;
+
+    driver.getActions().setSearchTerm('yosemite');
+    await searchSettled(driver, (s) => s.resultSearchTerm === 'yosemite');
+
+    assert.dom('[data-test-total]').hasText('1', 'the changed key updated');
+    assert.strictEqual(
+      resultsPerPageReads,
+      readsAfterInitialRender,
+      'the unchanged key was not re-evaluated',
+    );
+  });
+
   test('it accepts a custom mapContextToProps function', async function (assert) {
     const d = driver;
     const map = (state: SearchContextState) => ({
