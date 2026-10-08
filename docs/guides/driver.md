@@ -148,7 +148,8 @@ keep the snapshot in a tracked property and register test waiters, so
 
 Nothing touches the URL unless you ask. `syncUrl(driver)` restores the state
 from the URL and keeps it updated (debounced, back and forward included); in
-Ember, pass `@syncUrl={{true}}` to `<Search>`.
+Ember, set `syncUrl: true` in the config passed to `<Search @config={{config}}>`.
+It defaults to `false`.
 
 ```ts
 const stop = syncUrl(driver, { prefix: 'reports.' });

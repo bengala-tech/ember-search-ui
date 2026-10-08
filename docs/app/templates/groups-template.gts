@@ -18,11 +18,13 @@ import { asSearchUiDriver } from '../example/as-search-ui-driver.ts';
 // OR, NOT, on/off). The existing views keep using WithSearch and the
 // containers on the same driver, so they can move over one at a time.
 
-const URL_SYNC = {
-  prefix: 'q.',
-  ...(config.environment === 'test'
-    ? { adapter: memoryHistory(TEST_URL.value) }
-    : {}),
+const SEARCH_CONFIG = {
+  syncUrl: {
+    prefix: 'q.',
+    ...(config.environment === 'test'
+      ? { adapter: memoryHistory(TEST_URL.value) }
+      : {}),
+  },
 };
 
 <template>
@@ -30,7 +32,7 @@ const URL_SYNC = {
     <h2>List template, new groups spec</h2>
     <Search
       @driver={{@controller.searchDriver.driver}}
-      @syncUrl={{URL_SYNC}}
+      @config={{SEARCH_CONFIG}}
       as |search|
     >
       <QueryBuilder @search={{search}} @fields={{FIELDS}} />

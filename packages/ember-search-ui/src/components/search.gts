@@ -9,18 +9,22 @@ import {
 } from 'ember-search-ui-driver';
 import { TrackedSearch } from '../tracked-search.ts';
 
-type DriverConfig<Doc> = Omit<DriverOptions<Doc>, 'backend'>;
+export interface SearchConfig<Doc = unknown> extends Omit<
+  DriverOptions<Doc>,
+  'backend'
+> {
+  /** Required when <Search> creates the driver. */
+  backend?: DriverOptions<Doc>['backend'];
+  /** URL synchronization is off by default. */
+  syncUrl?: boolean | UrlSyncOptions;
+}
 
 export interface SearchSignature<Doc = unknown> {
   Args: {
     /** Use this driver; the component never destroys it. */
     driver?: SearchDriver<Doc>;
-    /** Or create (and own) a driver for this backend. Read once. */
-    backend?: DriverOptions<Doc>['backend'];
-    /** Options for the driver created from `@backend`. Read once. */
-    options?: DriverConfig<Doc>;
-    /** Keep the state in the URL; `true` or options for `syncUrl`. Read once. */
-    syncUrl?: boolean | UrlSyncOptions;
+    /** Driver settings and URL synchronization. Read once per connection. */
+    config?: SearchConfig<Doc>;
   };
   Blocks: {
     default: [TrackedSearch<Doc>];
@@ -31,7 +35,7 @@ export interface SearchSignature<Doc = unknown> {
  * Yields a TrackedSearch: `state`, `result`, `results`, `isLoading`, `filter`,
  * `node(id)` and the `driver` for commands. Everything it yields is tracked.
  *
- *   <Search @backend={{this.backend}} @syncUrl={{true}} as |search|>
+ *   <Search @config={{this.config}} as |search|>
  *     {{search.total}} results
  *     <button {{on "click" (fn search.driver.clearFilter)}}>Clear</button>
  *   </Search>
@@ -47,12 +51,12 @@ export default class Search<Doc = unknown> extends Component<
   constructor(owner: Owner, args: SearchSignature<Doc>['Args']) {
     super(owner, args);
     if (!args.driver) {
-      if (!args.backend) {
-        throw new Error('<Search> needs @driver or @backend');
+      if (!args.config?.backend) {
+        throw new Error('<Search> needs @driver or @config with a backend');
       }
       this.#ownedDriver = new SearchDriver<Doc>({
-        ...args.options,
-        backend: args.backend,
+        ...args.config,
+        backend: args.config.backend,
       });
     }
     registerDestructor(this, () => {
@@ -70,7 +74,7 @@ export default class Search<Doc = unknown> extends Component<
       this.#teardown();
       this.#driver = driver;
       // restore from the URL first, so the first snapshot already has it
-      const sync = this.args.syncUrl;
+      const sync = this.args.config?.syncUrl ?? false;
       if (sync) {
         this.#stopUrlSync = syncUrl(driver, sync === true ? {} : sync);
       }

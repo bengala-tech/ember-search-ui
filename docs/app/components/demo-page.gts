@@ -1,3 +1,4 @@
+import { hash } from '@ember/helper';
 import Component from '@glimmer/component';
 import { registerDestructor } from '@ember/destroyable';
 import { on } from '@ember/modifier';
@@ -71,7 +72,7 @@ export default class DemoPage extends Component<Signature> {
   <template>
     <Search
       @driver={{this.session.driver}}
-      @syncUrl={{this.session.urlSync}}
+      @config={{hash syncUrl=this.session.urlSync}}
       as |search|
     >
       <div class="layout">

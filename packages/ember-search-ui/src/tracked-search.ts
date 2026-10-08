@@ -98,7 +98,9 @@ export class TrackedSearch<Doc = unknown> {
  *
  *   search = trackSearch(this, driver);
  *
- * Pass `{ destroyDriver: true }` when `owner` also owns the driver.
+ * By default, destroying owner only unsubscribes this wrapper; a shared
+ * driver keeps working. Pass `{ destroyDriver: true }` only when the driver
+ * was created for this owner and should stop when the owner is destroyed.
  */
 export function trackSearch<Doc>(
   owner: object,

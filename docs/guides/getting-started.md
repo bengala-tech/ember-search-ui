@@ -34,7 +34,9 @@ import { Search, type TrackedSearch } from 'ember-search-ui';
 const backend = memoryBackend(inspections, {
   searchFields: ['title', 'description', 'project'],
 });
-const options = {
+const config = {
+  backend,
+  syncUrl: false, // default; set true to keep the search in the URL
   initialState: { page: { kind: 'offset', page: 1, perPage: 5 } },
 };
 
@@ -42,7 +44,7 @@ const setTerm = (search: TrackedSearch, event: Event) =>
   search.driver.setQuery((event.target as HTMLInputElement).value);
 
 <template>
-  <Search @backend={{backend}} @options={{options}} as |search|>
+  <Search @config={{config}} as |search|>
     <input type="search" {{on "input" (fn setTerm search)}} />
     <p>{{search.total}} inspections</p>
     <ul>

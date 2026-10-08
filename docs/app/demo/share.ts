@@ -26,7 +26,7 @@ const SHARED = new WeakMap<object, Shared>();
 
 /**
  * syncUrl options for `driver` under `prefix`, remembered for shareLink.
- * Pass them to syncUrl or <Search @syncUrl>.
+ * Pass them to syncUrl or <Search> config.syncUrl.
  */
 export function shareable(
   driver: SearchDriver<never> | SearchDriver<unknown>,

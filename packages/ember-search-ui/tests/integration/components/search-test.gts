@@ -99,18 +99,19 @@ module('Integration | Component | Search (new driver)', function (hooks) {
     driver.destroy();
   });
 
-  test('@backend creates a driver it owns and destroys', async function (assert) {
+  test('@config creates a driver it owns and destroys', async function (assert) {
     const backend = memoryBackend(DOCS);
     let driver: SearchDriver<Doc> | undefined;
     const capture = (search: TrackedSearch<Doc>) => {
       driver = search.driver;
     };
-    const options = {
+    const config = {
+      backend,
       initialState: { sort: [{ field: 'id', direction: 'desc' as const }] },
     };
     await render(
       <template>
-        <Search @backend={{backend}} @options={{options}} as |search|>
+        <Search @config={{config}} as |search|>
           {{capture search}}
           <span data-test-ids>{{idsOf search.results}}</span>
         </Search>
@@ -159,7 +160,7 @@ module('Integration | Component | Search (new driver)', function (hooks) {
     second.destroy();
   });
 
-  test('@syncUrl restores from the URL and writes changes back', async function (assert) {
+  test('config.syncUrl restores from the URL and writes changes back', async function (assert) {
     const codec = urlCodec();
     const source = newDriver();
     source.add('root', or(eq('x', 'a'), eq('x', 'c')));
@@ -167,10 +168,10 @@ module('Integration | Component | Search (new driver)', function (hooks) {
     source.destroy();
 
     const driver = newDriver();
-    const sync = { adapter: history, debounceMs: 0 };
+    const config = { syncUrl: { adapter: history, debounceMs: 0 } };
     await render(
       <template>
-        <Search @driver={{driver}} @syncUrl={{sync}} as |search|>
+        <Search @driver={{driver}} @config={{config}} as |search|>
           <span data-test-ids>{{idsOf search.results}}</span>
         </Search>
       </template>,
@@ -189,6 +190,44 @@ module('Integration | Component | Search (new driver)', function (hooks) {
     assert.false(
       history.read().includes('q=c'),
       'sync stopped with the component',
+    );
+    driver.destroy();
+  });
+
+  test('URL synchronization is off by default and when explicitly false', async function (assert) {
+    const driver = newDriver();
+    const originalUrl = window.location.href;
+    for (const config of [{}, { syncUrl: false }]) {
+      await render(
+        <template>
+          <Search @driver={{driver}} @config={{config}} as |search|>
+            <span>{{search.total}}</span>
+          </Search>
+        </template>,
+      );
+      driver.setQuery('unchanged-url');
+      await settled();
+      assert.strictEqual(window.location.href, originalUrl);
+      await clearRender();
+      driver.setQuery('');
+    }
+    driver.destroy();
+  });
+
+  test('trackSearch unsubscribes without destroying a shared driver by default', async function (assert) {
+    const driver = newDriver();
+    const owner = {};
+    const search = trackSearch(owner, driver);
+    await settled();
+    destroy(owner);
+    await settled();
+    driver.add('root', eq('x', 'b'));
+    await driver.settled();
+    assert.strictEqual(search.total, 6, 'the wrapper stopped updating');
+    assert.strictEqual(
+      driver.result.total,
+      3,
+      'the shared driver still searches',
     );
     driver.destroy();
   });

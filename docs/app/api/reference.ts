@@ -194,7 +194,7 @@ export const API: ApiPackage[] = [
         entries: [
           fn(
             'defineProperty',
-            'A frozen, checked property with defaults filled.',
+            'Copies and freezes a property; fills key and field.label defaults.',
             'properties',
           ),
           fn(
@@ -218,13 +218,21 @@ export const API: ApiPackage[] = [
             'The operators a filter UI offers for a property.',
             'properties',
           ),
-          fn('defaultOperator', 'The operator a new condition starts with.'),
+          fn(
+            'defaultOperator',
+            'The explicit default operator, or the first offered.',
+            'properties',
+          ),
           fn('optionsFor', "The property's options source.", 'properties'),
-          fn('staticOptions', 'An options source over a fixed list.'),
+          fn(
+            'staticOptions',
+            'Fixed picker options with load, label search and value resolution.',
+            'properties',
+          ),
           fn('findProperty', 'A property by key or field path.'),
           fn(
             'schemaFrom',
-            "The driver's field schema from properties.",
+            'Field schema from filterable properties, keyed by field.path.',
             'properties',
           ),
           fn(
@@ -245,9 +253,13 @@ export const API: ApiPackage[] = [
           type(
             'FilterSpec',
             'operators, defaultOperator, editor, chip, options, local.',
-            'filtering',
+            'properties',
           ),
-          type('OptionsSource', 'load, search and resolve picker options.'),
+          type(
+            'OptionsSource',
+            'load, search and resolve picker options.',
+            'properties',
+          ),
         ],
       },
       {
