@@ -4,8 +4,17 @@ import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { scheduleOnce } from '@ember/runloop';
 import { TrackedObject } from 'tracked-built-ins';
 import type Owner from '@ember/owner';
-import type { SearchDriver, SearchState } from '@elastic/search-ui';
-import type { MapContextToProps } from '../types.ts';
+import type { SearchState } from '@elastic/search-ui';
+import type {
+  MapContextToProps,
+  SearchDriver,
+  SearchUiDriver,
+} from '../types.ts';
+
+// ember-search-ui-driver's SearchUiCompat has search-ui's driver API
+// (getState, getActions, subscribeToStateChanges); only its state types are
+// its own. WithSearch reads both through search-ui's.
+const searchUi = (driver: SearchDriver) => driver as SearchUiDriver;
 
 export interface WithSearchSignature<T extends object> {
   Args: {
@@ -58,7 +67,7 @@ export default class WithSearch<T extends object> extends Component<
     driver: SearchDriver,
   ): Record<string, unknown> {
     const map = this.args.mapContextToProps || this.mapContextToProps!;
-    return (map({ ...state, ...driver.getActions() }, this.args) ||
+    return (map({ ...state, ...searchUi(driver).getActions() }, this.args) ||
       {}) as Record<string, unknown>;
   }
 
@@ -66,13 +75,17 @@ export default class WithSearch<T extends object> extends Component<
     this.unsubscribe();
     this.subscribedDriver = driver;
     this.trackedState = new TrackedObject<Record<string, unknown>>(
-      this.pickWantedProps(driver.getState(), driver),
+      this.pickWantedProps(searchUi(driver).getState(), driver),
     );
-    driver.subscribeToStateChanges(this.onStateChange);
+    searchUi(driver).subscribeToStateChanges(this.onStateChange);
   }
 
   private unsubscribe() {
-    this.subscribedDriver?.unsubscribeToStateChanges?.(this.onStateChange);
+    if (this.subscribedDriver) {
+      searchUi(this.subscribedDriver).unsubscribeToStateChanges?.(
+        this.onStateChange,
+      );
+    }
   }
 
   private onStateChange = (state: SearchState) => {

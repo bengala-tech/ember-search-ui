@@ -12,6 +12,7 @@
 🚀 Enhancements
 - Typed signatures for every component, including the args containers pass to `@view` and yield.
 - `ember-search-ui/template-registry` for Glint in loose-mode apps.
+- `WithSearch` and the containers accept ember-search-ui-driver's search-ui compatible drivers (`searchUiCompat`, `serverSearch`, `localSearch`) without a cast. The exported `SearchDriver` type is `SearchUiDriver | SearchUiCompat`; `SearchUiDriver` is @elastic/search-ui's `SearchDriver`.
 - `Containers::SearchBox` accepts `@onSelectAutocomplete(selection, { setSearchTerm, autocompleteResults, autocompleteSuggestions }, defaultOnSelectAutocomplete)`, as in @elastic/react-search-ui. `@handleOnSelectAutocomplete` still works but is deprecated.
 
 🐛 Bug fixes

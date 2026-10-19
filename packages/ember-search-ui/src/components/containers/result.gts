@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { hash } from '@ember/helper';
-import type { SearchDriver, SearchResult } from '@elastic/search-ui';
+import type { SearchResult } from '@elastic/search-ui';
+import type { SearchDriver } from '../../types.ts';
 import WithSearch from '../with-search.gts';
 import mapContextToProps from '../../helpers/map-context-to-props.ts';
 import {

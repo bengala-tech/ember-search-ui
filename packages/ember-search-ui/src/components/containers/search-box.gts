@@ -6,9 +6,9 @@ import type {
   AutocompleteSuggestion,
   AutocompletedResult,
   AutocompletedSuggestions,
-  SearchDriver,
   SearchDriverActions,
 } from '@elastic/search-ui';
+import type { SearchDriver } from '../../types.ts';
 import WithSearch from '../with-search.gts';
 import mapContextToProps, {
   type MappedContext,

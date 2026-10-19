@@ -1,10 +1,7 @@
 import Component from '@glimmer/component';
 import { fn, hash } from '@ember/helper';
-import type {
-  SearchDriver,
-  SearchDriverActions,
-  SortDirection,
-} from '@elastic/search-ui';
+import type { SearchDriverActions, SortDirection } from '@elastic/search-ui';
+import type { SearchDriver } from '../../types.ts';
 import WithSearch from '../with-search.gts';
 import mapContextToProps from '../../helpers/map-context-to-props.ts';
 import formatValue from '../../helpers/format-value.ts';

@@ -9,7 +9,6 @@ import {
   searchUiCompat,
   type SearchUiCompat,
 } from 'ember-search-ui-driver';
-import type { SearchDriver as ElasticSearchDriver } from '@elastic/search-ui';
 import WithSearch from '#src/components/with-search.gts';
 import PagingContainer from '#src/components/containers/paging.gts';
 import PagingInfoContainer from '#src/components/containers/paging-info.gts';
@@ -32,10 +31,8 @@ const DOCS: Doc[] = [
   { id: 5, title: 'Acadia', state: 'closed' },
 ];
 
-// The containers are typed for @elastic/search-ui's driver; the compat object
-// provides the same API.
-const asSearchUi = (compat: SearchUiCompat<Doc>) =>
-  compat as unknown as ElasticSearchDriver;
+// The containers take the compat object as it is: it has search-ui's driver
+// API, and their SearchDriver type includes it.
 const titles = (results: unknown) =>
   (results as Doc[]).map((d) => d.title).join(',');
 
@@ -58,7 +55,7 @@ module(
     });
 
     test('WithSearch, Paging and PagingInfo work unchanged', async function (assert) {
-      const driver = asSearchUi(compat);
+      const driver = compat;
       await render(
         <template>
           <WithSearch
@@ -95,7 +92,7 @@ module(
     });
 
     test('Sorting and SearchBox containers drive the new driver', async function (assert) {
-      const driver = asSearchUi(compat);
+      const driver = compat;
       const sortOptions: SortingOption[] = [
         { name: 'Relevance', value: '', direction: '' },
         { name: 'Title', value: 'title', direction: 'asc' },
@@ -138,7 +135,7 @@ module(
     });
 
     test('field filters set through search-ui actions', async function (assert) {
-      const driver = asSearchUi(compat);
+      const driver = compat;
       const closedOnly = () =>
         compat.actions.setFilter('state', 'closed', 'any');
       await render(

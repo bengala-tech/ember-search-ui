@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import type { SearchDriver } from '@elastic/search-ui';
+import type { SearchDriver } from '../../types.ts';
 import WithSearch from '../with-search.gts';
 import ResultContainer, { type ResultViewSignature } from './result.gts';
 import mapContextToProps from '../../helpers/map-context-to-props.ts';
