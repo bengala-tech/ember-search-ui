@@ -1,12 +1,14 @@
 import { isDateValue } from './operators.ts';
+import { nodeLabel } from './tree.ts';
 import type { FilterValue, NodeInput, Scalar } from './types.ts';
 
 // Prints a filter tree as the builder calls that make it:
 //
 //   or(range('cost', { gte: 3000 }), and(eq('state', 'pending'), ...))
 //
-// so a tree built in a UI can be pasted into code. Node meta is UI-only and
-// left out, and so are ids.
+// so a tree built in a UI can be pasted into code. Labels print as
+// named('...', node). Node meta is UI-only and left out (except a
+// meta.label, read as the label), and so are ids.
 
 export interface FilterToCodeOptions {
   /** Start with the import line for the builders used. Default false. */
@@ -98,7 +100,8 @@ export function filterToCode(
           inner.op === 'and' &&
           inner.children.length === 1 &&
           !inner.negate &&
-          !inner.disabled;
+          !inner.disabled &&
+          nodeLabel(inner) === undefined;
         const args = [quote(n.path), print(lone ? inner.children[0]! : inner)];
         if (n.quantifier !== 'some') args.push(quote(n.quantifier));
         doc = call('nested', ...args);
@@ -107,6 +110,8 @@ export function filterToCode(
     }
     if (n.negate) doc = call('not', doc);
     if (n.disabled) doc = call('disabled', doc);
+    const label = nodeLabel(n);
+    if (label !== undefined) doc = call('named', quote(label), doc);
     return doc;
   };
 

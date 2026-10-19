@@ -28,7 +28,8 @@ import type {
 //   ["c", id, flags, field, operator, value?]   (no value slot = no value yet)
 //   ["g", id, flags, "and" | "or", [children]]
 //   ["n", id, flags, path, "some" | "every" | "none", groupNode]
-//   {"meta": {...}, "node": <one of the above>}  when the node has meta
+//   {"label": "...", "meta": {...}, "node": <one of the above>}
+//       when the node has a label or meta (each key only when set)
 //
 // flags: "!" = negated, "-" = disabled ("!-" = both), "" = neither.
 
@@ -212,7 +213,11 @@ function encodeNode(node: FilterNode, withMeta: boolean): unknown {
       ];
       break;
   }
-  return withMeta && node.meta ? { meta: node.meta, node: compact } : compact;
+  const label = node.label?.trim() ? { label: node.label } : {};
+  const meta = withMeta && node.meta ? { meta: node.meta } : {};
+  return 'label' in label || 'meta' in meta
+    ? { ...label, ...meta, node: compact }
+    : compact;
 }
 
 function decodeRoot(raw: unknown): GroupNode {
@@ -226,8 +231,16 @@ function decodeRoot(raw: unknown): GroupNode {
 
 function decodeNode(raw: unknown): FilterNode {
   if (isPlainObject(raw)) {
-    if (!isPlainObject(raw['meta'])) throw new TypeError('Invalid meta');
-    return { ...decodeNode(raw['node']), meta: raw['meta'] };
+    const { label, meta } = raw;
+    if (meta !== undefined && !isPlainObject(meta))
+      throw new TypeError('Invalid meta');
+    if (label !== undefined && typeof label !== 'string')
+      throw new TypeError('Invalid label');
+    return {
+      ...decodeNode(raw['node']),
+      ...(label?.trim() ? { label } : {}),
+      ...(meta ? { meta } : {}),
+    };
   }
   if (!Array.isArray(raw)) throw new TypeError('A node must be an array');
   const [kind, id, flags] = raw as unknown[];

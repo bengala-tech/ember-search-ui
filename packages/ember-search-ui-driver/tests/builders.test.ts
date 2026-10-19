@@ -7,6 +7,7 @@ import {
   disabled,
   eq,
   exists,
+  named,
   nested,
   not,
   or,
@@ -77,5 +78,30 @@ describe('builders', () => {
       },
     });
     expect(nested('r', or(eq('a', 1)), 'every').filter.op).toBe('or');
+  });
+});
+
+describe('named', () => {
+  test('labels any node, composes with the other decorators', () => {
+    expect(named('Plant A', eq('project', 'a'))).toEqual({
+      kind: 'condition',
+      field: 'project',
+      operator: 'eq',
+      value: 'a',
+      label: 'Plant A',
+    });
+    expect(named('Late', not(or(eq('x', 1), eq('x', 2))))).toMatchObject({
+      kind: 'group',
+      negate: true,
+      label: 'Late',
+    });
+    expect(
+      named('Reqs', withId('r', nested('requirements', eq('s', 'ok')))),
+    ).toMatchObject({ kind: 'nested', id: 'r', label: 'Reqs' });
+  });
+
+  test('a blank label means none, and removes an existing one', () => {
+    expect(named('', eq('a', 1))).toEqual(eq('a', 1));
+    expect(named('  ', named('A', eq('a', 1)))).toEqual(eq('a', 1));
   });
 });

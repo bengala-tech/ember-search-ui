@@ -42,6 +42,16 @@ export const disabled = <T extends NodeInput>(node: T): T => ({
   disabled: true,
 });
 
+/**
+ * Gives a node a name for UIs, e.g. a pill's text; it is never sent to a
+ * backend. A blank label means none.
+ */
+export const named = <T extends NodeInput>(label: string, node: T): T => {
+  if (label.trim() !== '') return { ...node, label };
+  const { label: _label, ...rest } = node;
+  return rest as T;
+};
+
 /** Gives a node a fixed id, e.g. `facet:states`. */
 export const withId = <T extends NodeInput>(id: NodeId, node: T): T => ({
   ...node,

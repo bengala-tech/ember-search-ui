@@ -4,6 +4,7 @@ import {
   anyOf,
   disabled,
   eq,
+  named,
   nested,
   not,
   or,
@@ -26,12 +27,18 @@ const condition: fc.Arbitrary<NodeInput> = fc.oneof(
     .map(([f, v]) => range(f, { gte: v })),
 );
 
+const label = fc.option(
+  fc.constantFrom('Plant A', "O'Hare", 'línea\n2', '  padded  ', '{"x":1}'),
+  { freq: 3 }, // ~2 in 3 unnamed
+);
+
 const decorate = (node: fc.Arbitrary<NodeInput>) =>
   fc
-    .tuple(node, fc.boolean(), fc.integer({ min: 0, max: 5 }))
-    .map(([n, negated, off]) => {
+    .tuple(node, fc.boolean(), fc.integer({ min: 0, max: 5 }), label)
+    .map(([n, negated, off, name]) => {
       const withNegation = negated ? not(n) : n;
-      return off === 0 ? disabled(withNegation) : withNegation; // ~1 in 6 disabled
+      const withOff = off === 0 ? disabled(withNegation) : withNegation; // ~1 in 6 disabled
+      return name === null ? withOff : named(name, withOff);
     });
 
 export const { tree: randomTree } = fc.letrec<{

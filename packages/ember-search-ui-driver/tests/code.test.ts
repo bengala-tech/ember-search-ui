@@ -12,6 +12,7 @@ import {
   exists,
   filterToCode,
   materialize,
+  named,
   nested,
   not,
   or,
@@ -114,8 +115,38 @@ describe('filterToCode', () => {
   });
 
   test('meta is UI-only and left out', () => {
-    expect(filterToCode({ ...eq('a', 1), meta: { label: 'A' } })).toBe(
+    expect(filterToCode({ ...eq('a', 1), meta: { owner: 'facet' } })).toBe(
       "eq('a', 1)",
+    );
+  });
+
+  test('labelled nodes are wrapped in named(), outside not() and disabled()', () => {
+    expect(filterToCode(named('Plant A', eq('project', 'a')))).toBe(
+      "named('Plant A', eq('project', 'a'))",
+    );
+    const tree = and(
+      named("O'Hare", not(eq('site', 'ord'))),
+      named('Late', disabled(or(eq('x', 1), eq('x', 2)))),
+      nested('checks', named('Failed', and(eq('result', 'fail')))),
+    );
+    const code = filterToCode(tree, { imports: true });
+    expect(code).toBe(
+      [
+        "import { and, disabled, eq, named, nested, not, or } from 'ember-search-ui-driver';",
+        '',
+        'and(',
+        "  named('O\\'Hare', not(eq('site', 'ord'))),",
+        "  named('Late', disabled(or(eq('x', 1), eq('x', 2)))),",
+        "  nested('checks', named('Failed', and(eq('result', 'fail')))),",
+        ')',
+      ].join('\n'),
+    );
+    expect(run(filterToCode(tree))).toEqual(tree);
+  });
+
+  test('a meta.label is read as the label', () => {
+    expect(filterToCode({ ...eq('a', 1), meta: { label: 'A' } })).toBe(
+      "named('A', eq('a', 1))",
     );
   });
 });

@@ -11,6 +11,7 @@ export {
   findNode,
   findParent,
   materialize,
+  nodeLabel,
   mapNode,
   insertNode,
   removeNode,

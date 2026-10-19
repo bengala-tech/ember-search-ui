@@ -10,12 +10,15 @@ import {
   insertNode,
   materialize,
   moveNode,
+  named,
   nested,
+  nodeLabel,
   or,
   removeNode,
   sequentialIds,
   updateNode,
   withId,
+  type FilterNode,
   type GroupNode,
 } from '../src/index.ts';
 
@@ -147,5 +150,82 @@ describe('edits are immutable and share untouched subtrees', () => {
     expect(() => updateNode(emptyRoot(), 'nope', {})).toThrow(
       /No node with id "nope"/,
     );
+  });
+});
+
+describe('labels', () => {
+  const labelled = () =>
+    materialize(
+      {
+        ...and(
+          withId('plant', named('Plant A', eq('project', 'a'))),
+          withId('late', named('Late', or(eq('x', 1), eq('x', 2)))),
+          withId('reqs', nested('requirements', eq('status', 'ok'))),
+          withId('blank', named('  ', eq('y', 1))),
+          withId('empty', { ...eq('y', 2), label: '' }),
+        ),
+        id: 'root',
+      },
+      sequentialIds(),
+    ) as GroupNode;
+  const label = (root: GroupNode, id: string) =>
+    (findNode(root, id) as FilterNode).label;
+
+  test('materialize keeps labels and drops empty or blank ones', () => {
+    const root = labelled();
+    expect(label(root, 'plant')).toBe('Plant A');
+    expect(label(root, 'late')).toBe('Late');
+    expect(findNode(root, 'blank')).not.toHaveProperty('label');
+    expect(findNode(root, 'empty')).not.toHaveProperty('label');
+  });
+
+  test('update sets, changes and removes the label on every kind of node', () => {
+    let root = labelled();
+    root = updateNode(root, 'reqs', { label: 'Requirements' });
+    root = updateNode(root, 'late', { label: 'Overdue' });
+    root = updateNode(root, 'plant', { label: undefined });
+    expect(label(root, 'reqs')).toBe('Requirements');
+    expect(label(root, 'late')).toBe('Overdue');
+    expect(findNode(root, 'plant')).not.toHaveProperty('label');
+
+    root = updateNode(root, 'late', { label: '   ' });
+    expect(findNode(root, 'late')).not.toHaveProperty('label');
+  });
+
+  test('other edits keep the label', () => {
+    let root = labelled();
+    root = updateNode(root, 'late', {
+      op: 'and',
+      negate: true,
+      disabled: true,
+    });
+    root = moveNode(root, 'plant', 'late', 0);
+    root = updateNode(root, 'plant', { value: 'b' });
+    expect(findNode(root, 'late')).toMatchObject({
+      label: 'Late',
+      op: 'and',
+      negate: true,
+      disabled: true,
+    });
+    expect(findNode(root, 'plant')).toMatchObject({
+      label: 'Plant A',
+      value: 'b',
+    });
+  });
+
+  test('nodeLabel reads label, falls back to meta.label, ignores blanks', () => {
+    expect(nodeLabel(named('A', eq('a', 1)))).toBe('A');
+    expect(nodeLabel({ ...eq('a', 1), meta: { label: 'From meta' } })).toBe(
+      'From meta',
+    );
+    expect(
+      nodeLabel({ ...named('A', eq('a', 1)), meta: { label: 'From meta' } }),
+    ).toBe('A');
+    expect(
+      nodeLabel({ ...eq('a', 1), label: ' ', meta: { label: 'From meta' } }),
+    ).toBe('From meta');
+    expect(nodeLabel({ ...eq('a', 1), meta: { label: 3 } })).toBeUndefined();
+    expect(nodeLabel({ ...eq('a', 1), meta: { label: '' } })).toBeUndefined();
+    expect(nodeLabel(eq('a', 1))).toBeUndefined();
   });
 });

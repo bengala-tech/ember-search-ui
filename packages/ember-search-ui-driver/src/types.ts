@@ -31,7 +31,12 @@ interface NodeBase {
   readonly negate?: boolean;
   /** Kept in the tree, ignored when searching. */
   readonly disabled?: boolean;
-  /** UI-only data (label, owner); never sent to a backend. */
+  /**
+   * A name for UIs, e.g. a pill's text; never sent to a backend. An empty
+   * or blank label means none.
+   */
+  readonly label?: string;
+  /** UI-only data (owner, ...); never sent to a backend. */
   readonly meta?: Readonly<Record<string, unknown>>;
 }
 

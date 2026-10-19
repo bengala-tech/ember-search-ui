@@ -12,8 +12,10 @@ import {
   disabled,
   eq,
   exists,
+  findNode,
   materialize,
   matches,
+  named,
   nested,
   not,
   or,
@@ -478,4 +480,52 @@ test('searchApiBackend normalizes responses and passes the abort signal', async 
     aggregations: { status_counts: { '1': 20 } },
   });
   driver.destroy();
+});
+
+describe('searchApiCodec: labels are UI-only', () => {
+  const tree = () =>
+    root(
+      named('Plant A', eq('project', 'a')),
+      named('Late', or(eq('x', 1), named('Two', eq('x', 2)))),
+      { ...eq('y', 3), meta: { label: 'From meta' } },
+    );
+
+  test('the groups format never sends a label, and parsing never produces one', () => {
+    const groups = searchApiGroupFilters({ keepDisabled: true });
+    const wire = groups.serialize(tree(), ctx());
+    expect(JSON.stringify(wire)).not.toMatch(
+      /Plant A|Late|Two|From meta|label/,
+    );
+    expect(wire).toEqual(
+      groups.serialize(
+        root(eq('project', 'a'), or(eq('x', 1), eq('x', 2)), eq('y', 3)),
+        ctx(),
+      ),
+    );
+    const parsed = groups.parse!(wire, ctx());
+    expect(JSON.stringify(parsed)).not.toContain('label');
+  });
+
+  test('the list format never sends a label, and parsing never produces one', () => {
+    const list = searchApiListFilters();
+    const flat = root(
+      named('Plant A', eq('project', 'a')),
+      named('Both', and(eq('x', 1), named('Y', eq('y', 2)))),
+    );
+    const wire = list.serialize(flat, ctx());
+    expect(wire).toEqual([
+      { field: 'project', values: ['a'] },
+      { field: 'x', values: [1] },
+      { field: 'y', values: [2] },
+    ]);
+    expect(JSON.stringify(list.parse!(wire, ctx()))).not.toContain('label');
+  });
+
+  test('a whole request with labelled filters', () => {
+    const codec = searchApiCodec({ filters: 'groups' });
+    const request = codec.serialize(state({ filter: tree() }), ctx());
+    expect(JSON.stringify(request)).not.toMatch(/Plant A|Late|Two|label/);
+    const back = codec.parse(request, ctx());
+    expect(findNode(back.filter, 'root')).not.toHaveProperty('label');
+  });
 });

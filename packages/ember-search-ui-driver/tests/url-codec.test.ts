@@ -8,7 +8,9 @@ import {
   dateMath,
   disabled,
   eq,
+  findNode,
   materialize,
+  named,
   nested,
   not,
   or,
@@ -196,5 +198,98 @@ describe('urlCodec', () => {
       );
     }
     expect(onInvalid).toHaveBeenCalledTimes(bad.length);
+  });
+});
+
+describe('urlCodec: labels', () => {
+  const codec = urlCodec();
+  const stateWith = (patch: Partial<SearchState>) => createState(patch);
+  const filter = () =>
+    rootOf(
+      withId('plant', named('Plant A', eq('project', 'a'))),
+      withId('late', named("O'Hare & co", not(or(eq('x', 1), eq('x', 2))))),
+      withId('reqs', {
+        ...named('Reqs', nested('requirements', eq('status', 'ok'))),
+        meta: { owner: 'builder' },
+      }),
+    );
+
+  test('labels round-trip on every kind of node, with or without meta', () => {
+    const state = stateWith({ filter: filter() });
+    expect(codec.parse(codec.serialize(state))).toEqual(state);
+  });
+
+  test('a label is kept in a wrapper next to meta, and is written even when meta is not', () => {
+    const one = stateWith({
+      filter: rootOf(withId('p', named('P', eq('a', 1)))),
+    });
+    const f = new URLSearchParams(codec.serialize(one)).get('f');
+    expect(JSON.parse(f!)).toEqual([
+      'g',
+      'root',
+      '',
+      'and',
+      [{ label: 'P', node: ['c', 'p', '', 'a', 'eq', 1] }],
+    ]);
+
+    const noMeta = urlCodec({ meta: false });
+    const parsed = noMeta.parse(
+      noMeta.serialize(stateWith({ filter: filter() })),
+    );
+    expect(findNode(parsed.filter, 'reqs')).toMatchObject({ label: 'Reqs' });
+    expect(findNode(parsed.filter, 'reqs')).not.toHaveProperty('meta');
+  });
+
+  test('old URLs without labels still parse, meta-only wrappers included', () => {
+    const old = JSON.stringify([
+      'g',
+      'root',
+      '',
+      'and',
+      [
+        ['c', 'n1', '!', 'x', 'eq', 'b'],
+        { meta: { owner: 'facet' }, node: ['c', 'n2', '', 'y', 'eq', 1] },
+      ],
+    ]);
+    const parsed = codec.parse(`f=${encodeURIComponent(old)}`).filter;
+    expect(parsed.children).toEqual([
+      {
+        kind: 'condition',
+        id: 'n1',
+        negate: true,
+        field: 'x',
+        operator: 'eq',
+        value: 'b',
+      },
+      {
+        kind: 'condition',
+        id: 'n2',
+        field: 'y',
+        operator: 'eq',
+        value: 1,
+        meta: { owner: 'facet' },
+      },
+    ]);
+  });
+
+  test('a blank label in a URL is no label; a non-string label is invalid', () => {
+    const raw = (label: unknown) =>
+      `f=${encodeURIComponent(
+        JSON.stringify([
+          'g',
+          'root',
+          '',
+          'and',
+          [{ label, node: ['c', 'n1', '', 'x', 'eq', 1] }],
+        ]),
+      )}`;
+    expect(codec.parse(raw(' ')).filter.children[0]).not.toHaveProperty(
+      'label',
+    );
+
+    const invalid: string[] = [];
+    const strict = urlCodec({ onInvalid: (param) => invalid.push(param) });
+    expect(strict.parse(raw(7)).filter).toEqual(createState().filter);
+    expect(invalid).toEqual(['f']);
   });
 });

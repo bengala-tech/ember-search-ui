@@ -81,7 +81,7 @@ export function materialize(
   switch (input.kind) {
     case 'group':
       return {
-        ...input,
+        ...dropBlankLabel(input),
         id: claim(input.id),
         children: input.children.map((child) =>
           materialize(child, idFactory, taken),
@@ -89,13 +89,35 @@ export function materialize(
       };
     case 'nested':
       return {
-        ...input,
+        ...dropBlankLabel(input),
         id: claim(input.id),
         filter: materialize(input.filter, idFactory, taken) as GroupNode,
       };
     case 'condition':
-      return { ...input, id: claim(input.id) };
+      return { ...dropBlankLabel(input), id: claim(input.id) };
   }
+}
+
+const isBlank = (label: unknown) =>
+  typeof label !== 'string' || label.trim() === '';
+
+function dropBlankLabel<T extends { readonly label?: string }>(node: T): T {
+  if (!('label' in node) || !isBlank(node.label)) return node;
+  const { label: _label, ...rest } = node;
+  return rest as T;
+}
+
+/**
+ * The node's label for UIs: `label`, else a string `meta.label` (where apps
+ * stored one before labels existed). Blank labels count as none.
+ */
+export function nodeLabel(node: {
+  readonly label?: string;
+  readonly meta?: Readonly<Record<string, unknown>>;
+}): string | undefined {
+  if (!isBlank(node.label)) return node.label;
+  const fromMeta = node.meta?.['label'];
+  return isBlank(fromMeta) ? undefined : (fromMeta as string);
 }
 
 /**
@@ -173,26 +195,40 @@ export function removeNode(root: GroupNode, id: NodeId): GroupNode {
 }
 
 export type GroupPatch = Partial<
-  Pick<GroupNode, 'op' | 'negate' | 'disabled' | 'meta'>
+  Pick<GroupNode, 'op' | 'negate' | 'disabled' | 'label' | 'meta'>
 >;
 export type ConditionPatch = Partial<
   Pick<
     ConditionNode,
-    'field' | 'operator' | 'value' | 'negate' | 'disabled' | 'meta'
+    'field' | 'operator' | 'value' | 'negate' | 'disabled' | 'label' | 'meta'
   >
 >;
 export type NestedPatch = Partial<
-  Pick<NestedNode, 'path' | 'quantifier' | 'negate' | 'disabled' | 'meta'>
+  Pick<
+    NestedNode,
+    'path' | 'quantifier' | 'negate' | 'disabled' | 'label' | 'meta'
+  >
 >;
 export type NodePatch = GroupPatch | ConditionPatch | NestedPatch;
 
 const PATCHABLE: Record<FilterNode['kind'], readonly string[]> = {
-  group: ['op', 'negate', 'disabled', 'meta'],
-  condition: ['field', 'operator', 'value', 'negate', 'disabled', 'meta'],
-  nested: ['path', 'quantifier', 'negate', 'disabled', 'meta'],
+  group: ['op', 'negate', 'disabled', 'label', 'meta'],
+  condition: [
+    'field',
+    'operator',
+    'value',
+    'negate',
+    'disabled',
+    'label',
+    'meta',
+  ],
+  nested: ['path', 'quantifier', 'negate', 'disabled', 'label', 'meta'],
 };
 
-/** Shallow-merges `patch`; keys set to `undefined` are removed. */
+/**
+ * Shallow-merges `patch`; keys set to `undefined` are removed, and so is a
+ * blank `label`.
+ */
 export function updateNode(
   root: GroupNode,
   id: NodeId,
@@ -205,7 +241,8 @@ export function updateNode(
       if (!allowed.includes(key)) {
         throw new TreeError(`Cannot set "${key}" on a ${node.kind} node`);
       }
-      if (value === undefined) delete next[key];
+      if (value === undefined || (key === 'label' && isBlank(value)))
+        delete next[key];
       else next[key] = value;
     }
     return next as unknown as FilterNode;
