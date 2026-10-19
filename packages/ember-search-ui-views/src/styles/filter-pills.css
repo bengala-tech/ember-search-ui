@@ -1,0 +1,99 @@
+/* Filter pills. Themed through the query builder's custom properties. */
+.sui-fp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.sui-fp-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid var(--sui-qb-border, #d3dae6);
+  border-radius: 999px;
+  background: #f1f4fa;
+  color: var(--sui-qb-text, #1a1c21);
+}
+
+.sui-fp-pill button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sui-fp-pill-text {
+  overflow: hidden;
+  max-width: 32em;
+  padding: 2px 4px 2px 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sui-fp-pill-remove {
+  padding: 2px 8px 2px 4px;
+  color: var(--sui-qb-muted, #69707d);
+}
+
+.sui-fp-pill-text:focus-visible,
+.sui-fp-pill-remove:focus-visible,
+.sui-fp-menu button:focus {
+  outline: 2px solid var(--sui-qb-accent, #0077cc);
+  outline-offset: -2px;
+}
+
+.sui-fp-pill.is-negated {
+  border-color: var(--sui-qb-negate, #bd271e);
+  background: #f8e9e9;
+  color: var(--sui-qb-negate, #bd271e);
+}
+
+.sui-fp-pill.is-negated .sui-fp-pill-remove {
+  color: inherit;
+}
+
+.sui-fp-pill.is-disabled {
+  background: transparent;
+  color: var(--sui-qb-muted, #69707d);
+}
+
+.sui-fp-pill.is-disabled .sui-fp-pill-text {
+  text-decoration: line-through;
+}
+
+.sui-fp-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 12em;
+  margin: 0;
+  padding: 4px 0;
+  border: 1px solid var(--sui-qb-border, #d3dae6);
+  border-radius: var(--sui-qb-radius, 6px);
+  background: var(--sui-qb-bg, #ffffff);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  list-style: none;
+}
+
+.sui-fp-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sui-fp-menu button:hover {
+  background: #f1f4fa;
+}
+
+.sui-fp-menu .sui-fp-danger {
+  color: var(--sui-qb-negate, #bd271e);
+}

@@ -26,7 +26,9 @@ export { default as FilterBar } from './components/filter-bar.gts';
 export type { FilterBarSignature } from './components/filter-bar.gts';
 export { default as FilterChips } from './components/filter-chips.gts';
 export type { FilterChipsSignature } from './components/filter-chips.gts';
-export { describeFilter } from './query-builder/describe.ts';
+export { default as FilterPills } from './components/filter-pills.gts';
+export type { FilterPillsSignature } from './components/filter-pills.gts';
+export { describeFilter, describePill } from './query-builder/describe.ts';
 export {
   CONDITIONS,
   DATE_PRESETS,

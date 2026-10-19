@@ -9,6 +9,11 @@
 - `<Results>` renders this addon's `Result` by default instead of the app's `result` component.
 - `<AutocompleteInput>` no longer yields `Button`.
 
+🚀 Enhancements
+- `FilterPills` (`@search`, `@properties`, `@onEdit?`): the root filters as Kibana-style pills, one per node under the root. A pill reads the node's label, else a short description ("Project: Plant A", "2 conditions", "any of 2 conditions"); NOT pills read "NOT …" in the danger colour and switched off pills are struck through. A pill's menu edits (`@onEdit(nodeId)`), excludes / includes results, disables / re-enables and deletes it; its × deletes too. Values of collection properties show option labels.
+- `QueryBuilder`: a "Name (optional)" field on every group but the root, saved as the group's `label` on change.
+- `describeFilter` reads a labelled node (or one with a `meta.label`) as its label. `describePill(node, fields)` gives a pill's text.
+
 🐛 Bug fixes
 - SearchBox: no longer throws on submit / Enter / ArrowUp (removed `Ember` global).
 - SearchBox: the autocomplete menu no longer leaks a window keydown listener.

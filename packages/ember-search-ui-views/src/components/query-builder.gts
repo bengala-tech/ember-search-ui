@@ -3,6 +3,7 @@ import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import {
   legacyOf,
+  nodeLabel,
   schemaFrom,
   toProperty,
   type AnyProperty,
@@ -43,6 +44,7 @@ import {
   setField,
   setListText,
   setNestedPath,
+  setLabel,
   setOp,
   setQuantifier,
   setScalar,
@@ -139,6 +141,7 @@ const presetMissing = (expression: string) =>
 const depthClass = (depth: number) => `sui-qb-depth-${depth % 4}`;
 const inc = (depth: number) => depth + 1;
 const conditionId = (node: ConditionNode) => conditionOf(node).id;
+const labelOf = (node: FilterNode) => nodeLabel(node) ?? '';
 
 // --- value inputs -----------------------------------------------------------
 
@@ -539,6 +542,14 @@ const Group: TOC<GroupSignature> = <template>
           {{@scope}}
           fields{{/if}}:</span>
       {{#unless @isRoot}}
+        <input
+          type="text"
+          class="sui-qb-input sui-qb-name"
+          aria-label="Name (optional)"
+          placeholder="Name (optional)"
+          value={{labelOf @group}}
+          {{on "change" (fn setLabel @search.driver @group)}}
+        />
         <NodeControls
           @search={{@search}}
           @node={{@group}}

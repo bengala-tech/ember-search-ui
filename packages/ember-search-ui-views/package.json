@@ -132,6 +132,7 @@
       "./components/facets.js": "./dist/_app_/components/facets.js",
       "./components/filter-bar.js": "./dist/_app_/components/filter-bar.js",
       "./components/filter-chips.js": "./dist/_app_/components/filter-chips.js",
+      "./components/filter-pills.js": "./dist/_app_/components/filter-pills.js",
       "./components/layout-sidebar.js": "./dist/_app_/components/layout-sidebar.js",
       "./components/layout.js": "./dist/_app_/components/layout.js",
       "./components/multi-checkbox-facet.js": "./dist/_app_/components/multi-checkbox-facet.js",

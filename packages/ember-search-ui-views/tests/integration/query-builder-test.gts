@@ -1,8 +1,17 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { click, fillIn, render, select, settled } from '@ember/test-helpers';
+import {
+  click,
+  fillIn,
+  find,
+  render,
+  select,
+  settled,
+  triggerEvent,
+} from '@ember/test-helpers';
 import {
   SearchDriver,
+  findNode,
   memoryBackend,
   sequentialIds,
   type FieldSchema,
@@ -226,6 +235,48 @@ module('Integration | Component | QueryBuilder', function (hooks) {
 
     await click(`${inner} > .sui-qb-header .sui-qb-remove`);
     assert.dom('[data-test-summary]').hasText('everything');
+  });
+
+  test('groups other than the root can be named; the name is saved on change', async function (assert) {
+    await renderBuilder();
+    assert
+      .dom(`${ROOT} > .sui-qb-header .sui-qb-name`)
+      .doesNotExist('the root has no name');
+
+    await click(footer(ROOT, 'group'));
+    const inner = group(ROOT, 1);
+    await setRow(row(inner, 1), 'x', 'eq', 'b');
+    await click(footer(inner, 'condition'));
+    await setRow(row(inner, 2), 'u', 'eq', 'k');
+    const name = `${inner} > .sui-qb-header .sui-qb-name`;
+    assert.dom(name).hasAttribute('placeholder', 'Name (optional)');
+    assert.dom(name).hasAttribute('aria-label', 'Name (optional)');
+    const id = driver.state.filter.children[0]!.id;
+
+    // typing fires input events only; change comes on blur or Enter
+    const input = find(name) as HTMLInputElement;
+    for (const letter of 'Late') {
+      input.value += letter;
+      await triggerEvent(input, 'input');
+    }
+    assert.notOk(
+      findNode(driver.state.filter, id)!.label,
+      'not saved on each keystroke',
+    );
+    await triggerEvent(name, 'change');
+    assert.strictEqual(findNode(driver.state.filter, id)!.label, 'Late');
+    assert.dom('[data-test-summary]').hasText('Late');
+    assert.dom(name).hasValue('Late');
+
+    await fillIn(name, '  Overdue ');
+    assert.strictEqual(findNode(driver.state.filter, id)!.label, 'Overdue');
+
+    await fillIn(name, '   ');
+    assert.notOk(
+      'label' in findNode(driver.state.filter, id)!,
+      'a blank name clears it',
+    );
+    assert.dom('[data-test-summary]').hasText('X is b OR U is k');
   });
 
   test('value editors: option checkboxes, ranges and list conditions', async function (assert) {

@@ -105,6 +105,11 @@
   min-width: 140px;
 }
 
+.sui-qb-name {
+  min-width: 120px;
+  font-weight: 500;
+}
+
 .sui-qb-input:focus,
 .sui-qb-select:focus,
 .sui-qb-controls button:focus-visible,

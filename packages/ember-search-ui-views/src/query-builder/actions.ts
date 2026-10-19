@@ -82,6 +82,12 @@ export function addNested(
 export const setOp = (driver: Driver, group: GroupNode, op: 'and' | 'or') =>
   driver.update(group.id, { op });
 
+/** Names the node, or clears its name when the text is blank. */
+export const setLabel = (driver: Driver, node: FilterNode, event: Event) => {
+  const label = inputValue(event).trim();
+  driver.update(node.id, { label: label === '' ? undefined : label });
+};
+
 export const remove = (driver: Driver, node: FilterNode) =>
   driver.remove(node.id);
 
