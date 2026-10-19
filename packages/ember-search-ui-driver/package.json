@@ -1,6 +1,6 @@
 {
   "name": "ember-search-ui-driver",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.1",
   "description": "Framework-agnostic search driver: one flexible filter tree, codecs to any external filter spec",
   "keywords": [
     "search",
