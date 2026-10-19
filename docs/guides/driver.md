@@ -64,6 +64,38 @@ Try it: add the group, then negate it or switch it off.
   <DriverTree />
 </div>
 
+### Node labels
+
+Any node can have a `label`: a name for UIs, such as a pill's text. It is
+never sent to a backend and does not change what the node matches. `named`
+gives one; `update` changes or removes it. An empty or blank label means
+none.
+
+```ts
+import { named, nodeLabel } from 'ember-search-ui-driver';
+
+const id = driver.add(
+  'root',
+  named(
+    'Late work',
+    or(eq('state', 'overdue'), range('due_at', { lt: dateMath('now') })),
+  ),
+);
+driver.update(id, { label: 'Overdue' });
+driver.update(id, { label: undefined }); // no label
+
+nodeLabel(driver.findNode(id)!); // the label, else meta.label, else undefined
+```
+
+Labels survive everything that keeps the tree: tree commands, the URL (a
+labelled node is written as `{"label": "...", "node": [...]}`, and URLs
+from before labels still parse) and `filterToCode`, which prints
+`named('Late work', or(...))`. The search API codecs never send a label.
+
+Apps that already keep a name in `meta.label` need no change: wherever a
+label is read (`nodeLabel`, `describeFilter`, `FilterPills`,
+`filterToCode`) a string `meta.label` is the fallback.
+
 **What a node means when it has no effect.** A disabled node, a condition
 with an incomplete value, and a group with no active children are skipped
 by their parent, even when negated or inside an OR. An empty root matches

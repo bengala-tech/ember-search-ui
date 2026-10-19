@@ -7,7 +7,7 @@ imports:
 
 # Filtering UIs
 
-Three ready components cover most filter UIs. They all edit the same filter
+A few ready components cover most filter UIs. They all edit the same filter
 tree, so they can sit side by side.
 
 ## FilterBar and FilterChips
@@ -36,6 +36,43 @@ root. `setFilter(field, value)` in the search-ui compatible API edits the
 same condition, and the QueryBuilder shows it as a row, so the bar, legacy
 code and the builder never disagree.
 
+## FilterPills
+
+The filters at the top of the tree as pills, as in Kibana: one pill per
+node under the root, whatever it is: a condition, a group or a nested scope.
+
+```gts
+import { FilterPills } from 'ember-search-ui-views';
+
+<template>
+  <FilterPills
+    @search={{search}}
+    @properties={{properties}}
+    @onEdit={{this.edit}}
+  />
+</template>
+```
+
+A pill reads the node's label, else a short description: "Project: Plant
+A", "Cost: is at least 3000", "2 conditions", "any of 2 conditions". Values
+of properties with options show the option labels; for collection
+properties (`filter.options`, legacy collections) they are resolved through
+the options source, once per value. A NOT pill reads "NOT …" in the danger
+colour, and a switched off pill is struck through.
+
+Clicking a pill opens a menu:
+
+| Item                              | Does                                    |
+| --------------------------------- | --------------------------------------- |
+| Edit filter                       | Calls `@onEdit(nodeId)`; only with it.  |
+| Exclude results / Include results | `toggleNegate(id)`                      |
+| Temporarily disable / Re-enable   | `toggleDisabled(id)`                    |
+| Delete                            | `remove(id)`; the pill's × does it too. |
+
+Pills edit only these flags. To edit a pill's conditions, pair them with a
+QueryBuilder: the demo below scrolls to the pill's row in the builder on
+Edit. `describePill(node, fields)` gives a pill's text for your own pills.
+
 ## QueryBuilder
 
 The whole tree: conditions, AND/OR groups nested to any depth, NOT and
@@ -47,6 +84,15 @@ on/off on every row and group, and conditions on items of nested lists.
 
 With `@properties`, it offers the filterable fields, and a property's editor
 edits its rows.
+
+### Naming a group
+
+Every group but the root has a **Name (optional)** field. The name is saved
+when the field changes (on blur or Enter), not on every keystroke, as the
+group's `label`: `update(id, { label })`. Clearing the field removes it.
+Pills and `describeFilter` then show the name instead of the group's
+conditions, so "(Cost is at least 3000 OR Due is before now)" reads
+"Expensive or late".
 
 <div class="demo" data-test-demo="query-builder">
   <QueryBuilderDemo />
@@ -84,7 +130,8 @@ filterToCode(driver.state.filter, { imports: true });
 // and(nested('checks', and(eq('result', 'fail'), eq('item', 'gas lines'))))
 ```
 
-Ids and node `meta` are left out.
+Labels are printed as `named('…', node)`; ids and node `meta` are left out
+(a `meta.label` is printed as the label).
 Every demo also keeps its search in the URL under its own prefix, so
 **Show query** offers a link to the exact search on screen.
 

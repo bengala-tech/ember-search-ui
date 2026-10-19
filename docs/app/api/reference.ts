@@ -102,6 +102,7 @@ export const API: ApiPackage[] = [
           fn('not', 'The same node, negated.', 'driver'),
           fn('disabled', 'The same node, switched off.'),
           fn('withId', 'The same node with a given id.'),
+          fn('named', 'The same node with a label for UIs.', 'driver'),
           fn('where', 'A condition with any operator.'),
           fn('eq', 'Field equals a value.', 'driver'),
           fn('anyOf', 'Field equals one of the values.', 'driver'),
@@ -139,6 +140,11 @@ export const API: ApiPackage[] = [
           fn('collectIds', 'Every id in a tree.'),
           fn('findNode', 'A node by id.'),
           fn('findParent', 'The group holding a node.'),
+          fn(
+            'nodeLabel',
+            "A node's label, else its meta.label; blank is none.",
+            'driver',
+          ),
           fn('mapNode', 'A tree with one node replaced.'),
           fn('insertNode', 'A tree with a node inserted.'),
           fn('removeNode', 'A tree without a node.'),
@@ -514,6 +520,11 @@ export const API: ApiPackage[] = [
           cmp('FilterBar', 'One filter per property, ANDed.', 'filtering'),
           cmp('FilterChips', 'The set filters as chips.', 'filtering'),
           cmp(
+            'FilterPills',
+            'Root filters as pills, with edit, exclude, disable and delete.',
+            'filtering',
+          ),
+          cmp(
             'QueryBuilder',
             'The whole filter tree: groups, OR, NOT, on/off, nested lists.',
             'filtering',
@@ -524,6 +535,10 @@ export const API: ApiPackage[] = [
             'filtering',
           ),
           fn('describeFilter', 'A filter tree in words.'),
+          fn(
+            'describePill',
+            "A filter pill's text: the label, else a summary.",
+          ),
           val('CONDITIONS', "The query builder's condition kinds."),
           val('DATE_PRESETS', 'Relative date choices (last 7 days...).'),
           fn('conditionsFor', 'The condition kinds a field offers.'),
